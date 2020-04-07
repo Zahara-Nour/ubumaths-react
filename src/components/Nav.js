@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {useState} from 'react'
 import Navbar from 'react-bulma-components/lib/components/navbar'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import Icon from 'react-bulma-components/lib/components/icon'
@@ -10,15 +10,21 @@ import { selectConnected, selectUser } from 'features/auth/authSlice'
 function Nav() {
   const connected = useSelector(selectConnected)
   const user = useSelector(selectUser)
+  const [active, setActive] = useState(false)
+
+  const toggleActive = () => setActive((active) => !active)
+
+
+
   return (
-    <Navbar fixed="top">
+    <Navbar fixed="top" active={active}>
       <Navbar.Brand>
         <Navbar.Item href="/">
           <Icon>
             <FontAwesomeIcon icon={faInfinity} />
           </Icon>
         </Navbar.Item>
-        <Navbar.Burger />
+        <Navbar.Burger onClick={toggleActive}/>
       </Navbar.Brand>
 
       <Navbar.Menu>
