@@ -1,0 +1,468 @@
+[
+  {
+    "label": "Entiers",
+    "subcategories": [
+      {
+        "label": "Addition",
+        "subsubcategories": [
+          {
+            "label": "Résultat",
+            "levels": [
+              {
+                "level": 1,
+                "description": "Nombres à 1 chiffre.",
+                "enounce": "",
+                "expression": "$e{1;1}+$e{1;1}",
+                "correction": "value",
+                "answer": "decimal",
+                "defaultDelay": 1,
+                "point": 1
+              },
+              {
+                "level": 2,
+                "description": "Nombres à 2 chiffres",
+                "enounce": "",
+                "expression": "$e{2;2}+$e{2;2}",
+                "correction": "value",
+                "answer": "decimal",
+                "defaultDelay": 1,
+                "point": 1
+              },
+              {
+                "level": 3,
+                "description": "Nombres à 3 chiffres",
+                "enounce": "",
+                "expression": "$e{3;3}+$e{3;3}",
+                "correction": "value",
+                "answer": "decimal",
+                "defaultDelay": 1,
+                "point": 1
+              }
+            ]
+          },
+          {
+            "label": "A trou",
+            "levels": [
+              {
+                "level": 1,
+                "description": "Nombres à 1 chiffre.",
+                "enounce": "",
+                "expression": "?+$e{1;1}",
+                "correction": "value",
+                "answer": "decimal",
+                "defaultDelay": 1,
+                "point": 1
+              },
+              {
+                "level": 2,
+                "description": "Nombres à 2 chiffres",
+                "enounce": "",
+                "expression": "?+$e{2;2}",
+                "correction": "value",
+                "answer": "decimal",
+                "defaultDelay": 1,
+                "point": 1
+              },
+              {
+                "level": 3,
+                "description": "Nombres à 3 chiffres",
+                "enounce": "",
+                "expression": "?+$e{3;3}",
+                "correction": "value",
+                "answer": "decimal",
+                "defaultDelay": 1,
+                "point": 1
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "label": "Soustraction",
+        "subsubcategories": [
+          {
+            "label": "Résultat",
+            "levels": [
+              {
+                "level": 1,
+                "description": "Nombres à 1 chiffre.",
+                "enounce": "",
+                "expression": "$e{1;1}-$e{1;1}",
+                "correction": "value",
+                "answer": "decimal",
+                "defaultDelay": 1,
+                "point": 1
+              },
+              {
+                "level": 2,
+                "description": "Nombres à 2 chiffres",
+                "enounce": "",
+                "expression": "$e{2;2}-$e{2;2}",
+                "correction": "value",
+                "answer": "decimal",
+                "defaultDelay": 1,
+                "point": 1
+              },
+              {
+                "level": 3,
+                "description": "Nombres à 3 chiffres",
+                "enounce": "",
+                "expression": "$e{3;3}-$e{3;3}",
+                "correction": "value",
+                "answer": "decimal",
+                "defaultDelay": 1,
+                "point": 1
+              }
+            ]
+          },
+          {
+            "label": "A trou",
+            "levels": [
+              {
+                "level": 1,
+                "description": "Nombres à 1 chiffre.",
+                "enounce": "",
+                "expression": "?-$e{1;1}",
+                "correction": "value",
+                "answer": "decimal",
+                "defaultDelay": 1,
+                "point": 1
+              },
+              {
+                "level": 2,
+                "description": "Nombres à 2 chiffres",
+                "enounce": "",
+                "expression": "?-$e{2;2}",
+                "correction": "value",
+                "answer": "decimal",
+                "defaultDelay": 1,
+                "point": 1
+              },
+              {
+                "level": 3,
+                "description": "Nombres à 3 chiffres",
+                "enounce": "",
+                "expression": "?-$e{3;3}",
+                "correction": "value",
+                "answer": "decimal",
+                "defaultDelay": 1,
+                "point": 1
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "label": "Décimaux",
+    "subcategories": [
+      {
+        "label": "Addition",
+        "subsubcategories": [
+          {
+            "label": "Résultat",
+            "levels": [
+              {
+                "level": 1,
+                "description": "Nombres décimaux à 1 chiffre.",
+                "enounce": "",
+                "expression": "$e{1;1}+$e{1;1}",
+                "correction": "value",
+                "answer": "decimal",
+                "defaultDelay": 1,
+                "point": 1
+              },
+              {
+                "level": 2,
+                "description": "Nombres décimaux à 2 chiffres",
+                "enounce": "",
+                "expression": "$e{2;2}+$e{2;2}",
+                "correction": "value",
+                "answer": "decimal",
+                "defaultDelay": 1,
+                "point": 1
+              },
+              {
+                "level": 3,
+                "description": "Nombres décimaux à 3 chiffres",
+                "enounce": "",
+                "expression": "$e{3;3}+$e{3;3}",
+                "correction": "value",
+                "answer": "decimal",
+                "defaultDelay": 1,
+                "point": 1
+              }
+            ]
+          },
+          {
+            "label": "A trou",
+            "levels": [
+              {
+                "level": 1,
+                "description": "Nombres décimaux à 1 chiffre.",
+                "enounce": "",
+                "expression": "?+$e{1;1}",
+                "correction": "value",
+                "answer": "decimal",
+                "defaultDelay": 1,
+                "point": 1
+              },
+              {
+                "level": 2,
+                "description": "Nombres décimaux à 2 chiffres",
+                "enounce": "",
+                "expression": "?+$e{2;2}",
+                "correction": "value",
+                "answer": "decimal",
+                "defaultDelay": 1,
+                "point": 1
+              },
+              {
+                "level": 3,
+                "description": "Nombres décimaux à 3 chiffres",
+                "enounce": "",
+                "expression": "?+$e{3;3}",
+                "correction": "value",
+                "answer": "decimal",
+                "defaultDelay": 1,
+                "point": 1
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "label": "Soustraction",
+        "subsubcategories": [
+          {
+            "label": "Résultat",
+            "levels": [
+              {
+                "level": 1,
+                "description": "Nombres décimaux à 1 chiffre.",
+                "enounce": "",
+                "expression": "$e{1;1}-$e{1;1}",
+                "correction": "value",
+                "answer": "decimal",
+                "defaultDelay": 1,
+                "point": 1
+              },
+              {
+                "level": 2,
+                "description": "Nombres décimaux à 2 chiffres",
+                "enounce": "",
+                "expression": "$e{2;2}-$e{2;2}",
+                "correction": "value",
+                "answer": "decimal",
+                "defaultDelay": 1,
+                "point": 1
+              },
+              {
+                "level": 3,
+                "description": "Nombres décimaux à 3 chiffres",
+                "enounce": "",
+                "expression": "$e{3;3}-$e{3;3}",
+                "correction": "value",
+                "answer": "decimal",
+                "defaultDelay": 1,
+                "point": 1
+              }
+            ]
+          },
+          {
+            "label": "A trou",
+            "levels": [
+              {
+                "level": 1,
+                "description": "Nombres décimaux à 1 chiffre.",
+                "enounce": "",
+                "expression": "?-$e{1;1}",
+                "correction": "value",
+                "answer": "decimal",
+                "defaultDelay": 1,
+                "point": 1
+              },
+              {
+                "level": 2,
+                "description": "Nombres décimaux à 2 chiffres",
+                "enounce": "",
+                "expression": "?-$e{2;2}",
+                "correction": "value",
+                "answer": "decimal",
+                "defaultDelay": 1,
+                "point": 1
+              },
+              {
+                "level": 3,
+                "description": "Nombres décimaux à 3 chiffres",
+                "enounce": "",
+                "expression": "?-$e{3;3}",
+                "correction": "value",
+                "answer": "decimal",
+                "defaultDelay": 1,
+                "point": 1
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "label": "Relatifs",
+    "subcategories": [
+      {
+        "label": "Addition",
+        "subsubcategories": [
+          {
+            "label": "Résultat",
+            "levels": [
+              {
+                "level": 1,
+                "description": "Nombres relatifs à 1 chiffre.",
+                "enounce": "",
+                "expression": "$e{1;1}+$e{1;1}",
+                "correction": "value",
+                "answer": "decimal",
+                "defaultDelay": 1,
+                "point": 1
+              },
+              {
+                "level": 2,
+                "description": "Nombres relatifs à 2 chiffres",
+                "enounce": "",
+                "expression": "$e{2;2}+$e{2;2}",
+                "correction": "value",
+                "answer": "decimal",
+                "defaultDelay": 1,
+                "point": 1
+              },
+              {
+                "level": 3,
+                "description": "Nombres relatifs à 3 chiffres",
+                "enounce": "",
+                "expression": "$e{3;3}+$e{3;3}",
+                "correction": "value",
+                "answer": "decimal",
+                "defaultDelay": 1,
+                "point": 1
+              }
+            ]
+          },
+          {
+            "label": "A trou",
+            "levels": [
+              {
+                "level": 1,
+                "description": "Nombres relatifs à 1 chiffre.",
+                "enounce": "",
+                "expression": "?+$e{1;1}",
+                "correction": "value",
+                "answer": "decimal",
+                "defaultDelay": 1,
+                "point": 1
+              },
+              {
+                "level": 2,
+                "description": "Nombres relatifs à 2 chiffres",
+                "enounce": "",
+                "expression": "?+$e{2;2}",
+                "correction": "value",
+                "answer": "decimal",
+                "defaultDelay": 1,
+                "point": 1
+              },
+              {
+                "level": 3,
+                "description": "Nombres relatifs à 3 chiffres",
+                "enounce": "",
+                "expression": "?+$e{3;3}",
+                "correction": "value",
+                "answer": "decimal",
+                "defaultDelay": 1,
+                "point": 1
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "label": "Soustraction",
+        "subsubcategories": [
+          {
+            "label": "Résultat",
+            "levels": [
+              {
+                "level": 1,
+                "description": "Nombres relatifs à 1 chiffre.",
+                "enounce": "",
+                "expression": "$e{1;1}-$e{1;1}",
+                "correction": "value",
+                "answer": "decimal",
+                "defaultDelay": 1,
+                "point": 1
+              },
+              {
+                "level": 2,
+                "description": "Nombres relatifs à 2 chiffres",
+                "enounce": "",
+                "expression": "$e{2;2}-$e{2;2}",
+                "correction": "value",
+                "answer": "decimal",
+                "defaultDelay": 1,
+                "point": 1
+              },
+              {
+                "level": 3,
+                "description": "Nombres relatifs à 3 chiffres",
+                "enounce": "",
+                "expression": "$e{3;3}-$e{3;3}",
+                "correction": "value",
+                "answer": "decimal",
+                "defaultDelay": 1,
+                "point": 1
+              }
+            ]
+          },
+          {
+            "label": "A trou",
+            "levels": [
+              {
+                "level": 1,
+                "description": "Nombres relatifs à 1 chiffre.",
+                "enounce": "",
+                "expression": "?-$e{1;1}",
+                "correction": "value",
+                "answer": "decimal",
+                "defaultDelay": 1,
+                "point": 1
+              },
+              {
+                "level": 2,
+                "description": "Nombres relatifs à 2 chiffres",
+                "enounce": "",
+                "expression": "?-$e{2;2}",
+                "correction": "value",
+                "answer": "decimal",
+                "defaultDelay": 1,
+                "point": 1
+              },
+              {
+                "level": 3,
+                "description": "Nombres relatifs à 3 chiffres",
+                "enounce": "",
+                "expression": "?-$e{3;3}",
+                "correction": "value",
+                "answer": "decimal",
+                "defaultDelay": 1,
+                "point": 1
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+ 
+]

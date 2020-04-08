@@ -30,7 +30,7 @@ function Nav() {
       <Navbar.Menu>
         <Navbar.Container>
           <Navbar.Item href="http://navadra.lejolly.me">Navadra</Navbar.Item>
-          <Navbar.Item href="/calculmental">Calcul mental</Navbar.Item>
+          <Navbar.Item href="/calcul-mental">Calcul mental</Navbar.Item>
         </Navbar.Container>
 
         <Navbar.Container position="end">

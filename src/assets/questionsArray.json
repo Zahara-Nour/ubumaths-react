@@ -1,0 +1,8 @@
+[
+    ["Entiers", "Addition", "Résultat",1,"Nombres à 1 chiffre","$e{1;1}+$e{1;1}", "", "decimal", "value", 20000, 1],
+    ["Entiers", "Addition", "Résultat",2,"Nombres à 2 chiffres","$e{2;2}+$e{2;2}", "", "decimal", "value", 20000, 1],
+    ["Entiers", "Addition", "Résultat",3,"Nombres à 3 chiffres","$e{3;3}+$e{3;3}", "", "decimal", "value", 20000, 1],
+    ["Entiers", "Addition", "A trou",1,"Nombres à 1 chiffre","$e{3;3}+$e{3;3}", "", "decimal", "value", 20000, 1],
+    ["Entiers", "Addition", "A trou",2,"Nombres à 1 chiffre","$e{3;3}+$e{3;3}", "", "decimal", "value", 20000, 1],
+    ["Entiers", "Addition", "A trou",3,"Nombres à 1 chiffre","$e{3;3}+$e{3;3}", "", "decimal", "value", 20000, 1]
+]
