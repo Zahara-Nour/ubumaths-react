@@ -13,7 +13,7 @@ function App() {
       {/* <Switch>
         <Route path='/calcu-mental' component={Mental} />
       </Switch> */}
-      <Mental/>
+      <Mental />
     </>
   )
 }

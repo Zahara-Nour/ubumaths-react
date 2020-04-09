@@ -22,18 +22,11 @@ function Params({ categoryId, subcategoryId, subsubcategoryId }) {
     setLevel(0)
   }, [categoryId, subsubcategoryId, subcategoryId])
 
-  console.log(questions[categoryId])
-  console.log(questions[categoryId].subcategories[subcategoryId])
-  console.log(
-    questions[categoryId].subcategories[subcategoryId].subsubcategories[
-      subsubcategoryId
-    ],
-  )
-
   const levels =
     questions[categoryId].subcategories[subcategoryId].subsubcategories[
       subsubcategoryId
-    ].levels
+    ].levels 
+    
   const question = {
     ...levels[level],
     category: questions[categoryId].label,
