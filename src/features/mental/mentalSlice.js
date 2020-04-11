@@ -3,27 +3,36 @@ import { math } from 'tinycas/build/math/math'
 import db from '../../app/db'
 
 function generateQuestions(questions) {
+  const generateds = [] // to track duplicated questions
   return questions.map((question) => {
-    const { expression, ...rest } = question
+    const { expressions, ...rest } = question
+    let i = 0
+    let generated
+    do {
+      generated = math(
+        expressions[Math.floor(Math.random() * expressions.length)],
+      ).generate().string
+      console.log(generated)
+      i += 1
+    } while (generateds.includes(generated) && i < 3) // one limite à 3 le nombre de tentative au cas il ny ait pas assez de questions différentes.
+    generateds.push(generated)
+
     return {
-      text: math(expression).generate().string,
+      text: generated,
       ...rest,
     }
   })
 }
+
 const initialState = {
   rawQuestions: [],
   generatedQuestions: [],
-  fetching: false,
-  fetchError: false,
-  fetched: false,
-  dataFetched: null,
+  fetching: {},
+  fetchError: {},
+  fetched: {},
   ready: false,
   finished: false,
-  category: null,
-  subcategory: null,
-  subsubcategory: null,
-  level: 1,
+
   saving: false,
   saved: false,
   saveError: '',
@@ -43,15 +52,15 @@ const mentalSlice = createSlice({
     },
 
     addToBasket(state, action) {
-      state.rawQuestions.push(action.payload.question)
+      state.rawQuestions = state.rawQuestions.concat(action.payload.questions)
+    },
+
+    setBasket(state, action) {
+      state.rawQuestions = action.payload.questions
     },
 
     removeFromBasket(state, action) {
       state.rawQuestions.splice(action.payload.id, 1)
-    },
-
-    cleanBasket(state) {
-      state.rawQuestions = []
     },
 
     saveRequest(state) {
@@ -73,47 +82,61 @@ const mentalSlice = createSlice({
       state.saveError = ''
     },
 
-    fetchRequest(state) {
-      state.fetching = true
-      state.fetched = false
-      state.fetchError = false
-      state.dataFetched = null
+    fetchRequest(state, action) {
+      const type = action.payload.type
+      state.fetching[type] = true
+      state.fetched[type] = null
+      state.fetchError[type] = null
+    },
+    fetchReset(state, action) {
+      const type = action.payload.type
+      state.fetching[type] = false
+      state.fetched[type] = null
+      state.fetchError[type] = null
     },
 
     fetchFailure(state, action) {
-      state.fetching = false
-      state.fetchError = action.payload.error
+      const type = action.payload.type
+      state.fetching[type] = false
+      state.fetchError[type] = action.payload.error
     },
 
     fetchSuccess(state, action) {
-      state.fetching = false
-      state.fetched = true
-      state.dataFetched = action.payload.data
+      const type = action.payload.type
+      state.fetching[type] = false
+      state.fetched[type] = action.payload.data
     },
   },
 })
 
+const FETCH_ASSESSMENTS = 'assessments'
+const FETCH_ASSESSMENT = 'assessment'
+const FETCH_CLASSES = 'classes'
+export { FETCH_ASSESSMENT, FETCH_ASSESSMENTS, FETCH_CLASSES }
+
 export const {
   launchAssessment,
   assessmentFinished,
-  selectAssessment,
   prepareQuestions,
   addToBasket,
   removeFromBasket,
-  cleanBasket,
+  setBasket,
   saveFailure,
   saveRequest,
   saveSuccess,
   saveReset,
-  fetchFailure,
   fetchRequest,
   fetchSuccess,
+  fetchFailure,
+  fetchReset,
 } = mentalSlice.actions
 
 const selectReady = (state) => state.mental.ready
-const selectFetched = (state) => state.mental.fetched
-const selectDataFetched = (state) => state.mental.dataFetched
+
 const selectFinished = (state) => state.mental.finished
+const selectFetching = (type) => (state) => state.mental.fetching[type]
+const selectFetched = (type) => (state) => state.mental.fetched[type]
+const selectFetchError = (type) => (state) => state.mental.fetchError[type]
 const selectSaving = (state) => state.mental.saving
 const selectSaved = (state) => state.mental.saved
 const selectSaveError = (state) => state.mental.saveError
@@ -129,23 +152,73 @@ export {
   selectSaveError,
   selectSaved,
   selectFetched,
-  selectDataFetched,
+  selectFetching,
+  selectFetchError,
 }
 
-function saveBasketThunk(questions, title, template) {
+function saveBasketThunk({ questions, title, template, classes, students }) {
   const collection = template ? 'mental-templates' : 'mental-assessments'
-  return function (dispatch) {
+console.log(classes)
+  const assignAssessment = () =>
+    classes.forEach((c) => {
+      c.students.forEach((student) => {
+        db.collection('users')
+          .doc(student)
+          .collection('assessments')
+          .doc(title)
+          .set({ id:title,done:false })
+          .then(() =>
+            console.log('Evaluation ' + title + ' enregisrée pour ' + student),
+          )
+          .catch((error) => console.error('Error writing document: ', error))
+      })
+    })
+
+  const saveAssessment = (dispatch) => {
     dispatch(saveRequest())
     db.collection(collection)
       .doc(title)
       .set({ questions })
-      .then(function () {
-        dispatch(saveSuccess())
-        console.log('Document successfully written!')
+      .then(() => dispatch(saveSuccess()))
+      .then(() => {
+        console.log('Enregistrement réussi')
+        if (!template) assignAssessment()
       })
       .catch(function (error) {
         dispatch(saveFailure({ error }))
         console.error('Error writing document: ', error)
+      })
+  }
+  return saveAssessment
+}
+
+function loadBasketThunk(title, template) {
+  const collection = template ? 'mental-templates' : 'mental-assessments'
+  return function (dispatch) {
+    dispatch(fetchRequest({ type: FETCH_ASSESSMENT }))
+    db.collection(collection)
+      .doc(title)
+      .get()
+      .then(function (doc) {
+        if (doc.exists) {
+          console.log('Document data:', doc.data())
+          dispatch(fetchSuccess({ data: doc.data(), type: FETCH_ASSESSMENT }))
+          dispatch(setBasket({ questions: doc.data().questions }))
+          console.log('Document successfully loaded!')
+        } else {
+          // doc.data() will be undefined in this case
+          dispatch(
+            fetchFailure({
+              error: 'Aucun document trouvé ',
+              type: FETCH_ASSESSMENT,
+            }),
+          )
+          console.log('No such document!')
+        }
+      })
+      .catch(function (error) {
+        //dispatch(fetchFailure({ error }))
+        console.error('Error loading document: ', error)
       })
   }
 }
@@ -153,7 +226,7 @@ function saveBasketThunk(questions, title, template) {
 function loadAssessmentsThunk(template) {
   const collection = template ? 'mental-templates' : 'mental-assessments'
   return function (dispatch) {
-    dispatch(fetchRequest())
+    dispatch(fetchRequest({ type: FETCH_ASSESSMENTS }))
     db.collection(collection)
       .get()
       .then(function (querySnapshot) {
@@ -162,15 +235,40 @@ function loadAssessmentsThunk(template) {
           datas.push({ ...doc.data(), title: doc.id })
           console.log(doc.id, ' => ', doc.data())
         })
-        dispatch(fetchSuccess({ data: datas }))
+        dispatch(fetchSuccess({ data: datas, type: FETCH_ASSESSMENTS }))
       })
       .catch(function (error) {
         console.log('Error getting documents: ', error)
-        dispatch(fetchFailure({ error }))
+        // dispatch(fetchFailure({ error }))
       })
   }
 }
 
-export { saveBasketThunk, loadAssessmentsThunk }
+function loadClassesThunk() {
+  return function (dispatch) {
+    dispatch(fetchRequest({ type: FETCH_CLASSES }))
+    db.collection('classes')
+      .get()
+      .then(function (querySnapshot) {
+        const datas = []
+        querySnapshot.forEach(function (doc) {
+          datas.push({ ...doc.data(), id: doc.id })
+          console.log(doc.id, ' => ', doc.data())
+        })
+        dispatch(fetchSuccess({ data: datas, type: FETCH_CLASSES }))
+      })
+      .catch(function (error) {
+        console.log('Error getting documents: ', error)
+        //dispatch(fetchFailure({ error }))
+      })
+  }
+}
+
+export {
+  saveBasketThunk,
+  loadAssessmentsThunk,
+  loadBasketThunk,
+  loadClassesThunk,
+}
 
 export default mentalSlice.reducer

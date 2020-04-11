@@ -2,23 +2,23 @@ import React, { useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import {
   selectFetched,
-  selectDataFetched,
   loadAssessmentsThunk,
+  FETCH_ASSESSMENTS,
 } from 'features/mental/mentalSlice'
 import Box from 'react-bulma-components/lib/components/box/box'
 import List from 'react-bulma-components/lib/components/list'
 import Loader from 'react-bulma-components/lib/components/loader'
 
 function AssessmentsList({ template, clickCB, loadCB }) {
-  const fetched = useSelector(selectFetched)
+  const list = useSelector(selectFetched(FETCH_ASSESSMENTS))
   const dispatch = useDispatch()
-  const list = useSelector(selectDataFetched)
+  
   useEffect(() => dispatch(loadAssessmentsThunk(template)), [
     dispatch,
     template,
   ])
 
-  if (!fetched)
+  if (!list)
     return (
       <Loader
         style={{
@@ -31,13 +31,22 @@ function AssessmentsList({ template, clickCB, loadCB }) {
       />
     )
 
-  loadCB(list.map(({ title }) => title))
+  if (loadCB) {
+    loadCB(list.map(({ title }) => title))
+  }
 
   return (
     <Box>
       <List hoverable>
         {list.map(({ title }, index) => (
-          <List.Item key={index} onClick={() => clickCB(title)}>
+          <List.Item
+            key={index}
+            onClick={() => {
+              if (clickCB) {
+                clickCB(title)
+              }
+            }}
+          >
             {title}
           </List.Item>
         ))}

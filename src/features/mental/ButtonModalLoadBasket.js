@@ -1,99 +1,72 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState } from 'react'
 import Button from 'react-bulma-components/lib/components/button'
 import Modal from 'react-bulma-components/lib/components/modal'
 import Level from 'react-bulma-components/lib/components/level'
 import Notification from 'react-bulma-components/lib/components/notification'
 import Loader from 'react-bulma-components/lib/components/loader'
-import {
-  Control,
-  Input,
-  Field,
-  Label,
-  Radio,
-  Help,
-} from 'react-bulma-components/lib/components/form'
+import { Control, Radio } from 'react-bulma-components/lib/components/form'
 import { useSelector, useDispatch } from 'react-redux'
 import {
-  selectSaving,
-  saveBasketThunk,
+  selectFetching,
   saveReset,
-  selectSaved,
-  selectSaveError,
+  fetchReset,
+  selectFetchError,
+  loadBasketThunk,
+  selectFetched,
+  FETCH_ASSESSMENT,
+  
+  
 } from 'features/mental/mentalSlice'
 import AssessmentsList from 'features/mental/AssessmentsList'
 import ScrollArea from '@xico2k/react-scroll-area'
 
-export default function ButtonModalSaveBasket({ questions }) {
+export default function ButtonModalLoadBasket() {
   const dispatch = useDispatch()
-  const [title, setTitle] = useState('Titre')
   const [show, setShow] = useState(false)
   const [radioValue, setRadioValue] = useState('Modèle')
-  const [titleExists, setTitleExists] = useState(false)
-  const titles = useRef([])
-  const saving = useSelector(selectSaving)
-  const saved = useSelector(selectSaved)
-  const saveError = useSelector(selectSaveError)
+  const radioOnChange = (evt) => setRadioValue(evt.target.value)
+  const fetched = useSelector(selectFetched(FETCH_ASSESSMENT))
+  const fetching = useSelector(selectFetching(FETCH_ASSESSMENT))
+  const fetchError = useSelector(selectFetchError(FETCH_ASSESSMENT))
   const open = () => setShow(true)
   const close = () => {
-    if (!saving) {
+    if (!fetching) {
+      dispatch(fetchReset({type:FETCH_ASSESSMENT}))
       setShow(false)
-      dispatch(saveReset())
-      setTitle('Titre')
+
     }
   }
-  const radioOnChange = (evt) => {
-    const value = evt.target.value
-    setRadioValue(value)
-  }
-
-  useEffect(() => setTitleExists(titles.current.includes(title)), [title])
+  const text = 'Charger'
+  const [title, setTitle] = useState('')
 
   return (
     <>
       <Button color="link" onClick={open}>
-        Sauvegarder
+        {text}
       </Button>
 
       <Modal show={show} onClose={close} closeOnBlur>
         <Modal.Card onClose={close}>
           <Modal.Card.Head onClose={close}>
-            <Modal.Card.Title>Sauvegarder</Modal.Card.Title>
+            <Modal.Card.Title>{text}</Modal.Card.Title>
           </Modal.Card.Head>
 
           <Modal.Card.Body>
-            <Field>
-              <Label>Titre de l'évaluation</Label>
-              <Control>
-                <Input
-                  color={title === '' || titleExists ? 'danger' : null}
-                  placeholder="Titre"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                />
-                {title === '' && <Help color="danger">Entrez un titre !</Help>}
-                {titleExists && <Help color="danger">Cet enregistrement existe déjà ! Vous allez l'écraser !!!</Help>}
-              </Control>
-            </Field>
             <Level>
               <Level.Side align="left">
                 <Level.Item>
                   <Button
-                    disabled={saving}
+                    disabled={!!fetching || !title}
                     color="link"
-                    onClick={() => {
-                      dispatch(
-                        saveBasketThunk(
-                          questions,
-                          title,
-                          radioValue === 'Modèle',
-                        ),
-                      )
-                    }}
+                    onClick={() =>
+                      dispatch(loadBasketThunk(title, radioValue === 'Modèle'))
+                    }
                   >
-                    Sauvegarder
+                    {text}
                   </Button>
                 </Level.Item>
-                {saving && <Loader />}
+                <Level.Item>{title}</Level.Item>
+                {fetching === "Assessment" && <Level.Item><Loader/></Level.Item>}
               </Level.Side>
               <Level.Side align="right">
                 <Level.Item>
@@ -102,6 +75,7 @@ export default function ButtonModalSaveBasket({ questions }) {
                       onChange={radioOnChange}
                       checked={radioValue === 'Modèle'}
                       value="Modèle"
+                      name="type"
                     >
                       Modèle
                     </Radio>
@@ -109,6 +83,7 @@ export default function ButtonModalSaveBasket({ questions }) {
                       onChange={radioOnChange}
                       checked={radioValue === 'Evaluation'}
                       value="Evaluation"
+                      name="type"
                     >
                       Evaluation
                     </Radio>
@@ -116,20 +91,20 @@ export default function ButtonModalSaveBasket({ questions }) {
                 </Level.Item>
               </Level.Side>
             </Level>
-            {saved && (
+            {fetched && (
               <Notification
                 color="success"
-                onClick={() => dispatch(saveReset())}
+                onClick={() => dispatch(fetchReset({type:FETCH_ASSESSMENT}))}
               >
-                Enregistrement réussi !
+                Chargement réussi !
               </Notification>
             )}
-            {saveError && (
+            {fetchError && (
               <Notification
                 color="danger"
-                onClick={() => dispatch(saveReset())}
+                onClick={() => dispatch(fetchReset({type:FETCH_ASSESSMENT}))}
               >
-                L'enregistrement à échoué !{saveError}
+                Le chargement a échoué !{fetchError}
               </Notification>
             )}
           </Modal.Card.Body>
@@ -141,7 +116,6 @@ export default function ButtonModalSaveBasket({ questions }) {
               <AssessmentsList
                 template={radioValue === 'Modèle'}
                 clickCB={setTitle}
-                loadCB={(t) => (titles.current = t)}
               />
             </ScrollArea>
           </Modal.Card.Foot>

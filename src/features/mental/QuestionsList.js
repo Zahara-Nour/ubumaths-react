@@ -1,56 +1,83 @@
-import React, { useState } from 'react'
-import categories from '../../assets/questions'
-
-import Columns from 'react-bulma-components/lib/components/columns'
+import React, { useState, useEffect, useRef } from 'react'
 import Tabs from 'react-bulma-components/lib/components/tabs'
 import Menu from 'react-bulma-components/lib/components/menu'
 import Button from 'react-bulma-components/lib/components/button'
-import Content from 'react-bulma-components/lib/components/content'
-import {
-  Control,
-  Input,
-  Field,
-  Label,
-} from 'react-bulma-components/lib/components/form'
 import Level from 'react-bulma-components/lib/components/level'
 import { faCartArrowDown } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import questions from '../../assets/questions'
-import { math } from 'tinycas/build/math/math'
-import { addToBasket } from '../mental/mentalSlice'
+import { addToBasket, launchAssessment, setBasket } from '../mental/mentalSlice'
+import Description from './Description'
+import NumberSelect from 'components/NumberSelect'
+import { unstable_trace as trace } from 'scheduler/tracing'
+import { selectUser } from 'features/auth/authSlice'
 
 function QuestionsList() {
+  const user = useSelector(selectUser)
   const [categoryId, setCategoryId] = useState(0)
   const [subcategoryId, setSubcategoryId] = useState(0)
   const [subsubcategoryId, setSubsubcategoryId] = useState(0)
   const [nbQuestions, setNbQuestions] = useState(1)
-  
+
   const [level, setLevel] = useState(0)
   const dispatch = useDispatch()
 
+  const category = questions[categoryId]
+  const subcategories = questions[categoryId].subcategories
+  const subcategory = subcategories[subcategoryId]
+  const subsubcategories = subcategories[subcategoryId].subsubcategories
+  const subsubcategory = subsubcategories[subsubcategoryId]
+  const levels = subsubcategory.levels
 
-  const levels =
-    questions[categoryId].subcategories[subcategoryId].subsubcategories[
-      subsubcategoryId
-    ].levels
-
-  const question = {
+  const [question, setQuestion] = useState({
     ...levels[level],
-    category: questions[categoryId].label,
-    subcategory: questions[categoryId].subcategories[subcategoryId].label,
-    subsubcategory:
-      questions[categoryId].subcategories[subcategoryId].subsubcategories[
-        subsubcategoryId
-      ].label,
+    category: category.label,
+    subcategory: subcategory.label,
+    subsubcategory: subsubcategory.label,
+  })
+  const [delay, setDelay] = useState(question.defaultDelay)
+
+  console.log('level :' + level)
+  console.log(question.description)
+
+  useEffect(() => {
+    console.log('useEffect')
+    setQuestion({
+      ...levels[level],
+      category: category.label,
+      subcategory: subcategory.label,
+      subsubcategory: subsubcategory.label,
+    })
+    setDelay(question.defaultDelay)
+  }, [
+    category,
+    subcategory,
+    subsubcategory,
+    level,
+    levels,
+    question.defaultDelay,
+  ])
+
+  const handleClickSubcategory = (sindex) => {
+    setSubsubcategoryId(0)
+    setSubcategoryId(sindex)
+    setNbQuestions(1)
+    setLevel(0)
   }
 
-  const [delay, setDelay] = useState(question.defaultDelay)
+  const handleClickSubsubcategory = (ssindex) => {
+    if (subsubcategoryId !== ssindex) {
+      setSubsubcategoryId(ssindex)
+      setNbQuestions(1)
+      setLevel(0)
+    }
+  }
 
   return (
     <>
       <Tabs>
-        {categories.map((category, index) => {
+        {questions.map((category, index) => {
           return (
             <Tabs.Tab
               key={'category' + index}
@@ -63,162 +90,157 @@ function QuestionsList() {
                 setLevel(0)
               }}
             >
-              {category.label}
+              <strong>{category.label}</strong>
             </Tabs.Tab>
           )
         })}
       </Tabs>
 
-      <Columns>
-        <Columns.Column size={8}>
-          <Menu>
-            <Menu.List>
-              {categories[categoryId].subcategories.map(
-                (subcategory, sindex) => {
-                  return (
-                    <Menu.List.Item
-                      key={'subcategory' + sindex}
-                      active={subcategoryId === sindex}
-                      onClick={() => {
-                        setSubsubcategoryId(0)
-                        setSubcategoryId(sindex)
-                        setNbQuestions(1)
-                        setLevel(0)
-                      }}
-                    >
-                      <Menu.List title={subcategory.label}>
-                        {subcategory.subsubcategories.map(
-                          (subsubcategory, ssindex) => {
-                            const active = subsubcategoryId === ssindex
-                            return (
-                              <Menu.List.Item
-                                hidden={subcategoryId !== sindex}
-                                key={'subsubcategory' + ssindex}
-                                active={active}
-                                onClick={() => {
-                                  setSubsubcategoryId(ssindex)
-                                }}
-                              >
-                                <Level renderAs="div">
-                                  <Level.Side align="left">
-                                    <Level.Item>
-                                      {active ? (
-                                        <strong>{subsubcategory.label}</strong>
-                                      ) : (
-                                        subsubcategory.label
-                                      )}
-                                    </Level.Item>
-                                  </Level.Side>
-                                  {active && (
-                                    <Level.Side align="right">
-                                      <Level.Item>
-                                        <Input
-                                          size="small"
-                                          onChange={(evt) =>
-                                            setNbQuestions(evt.target.value)
-                                          }
-                                          name="number"
-                                          type="number"
-                                          placeholder="10"
-                                          value={nbQuestions}
-                                        />
-                                        <Button
-                                          color="link"
-                                          onClick={() => {
-                                            for (
-                                              let i = 0;
-                                              i < nbQuestions;
-                                              i++
-                                            ) {
-                                              dispatch(
-                                                addToBasket({
-                                                  question: {
-                                                    ...question,
-                                                    delay:
-                                                      parseInt(delay, 10) *
-                                                      1000,
-                                                  },
-                                                }),
-                                              )
+      <Menu>
+        <Menu.List>
+          {subcategories.map((subcategory, sindex) => {
+            const sactive = subcategoryId === sindex
+            return (
+              <Menu.List.Item
+                key={'subcategory' + sindex}
+                onClick={() => handleClickSubcategory(sindex)}
+              >
+                <Menu.List title={subcategory.label.toUpperCase()}>
+                  {sactive &&
+                    subcategory.subsubcategories.map(
+                      (subsubcategory, ssindex) => {
+                        const ssactive = subsubcategoryId === ssindex
+                        console.log('rendering subsubcategory' + ssindex)
+                        return (
+                          <Menu.List.Item
+                            key={'subsubcategory' + ssindex}
+                            active={ssactive}
+                            onClick={() => handleClickSubsubcategory(ssindex)}
+                          >
+                            <Level renderAs="div">
+                              <Level.Side align="left">
+                                <Level.Item
+                                  style={
+                                    ssactive
+                                      ? { color: 'white' }
+                                      : { color: 'blue' }
+                                  }
+                                >
+                                  {subsubcategory.label}
+                                </Level.Item>
+                                {ssactive && (
+                                  <Level.Item>
+                                    <Description question={question} />
+                                  </Level.Item>
+                                )}
+
+                                {ssactive && levels.length > 1 && (
+                                  <Level.Item>
+                                    <Button.Group>
+                                      {levels.map((q, index) => {
+                                        return (
+                                          <Button
+                                            key={'button level' + index}
+                                            size="small"
+                                            color={
+                                              level === index ? 'primary' : ''
                                             }
-                                          }}
-                                        >
-                                          <FontAwesomeIcon
-                                            icon={faCartArrowDown}
-                                          />
-                                        </Button>
-                                      </Level.Item>
-                                      <Level.Item></Level.Item>
-                                    </Level.Side>
-                                  )}
-                                </Level>
-                              </Menu.List.Item>
-                            )
-                          },
-                        )}
-                      </Menu.List>
-                    </Menu.List.Item>
-                  )
-                },
-              )}
-            </Menu.List>
-          </Menu>
-        </Columns.Column>
-
-        <Columns.Column size={4}>
-          {question ? (
-            <>
-              <Field>
-                <Content>
-                  <div
-                    dangerouslySetInnerHTML={{
-                      __html:
-                        question.description +
-                        '<br><strong>Exemple:</strong> ' +
-                        math(question.expression).generate().string,
-                    }}
-                  />
-                </Content>
-              </Field>
-
-              <Field>
-                <Label>Niveau</Label>
-                <Button.Group>
-                  {levels.map((q, index) => {
-                    return (
-                      <Control key={'button' + index}>
-                        <Button
-                          color={level === index ? 'primary' : ''}
-                          onClick={() => {
-                            setLevel(index)
-                          }}
-                        >
-                          {index + 1}
-                        </Button>
-                      </Control>
-                    )
-                  })}
-                </Button.Group>
-              </Field>
-
-              <Field>
-                <Label>Délai</Label>
-                <Control>
-                  <Input
-                    onChange={(evt) => setDelay(evt.target.value)}
-                    name="delay"
-                    type="number"
-                    placeholder="0"
-                    value={delay}
-                  />
-                </Control>
-              </Field>
-            </>
-          ) : (
-            <div />
-          )}
-        </Columns.Column>
-      </Columns>
+                                            onClick={(e) => {
+                                              console.log(
+                                                'click : doing setlevel',
+                                              )
+                                              e.stopPropagation()
+                                              trace(
+                                                'level',
+                                                performance.now(),
+                                                () => setLevel(index),
+                                              )
+                                            }}
+                                          >
+                                            {index + 1}
+                                          </Button>
+                                        )
+                                      })}
+                                    </Button.Group>
+                                  </Level.Item>
+                                )}
+                                {ssactive && (
+                                  <Level.Item>
+                                    <div
+                                      style={{
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                      }}
+                                    >
+                                      <NumberSelect
+                                        name="Délais"
+                                        value={delay}
+                                        onClick={setDelay}
+                                      />
+                                      {user.role === 'teacher' && (
+                                        <NumberSelect
+                                          name="Quantité"
+                                          value={nbQuestions}
+                                          onClick={setNbQuestions}
+                                        />
+                                      )}
+                                    </div>
+                                  </Level.Item>
+                                )}
+                              </Level.Side>
+                              <Level.Side align="right">
+                                {ssactive && (
+                                  <Level.Item>
+                                    <Button
+                                      color="link"
+                                      onClick={() => {
+                                        const questions = []
+                                        for (let i = 0; i < nbQuestions; i++) {
+                                          questions.push({
+                                            ...question,
+                                            delay: parseInt(delay, 10) * 1000,
+                                          })
+                                        }
+                                        dispatch(addToBasket({ questions }))
+                                      }}
+                                    >
+                                      {user.role === 'teacher' && <FontAwesomeIcon icon={faCartArrowDown} />}
+                                    </Button>
+                                  </Level.Item>
+                                )}
+                                {ssactive && (
+                                  <Level.Item>
+                                    <Button
+                                      color="link"
+                                      onClick={() => {
+                                        const questions = []
+                                        for (let i = 0; i < 10; i++) {
+                                          questions.push({
+                                            ...question,
+                                            delay: parseInt(delay, 10) * 1000,
+                                          })
+                                        }
+                                        dispatch(setBasket({ questions: [] }))
+                                        dispatch(addToBasket({ questions }))
+                                        dispatch(launchAssessment())
+                                      }}
+                                    >
+                                      Go !
+                                    </Button>
+                                  </Level.Item>
+                                )}
+                              </Level.Side>
+                            </Level>
+                          </Menu.List.Item>
+                        )
+                      },
+                    )}
+                </Menu.List>
+              </Menu.List.Item>
+            )
+          })}
+        </Menu.List>
+      </Menu>
     </>
   )
 }

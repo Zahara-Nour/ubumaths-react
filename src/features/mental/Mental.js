@@ -5,17 +5,22 @@ import Basket from './Basket'
 import Columns from 'react-bulma-components/lib/components/columns'
 import Button from 'react-bulma-components/lib/components/button'
 import Box from 'react-bulma-components/lib/components/box'
-import Section from 'react-bulma-components/lib/components/section'
+
 import Heading from 'react-bulma-components/lib/components/heading'
 import Container from 'react-bulma-components/lib/components/container'
 import Hero from 'react-bulma-components/lib/components/hero'
 import { launchAssessment } from './mentalSlice'
 import { selectReady } from './mentalSlice'
 import QuestionsList from './QuestionsList'
+import { selectUser } from 'features/auth/authSlice'
+
+
 
 function Mental() {
   const dispatch = useDispatch()
   const ready = useSelector(selectReady)
+  const user = useSelector(selectUser)
+
 
   if (ready) return <Assessment />
 
@@ -28,28 +33,30 @@ function Mental() {
           </Container>
         </Hero.Body>
       </Hero>
+
       <Columns>
         <Columns.Column size={8}>
-          <Section>
-            <Box>
-              <QuestionsList />
-            </Box>
-          </Section>
+          <Box>
+            <QuestionsList />
+          </Box>
         </Columns.Column>
+
         <Columns.Column size={4}>
-          <Section>
+          {user.role === 'teacher' && (
             <Button
+              fullwidth
               color="primary"
               onClick={() => dispatch(launchAssessment())}
             >
               Go daddy !
             </Button>
-          </Section>
-          <Section>
+          )}
+
+          {user.role === 'teacher' && (
             <Box>
               <Basket />
             </Box>
-          </Section>
+          )}
         </Columns.Column>
       </Columns>
     </>
