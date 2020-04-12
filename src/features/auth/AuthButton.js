@@ -8,8 +8,9 @@ import {
   loginFailure,
   logoutRequest,
   logoutSuccess,
+  fetchUserThunk,
 } from './authSlice'
-import { selectConnected } from './authSlice'
+import { selectConnected, } from './authSlice'
 
 export default function AuthButton() {
   const dispatch = useDispatch()
@@ -17,7 +18,10 @@ export default function AuthButton() {
 
   const handleLoginSuccess = (response) => {
     console.log(response.profileObj)
-    dispatch(loginSuccess({ user: response.profileObj }))
+    const user = response.profileObj
+    dispatch(loginSuccess({ user }))
+    console.log(user)
+    dispatch(fetchUserThunk({id:user.email}))
   }
 
   const handleLoginFailure = (response) => {

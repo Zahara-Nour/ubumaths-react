@@ -11,12 +11,10 @@ import {
   saveReset,
   fetchReset,
   selectFetchError,
-  loadBasketThunk,
   selectFetched,
   FETCH_ASSESSMENT,
-  
-  
-} from 'features/mental/mentalSlice'
+} from 'features/db/dbSlice'
+import { loadBasketThunk } from 'features/mental/mentalSlice'
 import AssessmentsList from 'features/mental/AssessmentsList'
 import ScrollArea from '@xico2k/react-scroll-area'
 
@@ -31,9 +29,8 @@ export default function ButtonModalLoadBasket() {
   const open = () => setShow(true)
   const close = () => {
     if (!fetching) {
-      dispatch(fetchReset({type:FETCH_ASSESSMENT}))
+      dispatch(fetchReset({ type: FETCH_ASSESSMENT }))
       setShow(false)
-
     }
   }
   const text = 'Charger'
@@ -66,7 +63,11 @@ export default function ButtonModalLoadBasket() {
                   </Button>
                 </Level.Item>
                 <Level.Item>{title}</Level.Item>
-                {fetching === "Assessment" && <Level.Item><Loader/></Level.Item>}
+                {fetching === 'Assessment' && (
+                  <Level.Item>
+                    <Loader />
+                  </Level.Item>
+                )}
               </Level.Side>
               <Level.Side align="right">
                 <Level.Item>
@@ -94,7 +95,7 @@ export default function ButtonModalLoadBasket() {
             {fetched && (
               <Notification
                 color="success"
-                onClick={() => dispatch(fetchReset({type:FETCH_ASSESSMENT}))}
+                onClick={() => dispatch(fetchReset({ type: FETCH_ASSESSMENT }))}
               >
                 Chargement réussi !
               </Notification>
@@ -102,7 +103,7 @@ export default function ButtonModalLoadBasket() {
             {fetchError && (
               <Notification
                 color="danger"
-                onClick={() => dispatch(fetchReset({type:FETCH_ASSESSMENT}))}
+                onClick={() => dispatch(fetchReset({ type: FETCH_ASSESSMENT }))}
               >
                 Le chargement a échoué !{fetchError}
               </Notification>

@@ -14,15 +14,21 @@ import {
 } from 'react-bulma-components/lib/components/form'
 import { useSelector, useDispatch } from 'react-redux'
 import {
-  selectSaving,
+
   saveBasketThunk,
+  
+  loadClassesThunk,
+} from 'features/mental/mentalSlice'
+import {
+  selectSaving,
+
   saveReset,
   selectSaved,
   selectSaveError,
   selectFetched,
   FETCH_CLASSES,
-  loadClassesThunk,
-} from 'features/mental/mentalSlice'
+
+} from 'features/db/dbSlice'
 
 import AssessmentsList from 'features/mental/AssessmentsList'
 import ScrollArea from '@xico2k/react-scroll-area'

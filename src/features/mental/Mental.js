@@ -3,24 +3,22 @@ import { useDispatch, useSelector } from 'react-redux'
 import Assessment from './Assessment'
 import Basket from './Basket'
 import Columns from 'react-bulma-components/lib/components/columns'
-import Button from 'react-bulma-components/lib/components/button'
+
 import Box from 'react-bulma-components/lib/components/box'
 
 import Heading from 'react-bulma-components/lib/components/heading'
 import Container from 'react-bulma-components/lib/components/container'
 import Hero from 'react-bulma-components/lib/components/hero'
-import { launchAssessment } from './mentalSlice'
+
 import { selectReady } from './mentalSlice'
 import QuestionsList from './QuestionsList'
 import { selectUser } from 'features/auth/authSlice'
-
-
+import AssignedAssessments from './AssignedAssessments'
 
 function Mental() {
-  const dispatch = useDispatch()
+ 
   const ready = useSelector(selectReady)
   const user = useSelector(selectUser)
-
 
   if (ready) return <Assessment />
 
@@ -42,20 +40,10 @@ function Mental() {
         </Columns.Column>
 
         <Columns.Column size={4}>
-          {user.role === 'teacher' && (
-            <Button
-              fullwidth
-              color="primary"
-              onClick={() => dispatch(launchAssessment())}
-            >
-              Go daddy !
-            </Button>
-          )}
+          {user.role === 'teacher' && <Basket />}
 
-          {user.role === 'teacher' && (
-            <Box>
-              <Basket />
-            </Box>
+          {user.role === 'student' && (
+            <AssignedAssessments userId={user.email} />
           )}
         </Columns.Column>
       </Columns>

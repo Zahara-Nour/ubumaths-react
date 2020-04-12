@@ -1,6 +1,18 @@
 import { createSlice } from '@reduxjs/toolkit'
 import { math } from 'tinycas/build/math/math'
 import db from '../../app/db'
+import {
+  saveRequest,
+  saveSuccess,
+  saveFailure,
+  fetchRequest,
+  fetchSuccess,
+  fetchFailure,
+  FETCH_CLASSES,
+  FETCH_ASSIGNED_ASSESSMENTS,
+  FETCH_ASSESSMENT,
+  FETCH_ASSESSMENTS,
+} from 'features/db/dbSlice'
 
 function generateQuestions(questions) {
   const generateds = [] // to track duplicated questions
@@ -27,15 +39,8 @@ function generateQuestions(questions) {
 const initialState = {
   rawQuestions: [],
   generatedQuestions: [],
-  fetching: {},
-  fetchError: {},
-  fetched: {},
   ready: false,
   finished: false,
-
-  saving: false,
-  saved: false,
-  saveError: '',
 }
 
 const mentalSlice = createSlice({
@@ -62,57 +67,8 @@ const mentalSlice = createSlice({
     removeFromBasket(state, action) {
       state.rawQuestions.splice(action.payload.id, 1)
     },
-
-    saveRequest(state) {
-      state.saving = true
-      state.saved = false
-      state.saveError = ''
-    },
-    saveFailure(state, action) {
-      state.saving = false
-      state.saveError = action.payload.error
-    },
-    saveSuccess(state, action) {
-      state.saving = false
-      state.saved = true
-    },
-    saveReset(state) {
-      state.saving = false
-      state.saved = false
-      state.saveError = ''
-    },
-
-    fetchRequest(state, action) {
-      const type = action.payload.type
-      state.fetching[type] = true
-      state.fetched[type] = null
-      state.fetchError[type] = null
-    },
-    fetchReset(state, action) {
-      const type = action.payload.type
-      state.fetching[type] = false
-      state.fetched[type] = null
-      state.fetchError[type] = null
-    },
-
-    fetchFailure(state, action) {
-      const type = action.payload.type
-      state.fetching[type] = false
-      state.fetchError[type] = action.payload.error
-    },
-
-    fetchSuccess(state, action) {
-      const type = action.payload.type
-      state.fetching[type] = false
-      state.fetched[type] = action.payload.data
-    },
   },
 })
-
-const FETCH_ASSESSMENTS = 'assessments'
-const FETCH_ASSESSMENT = 'assessment'
-const FETCH_CLASSES = 'classes'
-export { FETCH_ASSESSMENT, FETCH_ASSESSMENTS, FETCH_CLASSES }
 
 export const {
   launchAssessment,
@@ -121,25 +77,11 @@ export const {
   addToBasket,
   removeFromBasket,
   setBasket,
-  saveFailure,
-  saveRequest,
-  saveSuccess,
-  saveReset,
-  fetchRequest,
-  fetchSuccess,
-  fetchFailure,
-  fetchReset,
 } = mentalSlice.actions
 
 const selectReady = (state) => state.mental.ready
 
 const selectFinished = (state) => state.mental.finished
-const selectFetching = (type) => (state) => state.mental.fetching[type]
-const selectFetched = (type) => (state) => state.mental.fetched[type]
-const selectFetchError = (type) => (state) => state.mental.fetchError[type]
-const selectSaving = (state) => state.mental.saving
-const selectSaved = (state) => state.mental.saved
-const selectSaveError = (state) => state.mental.saveError
 const selectRawQuestions = (state) => state.mental.rawQuestions
 const selectGeneratedQuestions = (state) => state.mental.generatedQuestions
 
@@ -148,17 +90,11 @@ export {
   selectFinished,
   selectRawQuestions,
   selectGeneratedQuestions,
-  selectSaving,
-  selectSaveError,
-  selectSaved,
-  selectFetched,
-  selectFetching,
-  selectFetchError,
 }
 
 function saveBasketThunk({ questions, title, template, classes, students }) {
   const collection = template ? 'mental-templates' : 'mental-assessments'
-console.log(classes)
+  console.log(classes)
   const assignAssessment = () =>
     classes.forEach((c) => {
       c.students.forEach((student) => {
@@ -166,7 +102,7 @@ console.log(classes)
           .doc(student)
           .collection('assessments')
           .doc(title)
-          .set({ id:title,done:false })
+          .set({ id: title, done: false })
           .then(() =>
             console.log('Evaluation ' + title + ' enregisrée pour ' + student),
           )
@@ -192,12 +128,12 @@ console.log(classes)
   return saveAssessment
 }
 
-function loadBasketThunk(title, template) {
+function loadBasketThunk({id, template} = {template:false}) {
   const collection = template ? 'mental-templates' : 'mental-assessments'
   return function (dispatch) {
     dispatch(fetchRequest({ type: FETCH_ASSESSMENT }))
     db.collection(collection)
-      .doc(title)
+      .doc(id)
       .get()
       .then(function (doc) {
         if (doc.exists) {
@@ -244,6 +180,30 @@ function loadAssessmentsThunk(template) {
   }
 }
 
+function loadAssignedAssessmentsThunk({ userId }) {
+  return function (dispatch) {
+    dispatch(fetchRequest({ type: FETCH_ASSIGNED_ASSESSMENTS }))
+    db.collection('users')
+      .doc(userId)
+      .collection('assessments')
+      .get()
+      .then(function (querySnapshot) {
+        const datas = []
+        querySnapshot.forEach(function (doc) {
+          datas.push({ ...doc.data(), title: doc.id })
+          console.log(doc.id, ' => ', doc.data())
+        })
+        dispatch(
+          fetchSuccess({ data: datas, type: FETCH_ASSIGNED_ASSESSMENTS }),
+        )
+      })
+      .catch(function (error) {
+        console.log('Error getting documents: ', error)
+        // dispatch(fetchFailure({ error }))
+      })
+  }
+}
+
 function loadClassesThunk() {
   return function (dispatch) {
     dispatch(fetchRequest({ type: FETCH_CLASSES }))
@@ -269,6 +229,7 @@ export {
   loadAssessmentsThunk,
   loadBasketThunk,
   loadClassesThunk,
+  loadAssignedAssessmentsThunk,
 }
 
 export default mentalSlice.reducer

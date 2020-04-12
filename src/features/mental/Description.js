@@ -1,13 +1,12 @@
-import React from 'react'
+import React, {memo} from 'react'
 import Content from 'react-bulma-components/lib/components/content'
 import Box from 'react-bulma-components/lib/components/box'
 import { math } from 'tinycas/build/math/math'
 
-export default function Description({ question }) {
+export default memo(function Description({ question }) {
   if (!question) return <div />
   
-  console.log(question.subcategory)
-console.log(question.description)
+ 
   return (
     <Box>
       <Content>
@@ -26,4 +25,4 @@ console.log(question.description)
       </Content>
     </Box>
   )
-}
+})

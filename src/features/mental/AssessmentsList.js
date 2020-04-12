@@ -1,10 +1,16 @@
 import React, { useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import {
-  selectFetched,
+  
   loadAssessmentsThunk,
-  FETCH_ASSESSMENTS,
+
 } from 'features/mental/mentalSlice'
+import {
+  selectFetched,
+
+  FETCH_ASSESSMENTS,
+} from 'features/db/dbSlice'
+
 import Box from 'react-bulma-components/lib/components/box/box'
 import List from 'react-bulma-components/lib/components/list'
 import Loader from 'react-bulma-components/lib/components/loader'
