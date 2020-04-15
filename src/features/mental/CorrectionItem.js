@@ -18,20 +18,10 @@ function CorrectionItem({ question, number, answer }) {
   
   const correct = !badExpression ? q.equals(a) : false
   const strictlyCorrect = !badExpression ? q.eval().string===answer.ASCIIMath : false
-  console.log('-------------')
-  console.log("question :",q.string)
-  console.log("réponse attendue",q.eval().string)
-  console.log("réponse",answer.ASCIIMath)
-  console.log("correct",correct)
-  console.log("strictlyCorrect",strictlyCorrect)
-  // console.log(q.string+" === "+a.string + " ? :", q.string===a.string)
-  console.log("empty", empty)
-  console.log("badExpression", badExpression)
-  console.log('-------------')
 
   let correction = q.latex+'='
   if (!correct &&!empty) {
-    correction += '\\enclose{updiagonalstrike downdiagonalstrike}[6px solid rgba(205, 0, 11, .4)]{'+answer.latex+'}\\text{  }'
+    correction += '\\enclose{updiagonalstrike}[6px solid rgba(205, 0, 11, .4)]{'+answer.latex+'}\\text{  }'
   }
   
   if (badExpression || !correct) {
@@ -43,7 +33,6 @@ function CorrectionItem({ question, number, answer }) {
 
   
   if (correct && !strictlyCorrect) {
-    console.log('tottoototot')
     correction +="\\color{black}\\text{ mais }\\color{green}"+q.eval().latex+"\\color{black}\\text{ c'est encore mieux !}" 
   }
 
@@ -51,14 +40,12 @@ function CorrectionItem({ question, number, answer }) {
     correction +="\\color{black}\\text{   (tu n'as rien répondu)}" 
   }
 
-
-  // number = number.toString()
   const numStyle = {
     color: '#fff',
     display: 'inline-block',
     padding: '0.5em',
     marginRight: '1em',
-    fontSize: '50px',
+    fontSize: '40px',
     background: '#02D1B2',
     width: '0.7em',
     height: '0.7em',

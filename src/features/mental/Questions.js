@@ -38,16 +38,43 @@ function Questions({ questions }) {
     }
   })
 
-  if (hasToChange) changeQuestion()
+  useEffect(() => {
+    if (hasToChange) {
+      setHasToChange(false)
 
-  useInterval(() => setHasToChange(true), isRunning ? delay : null)
-  useInterval(countDown, isRunning ? 500 : null)
+      const answerLatex = mfRef.current.$text('latex')
+      const answerASCIIMath = mfRef.current.$text('ASCIIMath')
 
-  if (!isRunning) {
-    setDelay(questions[current].delay)
-    setIsRunning(true)
-    setStart(Date.now())
-  }
+      answersRef.current.push({
+        ASCIIMath: answerASCIIMath,
+        latex: answerLatex,
+      })
+
+      if (current === questions.length - 1) {
+        setIsFinished(true)
+      } else {
+        setCurrent((current) => current + 1)
+        setIsRunning(false)
+        mfRef.current.$perform('deleteAll')
+      }
+    }
+  }, [hasToChange, current, questions.length])
+
+  useInterval(
+    () => {
+      setHasToChange(true)
+    },
+    isRunning ? delay : null,
+  )
+  useInterval(countDown, isRunning ? 10 : null)
+
+  useEffect(() => {
+    if (!isRunning) {
+      setDelay(questions[current].delay)
+      setIsRunning(true)
+      setStart(Date.now())
+    }
+  }, [current, isRunning, questions])
 
   //necessary to avoid rerendering of the Mathfield component with a new config, which would create a new Mathfield
   const mfConfigRef = useRef({
@@ -62,34 +89,12 @@ function Questions({ questions }) {
     },
 
     onKeystroke: (el, key, evt) => {
-      console.log('key', key)
       if (key === 'Enter' || key === 'NumpadEnter') {
         setHasToChange(true)
       }
       return true
     },
   })
-
-  function changeQuestion() {
-    setHasToChange(false)
-    console.log('change')
-    const answerLatex = mfRef.current.$text('latex')
-    const answerASCIIMath = mfRef.current.$text('ASCIIMath')
-    console.log('answerasciimath: ', answerASCIIMath)
-    console.log('answerLatex: ', answerLatex)
-
-    answersRef.current.push({ ASCIIMath: answerASCIIMath, latex: answerLatex })
-    console.log([...answersRef.current])
-
-    if (current === questions.length - 1) {
-      console.log('fnished')
-      setIsFinished(true)
-    } else {
-      setCurrent((current) => current + 1)
-      setIsRunning(false)
-      mfRef.current.$perform('deleteAll')
-    }
-  }
 
   function countDown() {
     setElapsed(Date.now() - start)
@@ -158,11 +163,16 @@ function useInterval(callback, delay) {
 
   useEffect(() => {
     function tick() {
+      console.log('tick', savedCallback.current)
       savedCallback.current()
     }
     if (delay !== null) {
+      console.log('setting interval', savedCallback.current)
       let id = setInterval(tick, delay)
-      return () => clearInterval(id)
+      return () => {
+        console.log('clearing interval', savedCallback.current)
+        clearInterval(id)
+      }
     }
   }, [delay])
 }
