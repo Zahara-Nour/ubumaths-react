@@ -41,6 +41,7 @@ const initialState = {
   generatedQuestions: [],
   ready: false,
   finished: false,
+  answers: [],
 }
 
 const mentalSlice = createSlice({
@@ -50,10 +51,12 @@ const mentalSlice = createSlice({
     launchAssessment(state) {
       state.generatedQuestions = generateQuestions(state.rawQuestions)
       state.ready = true
+      state.answers = []
     },
 
-    assessmentFinished(state) {
+    assessmentFinished(state, action) {
       state.finished = true
+      state.answers = action.payload.answers
     },
 
     addToBasket(state, action) {
@@ -80,7 +83,7 @@ export const {
 } = mentalSlice.actions
 
 const selectReady = (state) => state.mental.ready
-
+const selectAnswers = (state) => state.mental.answers
 const selectFinished = (state) => state.mental.finished
 const selectRawQuestions = (state) => state.mental.rawQuestions
 const selectGeneratedQuestions = (state) => state.mental.generatedQuestions
@@ -88,6 +91,7 @@ const selectGeneratedQuestions = (state) => state.mental.generatedQuestions
 export {
   selectReady,
   selectFinished,
+  selectAnswers,
   selectRawQuestions,
   selectGeneratedQuestions,
 }
@@ -128,7 +132,7 @@ function saveBasketThunk({ questions, title, template, classes, students }) {
   return saveAssessment
 }
 
-function loadBasketThunk({id, template} = {template:false}) {
+function loadBasketThunk({ id, template } = { template: false }) {
   const collection = template ? 'mental-templates' : 'mental-assessments'
   return function (dispatch) {
     dispatch(fetchRequest({ type: FETCH_ASSESSMENT }))

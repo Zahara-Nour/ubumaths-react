@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import {
   loadAssignedAssessmentsThunk,
-  setBasket,
   launchAssessment,
   loadBasketThunk,
   selectRawQuestions,
@@ -10,7 +9,6 @@ import {
 import {
   selectFetched,
   FETCH_ASSIGNED_ASSESSMENTS,
-  FETCH_ASSESSMENT,
 } from 'features/db/dbSlice'
 
 import Box from 'react-bulma-components/lib/components/box/box'
@@ -56,6 +54,7 @@ export default function AssignedAssessments({ userId }) {
         }}
       />
     )
+    
 
   return (
     <Box>

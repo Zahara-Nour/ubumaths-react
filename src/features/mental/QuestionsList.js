@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState } from 'react'
 import Tabs from 'react-bulma-components/lib/components/tabs'
 import Menu from 'react-bulma-components/lib/components/menu'
 

@@ -8,7 +8,6 @@ export default memo(function Subcategory({ subcategory, active, onClick }) {
       
     if (subsubcategoryId !== index) {
       setSubsubcategoryId(index)
-      console.log("new subsubcategoryId "+ subsubcategoryId)
     }
   }
 
@@ -19,7 +18,6 @@ export default memo(function Subcategory({ subcategory, active, onClick }) {
         
           {subcategory.subsubcategories.map((subsubcategory, ssindex) => {
             const ssactive = subsubcategoryId === ssindex
-            console.log('rendering subsubcategory' + ssindex)
             return (
               <Subsubcategory
                 subsubcategory={subsubcategory}

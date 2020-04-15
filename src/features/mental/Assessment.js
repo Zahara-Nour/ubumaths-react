@@ -8,7 +8,7 @@ import {selectFinished, selectGeneratedQuestions} from './mentalSlice'
 function Assessment() {
   const finished = useSelector(selectFinished)
   const questions = useSelector(selectGeneratedQuestions)
-  console.log(questions)
+  
 
   if (finished) return <Correction questions={questions} />
 

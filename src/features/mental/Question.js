@@ -4,9 +4,9 @@ import TeX from '@matejmazur/react-katex'
 
 
 
-export default function Question ({text}) {
+export default function Question ({text, fontSize}) {
     return (
-        <div style={{ fontSize:100}}>
+        <div style={{ fontSize }}>
             <TeX  math={text} block />
         </div>
     )

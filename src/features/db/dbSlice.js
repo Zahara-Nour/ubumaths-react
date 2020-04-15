@@ -1,14 +1,9 @@
 import { createSlice } from '@reduxjs/toolkit'
 
 const initialState = {
-  rawQuestions: [],
-  generatedQuestions: [],
   fetching: {},
   fetchError: {},
   fetched: {},
-  ready: false,
-  finished: false,
-
   saving: false,
   saved: false,
   saveError: '',

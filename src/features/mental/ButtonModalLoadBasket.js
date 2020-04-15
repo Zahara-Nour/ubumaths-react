@@ -8,7 +8,6 @@ import { Control, Radio } from 'react-bulma-components/lib/components/form'
 import { useSelector, useDispatch } from 'react-redux'
 import {
   selectFetching,
-  saveReset,
   fetchReset,
   selectFetchError,
   selectFetched,

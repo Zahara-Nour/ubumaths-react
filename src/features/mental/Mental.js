@@ -1,5 +1,5 @@
 import React from 'react'
-import { useDispatch, useSelector } from 'react-redux'
+import { useSelector } from 'react-redux'
 import Assessment from './Assessment'
 import Basket from './Basket'
 import Columns from 'react-bulma-components/lib/components/columns'
