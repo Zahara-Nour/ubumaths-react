@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { math } from 'tinycas/build/math/math'
 import 'katex/dist/katex.min.css'
 import List from 'react-bulma-components/lib/components/list'
@@ -8,7 +8,7 @@ import { faCheckCircle } from '@fortawesome/free-solid-svg-icons'
 import { faTimesCircle } from '@fortawesome/free-solid-svg-icons'
 import StaticMathfield from 'components/StaticMathfield'
 
-function CorrectionItem({ question, number, answer }) {
+function CorrectionItem({ question, number, answer, addPoint }) {
   const q = math(question.text)
   question = q.latex
   const empty = !answer.ASCIIMath
@@ -55,6 +55,8 @@ function CorrectionItem({ question, number, answer }) {
     lineHeight: '0.7em',
     // boxSizing:'contentBox'
   }
+
+  useEffect(() => {if (correct) addPoint()},[addPoint, correct])
 
   return (
     <div style={{fontSize:40}}>
