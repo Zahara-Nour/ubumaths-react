@@ -15,7 +15,8 @@ import {
 } from 'features/db/dbSlice'
 import { loadBasketThunk } from 'features/mental/mentalSlice'
 import AssessmentsList from 'features/mental/AssessmentsList'
-import ScrollArea from '@xico2k/react-scroll-area'
+// import ScrollArea from '@xico2k/react-scroll-area'
+
 
 export default function ButtonModalLoadBasket() {
   const dispatch = useDispatch()
@@ -112,12 +113,12 @@ export default function ButtonModalLoadBasket() {
           <Modal.Card.Foot
             style={{ alignItems: 'center', justifyContent: 'center' }}
           >
-            <ScrollArea height="300px">
+            {/* <ScrollArea height="300px"> */}
               <AssessmentsList
                 template={radioValue === 'Modèle'}
                 clickCB={setTitle}
               />
-            </ScrollArea>
+            {/* </ScrollArea> */}
           </Modal.Card.Foot>
         </Modal.Card>
       </Modal>

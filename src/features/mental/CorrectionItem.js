@@ -1,12 +1,12 @@
 import React, { useEffect } from 'react'
 import { math } from 'tinycas/build/math/math'
-import 'katex/dist/katex.min.css'
+
 import List from 'react-bulma-components/lib/components/list'
 import Level from 'react-bulma-components/lib/components/level'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCheckCircle } from '@fortawesome/free-solid-svg-icons'
 import { faTimesCircle } from '@fortawesome/free-solid-svg-icons'
-import StaticMathfield from 'components/StaticMathfield'
+import MathField from 'react-mathfield'
 
 function CorrectionItem({ question, number, answer, addPoint }) {
   const q = math(question.text)
@@ -65,7 +65,7 @@ function CorrectionItem({ question, number, answer, addPoint }) {
           <Level.Side align='left'>
             <Level.Item>
               <div style={numStyle}>{number}</div>
-              <StaticMathfield text={correction}/>
+              <MathField latex={correction}/>
               </Level.Item>
               <Level.Item>
               {correct && (

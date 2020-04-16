@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import Question from './Question'
 import '../../components/CircularProgressBar.css'
 import CircularProgressBar from '../../components/CircularProgressBar.js'
@@ -11,7 +11,7 @@ import QuestionNumber from './QuestionNumber'
 import { useDispatch } from 'react-redux'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faFont } from '@fortawesome/free-solid-svg-icons'
-import Mathfield from 'components/Mathfield'
+import MathField from 'react-mathfield'
 import math from 'tinycas'
 
 function Questions({ questions }) {
@@ -76,7 +76,7 @@ function Questions({ questions }) {
     }
   }, [current, isRunning, questions])
 
-  //necessary to avoid rerendering of the Mathfield component with a new config, which would create a new Mathfield
+  //necessary to avoid rerendering of the MathField component with a new config, which would create a new MathField
   const mfConfigRef = useRef({
     onContentDidChange: () => {
       const answerASCIIMath = mfRef.current.$text('ASCIIMath')
@@ -140,7 +140,7 @@ function Questions({ questions }) {
       <Level>
         <Level.Item>
           <div style={mfStyle}>
-            <Mathfield autoFocus mfRef={mfRef} config={mfConfigRef.current} />
+            <MathField autoFocus mfRef={mfRef} config={mfConfigRef.current} />
           </div>
         </Level.Item>
       </Level>

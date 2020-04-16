@@ -31,7 +31,7 @@ import {
 } from 'features/db/dbSlice'
 
 import AssessmentsList from 'features/mental/AssessmentsList'
-import ScrollArea from '@xico2k/react-scroll-area'
+//import ScrollArea from '@xico2k/react-scroll-area'
 import ChooseClasses from './ChooseClasses'
 import ChooseStudents from './ChooseStudents'
 
@@ -185,13 +185,13 @@ export default function ButtonModalSaveBasket({ questions }) {
           <Modal.Card.Foot
             style={{ alignItems: 'center', justifyContent: 'center' }}
           >
-            <ScrollArea height="300px">
+            {/* <ScrollArea height="300px"> */}
               <AssessmentsList
                 template={radioValue === 'Modèle'}
                 clickCB={setTitle}
                 loadCB={(t) => (titles.current = t)}
               />
-            </ScrollArea>
+            {/* </ScrollArea> */}
           </Modal.Card.Foot>
         </Modal.Card>
       </Modal>

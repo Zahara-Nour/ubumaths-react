@@ -1,13 +1,13 @@
 import React from 'react';
-import 'katex/dist/katex.min.css'
-import TeX from '@matejmazur/react-katex'
+
+import MathField from 'react-mathfield'
 
 
 
 export default function Question ({text, fontSize}) {
     return (
         <div style={{ fontSize }}>
-            <TeX  math={text} block />
+            <MathField  latex={text}  />
         </div>
     )
 }
