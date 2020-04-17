@@ -24,7 +24,7 @@ function generateQuestions(questions) {
       generated = math(
         expressions[Math.floor(Math.random() * expressions.length)],
       ).generate().string
-      console.log(generated)
+
       i += 1
     } while (generateds.includes(generated) && i < 3) // one limite à 3 le nombre de tentative au cas il ny ait pas assez de questions différentes.
     generateds.push(generated)
@@ -42,15 +42,19 @@ const initialState = {
   ready: false,
   finished: false,
   answers: [],
+  marked: false,
+  assessmentId: '',
 }
 
 const mentalSlice = createSlice({
   name: 'mental',
   initialState: initialState,
   reducers: {
-    launchAssessment(state) {
+    launchAssessment(state, action) {
       state.generatedQuestions = generateQuestions(state.rawQuestions)
       state.ready = true
+      state.marked = action.payload.marked
+      state.assessmentId = action.payload.assessmentId
       state.answers = []
     },
 
@@ -83,8 +87,10 @@ export const {
 } = mentalSlice.actions
 
 const selectReady = (state) => state.mental.ready
+const selectMarked = (state) => state.mental.marked
 const selectAnswers = (state) => state.mental.answers
 const selectFinished = (state) => state.mental.finished
+const selectAssessmentId = (state) => state.mental.assessmentId
 const selectRawQuestions = (state) => state.mental.rawQuestions
 const selectGeneratedQuestions = (state) => state.mental.generatedQuestions
 
@@ -92,27 +98,70 @@ export {
   selectReady,
   selectFinished,
   selectAnswers,
+  selectMarked,
+  selectAssessmentId,
   selectRawQuestions,
   selectGeneratedQuestions,
 }
 
-function saveBasketThunk({ questions, title, template, classes, students }) {
-  const collection = template ? 'mental-templates' : 'mental-assessments'
-  console.log(classes)
-  const assignAssessment = () =>
-    classes.forEach((c) => {
-      c.students.forEach((student) => {
-        db.collection('users')
-          .doc(student)
-          .collection('assessments')
-          .doc(title)
-          .set({ id: title, done: false })
-          .then(() =>
-            console.log('Evaluation ' + title + ' enregisrée pour ' + student),
-          )
-          .catch((error) => console.error('Error writing document: ', error))
+function saveMarkAsync(userId, assessmentId, mark) {
+  return function (dispatch) {
+    db.collection('users')
+      .doc(userId)
+      .collection('assessments')
+      .doc(assessmentId)
+      .get()
+      .then((doc) => {
+        if (doc.exists) {
+          console.log('got document')
+          const data = doc.data()
+          data.best = data.best > mark ? data.best : mark
+          data.results = data.results.concat({
+            mark,
+            timestamp: new Date().getTime(),
+          })
+          return data
+        } else {
+          console.log('No such document!')
+        }
       })
+      .then((data) => {
+        console.log('trying to save')
+        db.collection('users')
+          .doc(userId)
+          .collection('assessments')
+          .doc(assessmentId)
+          .set(data)
+          .then(() => console.log('Note enregisrée pour ' + userId))
+      })
+      .catch((error) => console.error('Error writing document: ', error))
+  }
+}
+
+function saveBasketAsync( questions, title, template, classes, students) {
+  const collection = template ? 'mental-templates' : 'mental-assessments'
+
+  const allStudents = classes.reduce(
+    (prev, current) => prev.concat(current),
+    [],
+  )
+  students.forEach((student) => {
+    if (!allStudents.includes(student)) allStudents.push(student)
+  })
+
+  const assignAssessment = () => {
+    allStudents.forEach((student) => {
+      db.collection('users')
+        .doc(student)
+        .collection('assessments')
+        .doc(title)
+        .set({ id: title, results: [], best: 0 })
+        .then(() =>
+          console.log('Evaluation ' + title + ' enregisrée pour ' + student),
+        )
+        .catch((error) => console.error('Error writing document: ', error))
     })
+  }
 
   const saveAssessment = (dispatch) => {
     dispatch(saveRequest())
@@ -132,10 +181,12 @@ function saveBasketThunk({ questions, title, template, classes, students }) {
   return saveAssessment
 }
 
-function loadBasketThunk({ id, template } = { template: false }) {
+function loadBasketAsync( id, template=false) {
   const collection = template ? 'mental-templates' : 'mental-assessments'
+
   return function (dispatch) {
     dispatch(fetchRequest({ type: FETCH_ASSESSMENT }))
+
     db.collection(collection)
       .doc(id)
       .get()
@@ -163,7 +214,7 @@ function loadBasketThunk({ id, template } = { template: false }) {
   }
 }
 
-function loadAssessmentsThunk(template) {
+function loadAssessmentsAsync(template) {
   const collection = template ? 'mental-templates' : 'mental-assessments'
   return function (dispatch) {
     dispatch(fetchRequest({ type: FETCH_ASSESSMENTS }))
@@ -184,7 +235,7 @@ function loadAssessmentsThunk(template) {
   }
 }
 
-function loadAssignedAssessmentsThunk({ userId }) {
+function loadAssignedAssessmentsAsync({ userId }) {
   return function (dispatch) {
     dispatch(fetchRequest({ type: FETCH_ASSIGNED_ASSESSMENTS }))
     db.collection('users')
@@ -208,7 +259,7 @@ function loadAssignedAssessmentsThunk({ userId }) {
   }
 }
 
-function loadClassesThunk() {
+function loadClassesAsync() {
   return function (dispatch) {
     dispatch(fetchRequest({ type: FETCH_CLASSES }))
     db.collection('classes')
@@ -229,11 +280,12 @@ function loadClassesThunk() {
 }
 
 export {
-  saveBasketThunk,
-  loadAssessmentsThunk,
-  loadBasketThunk,
-  loadClassesThunk,
-  loadAssignedAssessmentsThunk,
+  saveBasketAsync,
+  saveMarkAsync,
+  loadAssessmentsAsync,
+  loadBasketAsync,
+  loadClassesAsync,
+  loadAssignedAssessmentsAsync,
 }
 
 export default mentalSlice.reducer

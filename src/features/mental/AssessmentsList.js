@@ -2,7 +2,7 @@ import React, { useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import {
   
-  loadAssessmentsThunk,
+  loadAssessmentsAsync,
 
 } from 'features/mental/mentalSlice'
 import {
@@ -19,7 +19,7 @@ function AssessmentsList({ template, clickCB, loadCB }) {
   const list = useSelector(selectFetched(FETCH_ASSESSMENTS))
   const dispatch = useDispatch()
   
-  useEffect(() => dispatch(loadAssessmentsThunk(template)), [
+  useEffect(() => dispatch(loadAssessmentsAsync(template)), [
     dispatch,
     template,
   ])

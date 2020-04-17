@@ -3,7 +3,6 @@ import Question from './Question'
 import '../../components/CircularProgressBar.css'
 import CircularProgressBar from '../../components/CircularProgressBar.js'
 import { assessmentFinished } from './mentalSlice'
-import Container from 'react-bulma-components/lib/components/container'
 import Section from 'react-bulma-components/lib/components/section'
 import Level from 'react-bulma-components/lib/components/level'
 import Button from 'react-bulma-components/lib/components/button'
@@ -13,6 +12,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faFont } from '@fortawesome/free-solid-svg-icons'
 import MathField from 'react-mathfield'
 import math from 'tinycas'
+import {useInterval} from 'hooks'
+import './mental.css'
 
 function Questions({ questions }) {
   const dispatch = useDispatch()
@@ -23,7 +24,7 @@ function Questions({ questions }) {
   const [hasToChange, setHasToChange] = useState(false)
   const [elapsed, setElapsed] = useState(0)
   const answersRef = useRef([])
-  const [delay, setDelay] = useState(0)
+  const [delay, setDelay] = useState()
   const [font, setFont] = useState(80)
   const [mfStyle, setMfStyle] = useState({
     fontSize: font,
@@ -55,7 +56,10 @@ function Questions({ questions }) {
       } else {
         setCurrent((current) => current + 1)
         setIsRunning(false)
+        
         mfRef.current.$perform('deleteAll')
+        console.log('delete',mfRef.current.$text())
+      
       }
     }
   }, [hasToChange, current, questions.length])
@@ -76,31 +80,40 @@ function Questions({ questions }) {
     }
   }, [current, isRunning, questions])
 
-  //necessary to avoid rerendering of the MathField component with a new config, which would create a new MathField
-  const mfConfigRef = useRef({
-    onContentDidChange: () => {
-      const answerASCIIMath = mfRef.current.$text('ASCIIMath')
-      const e = answerASCIIMath ? math(answerASCIIMath) : ''
-      if (e.type === '!! Error !!') {
-        setMfStyle({ ...mfStyle, border: '2px solid red' })
-      } else {
-        setMfStyle({ ...mfStyle, border: '2px solid #1C6EA4' })
-      }
-    },
+  const handleChange = () => {
+    
+    const answerASCIIMath = mfRef.current.$text('ASCIIMath')
+    const e = answerASCIIMath ? math(answerASCIIMath) : ''
+    if (e.type === '!! Error !!') {
+      setMfStyle({ ...mfStyle, border: '2px solid red' })
+    } else {
+      setMfStyle({ ...mfStyle, border: '2px solid #1C6EA4' })
+    }
+  }
 
+
+  const mfConfig = {
+    
     onKeystroke: (el, key, evt) => {
+      const content = mfRef.current.$text('ASCIIMath') // latex output fails after deletinf mathfield content
+      console.log('stoke text', content) 
       if (key === 'Enter' || key === 'NumpadEnter') {
-        setHasToChange(true)
+        
+        if (content) {
+          console.log('content not empty', content)
+          setHasToChange(true)
+        }
       }
       return true
-    },
-  })
+    }
+  }
 
   function countDown() {
     setElapsed(Date.now() - start)
   }
 
   const value = ((delay - elapsed) * 100) / delay
+
 
   const increaseFont = () => {
     setFont((s) => s + 10)
@@ -133,48 +146,29 @@ function Questions({ questions }) {
         </Level.Side>
       </Level>
 
-      <Container>
+     <Level>
+     <Level.Item>
         <Question text={questions[current].text} fontSize={font} />
-      </Container>
+        </Level.Item>
+        </Level>
 
       <Level>
         <Level.Item>
-          <div style={mfStyle}>
-            <MathField autoFocus mfRef={mfRef} config={mfConfigRef.current} />
-          </div>
+          
+            <MathField autoFocus style={mfStyle} mfRef={mfRef} config={mfConfig} onChange={handleChange} />
+          
         </Level.Item>
       </Level>
-      <CircularProgressBar
+      {isRunning && <CircularProgressBar
         style={{ bottom: 10 }}
         strokeWidth='20'
         sqSize='150'
         percentage={value}
-      />
+      />}
     </Section>
   )
 }
 
-function useInterval(callback, delay) {
-  const savedCallback = useRef()
 
-  useEffect(() => {
-    savedCallback.current = callback
-  })
-
-  useEffect(() => {
-    function tick() {
-      console.log('tick', savedCallback.current)
-      savedCallback.current()
-    }
-    if (delay !== null) {
-      console.log('setting interval', savedCallback.current)
-      let id = setInterval(tick, delay)
-      return () => {
-        console.log('clearing interval', savedCallback.current)
-        clearInterval(id)
-      }
-    }
-  }, [delay])
-}
 
 export default Questions

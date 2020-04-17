@@ -15,7 +15,7 @@
                 "expressions": ["$e{1;1}+$e{1;1}"],
                 "correction": "value",
                 "answer": "decimal",
-                "defaultDelay": 1,
+                "defaultDelay": 10,
                 "point": 1
               },
               {
@@ -25,7 +25,7 @@
                 "expressions": ["$e{2;2}+$e{2;2}"],
                 "correction": "value",
                 "answer": "decimal",
-                "defaultDelay": 1,
+                "defaultDelay": 10,
                 "point": 1
               },
               {
@@ -35,7 +35,7 @@
                 "expressions": ["$e{3;3}+$e{3;3}"],
                 "correction": "value",
                 "answer": "decimal",
-                "defaultDelay": 1,
+                "defaultDelay": 10,
                 "point": 1
               }
             ]
@@ -50,7 +50,7 @@
                 "expressions": ["?+$e{1;1}=10", "$e{1;1}+?=10"],
                 "correction": "value",
                 "answer": "decimal",
-                "defaultDelay": 1,
+                "defaultDelay": 10,
                 "point": 1
               },
               {
@@ -60,7 +60,7 @@
                 "expressions": ["?+$e{2;2}=100", "$e{2;2}+?=1000"],
                 "correction": "value",
                 "answer": "decimal",
-                "defaultDelay": 1,
+                "defaultDelay": 10,
                 "point": 1
               },
               {
@@ -70,7 +70,7 @@
                 "expressions": ["?+$e{3;3}=1000", "$e{3;3}+?=1000"],
                 "correction": "value",
                 "answer": "decimal",
-                "defaultDelay": 1,
+                "defaultDelay": 10,
                 "point": 1
               }
             ]
@@ -85,7 +85,7 @@
                 "expressions": ["?+$e[2;9] = $e[11;$1+9]", "$e[2;9]+? = $e[11;$1+9]"],
                 "correction": "value",
                 "answer": "decimal",
-                "defaultDelay": 1,
+                "defaultDelay": 10,
                 "point": 1
               },
               {
@@ -95,7 +95,7 @@
                 "expressions": ["?+$e{2;2} = $e[$1+12;$1+99]", "$e{2;2}+? = $e[$1+12;$1+99]"],
                 "correction": "value",
                 "answer": "decimal",
-                "defaultDelay": 1,
+                "defaultDelay": 10,
                 "point": 1
               },
               {
@@ -105,7 +105,7 @@
                 "expressions": ["?+$e[101;897]=$e[$1+102;999]", "$e[101;897]+? =$e[$1+102;999]"],
                 "correction": "value",
                 "answer": "decimal",
-                "defaultDelay": 1,
+                "defaultDelay": 10,
                 "point": 1
               }
             ]
@@ -120,7 +120,7 @@
                 "expressions": ["$e{1;1}+${10-$1}+$e{1;1}", "$e{1;1}+$e{1;1}+${10-$2}", "$e{1;1}+$e{1;1}+${10-$1}" ],
                 "correction": "value",
                 "answer": "decimal",
-                "defaultDelay": 1,
+                "defaultDelay": 10,
                 "point": 1
               },
               {
@@ -130,7 +130,7 @@
                 "expressions": ["$e{2;2}+${100-$1}+$e{2;2}", "$e{2;2}+$e{2;2}+${100-$2}", "$e{2;2}+$e{2;2}+${100-$1}"],
                 "correction": "value",
                 "answer": "decimal",
-                "defaultDelay": 1,
+                "defaultDelay": 10,
                 "point": 1
               },
               {
@@ -140,7 +140,7 @@
                 "expressions": ["$e{3;3}+${1000-$1}+$e{3;3}", "$e{3;3}+$e{3;3}+${1000-$2}", "$e{3;3}+$e{3;3}+${1000-$1}"],
                 "correction": "value",
                 "answer": "decimal",
-                "defaultDelay": 1,
+                "defaultDelay": 10,
                 "point": 1
               }
             ]
@@ -160,7 +160,7 @@
                 "expressions": ["$e[2;9]-$e[1;$1-1]"],
                 "correction": "value",
                 "answer": "decimal",
-                "defaultDelay": 1,
+                "defaultDelay": 10,
                 "point": 1
               },
               {
@@ -170,7 +170,7 @@
                 "expressions": ["${ $e[2;9]*10 + $e[2;9] } - ${ $e[1;$1-1]*10 + $e[1;$2-1] }"],
                 "correction": "value",
                 "answer": "decimal",
-                "defaultDelay": 1,
+                "defaultDelay": 10,
                 "point": 1
               },
               {
@@ -180,7 +180,7 @@
                 "expressions": ["${ $e[2;9]*100 + $e[2;9]*10 + $e[2;9] } - ${ $e[1;$1-1]*100 + $e[1;$2-1]*10 + $e[1;$3-1] }"],
                 "correction": "value",
                 "answer": "decimal",
-                "defaultDelay": 1,
+                "defaultDelay": 10,
                 "point": 1
               },
               {
@@ -190,7 +190,7 @@
                 "expressions": ["$e[11;99]-$e[10;$1-1]"],
                 "correction": "value",
                 "answer": "decimal",
-                "defaultDelay": 1,
+                "defaultDelay": 10,
                 "point": 1
               },
               {
@@ -200,7 +200,7 @@
                 "expressions": ["$e[101;999]-$e[100;$1-1]"],
                 "correction": "value",
                 "answer": "decimal",
-                "defaultDelay": 1,
+                "defaultDelay": 10,
                 "point": 1
               }
             ]
@@ -215,7 +215,7 @@
                 "expressions": ["?-$e[2;8]=$e[1;9-$1]","$e[2;9]-?=$e[1;$1-1]" ],
                 "correction": "value",
                 "answer": "decimal",
-                "defaultDelay": 1,
+                "defaultDelay": 10,
                 "point": 1
               },
               {
@@ -225,7 +225,7 @@
                 "expressions": ["${ $e[2;9]*10 + $e[2;9] } - ? =  ${ $e[1;$1-1]*10 + $e[1;$2-1] }"],
                 "correction": "value",
                 "answer": "decimal",
-                "defaultDelay": 1,
+                "defaultDelay": 10,
                 "point": 1
               },
               {
@@ -235,7 +235,7 @@
                 "expressions": ["${ $e[2;9]*100 + $e[2;9]*10 + $e[2;9] } - ? = ${ $e[1;$1-1]*100 + $e[1;$2-1]*10 + $e[1;$3-1] }"],
                 "correction": "value",
                 "answer": "decimal",
-                "defaultDelay": 1,
+                "defaultDelay": 10,
                 "point": 1
               },
               {
@@ -245,7 +245,7 @@
                 "expressions": ["?-$e[12;98]=$e[1;99-$1]","$e[12;99]-?=$e[1;$1-10]"],
                 "correction": "value",
                 "answer": "decimal",
-                "defaultDelay": 1,
+                "defaultDelay": 10,
                 "point": 1
               },
               {
@@ -255,7 +255,7 @@
                 "expressions": ["?-$e[102;998]=$e[1;999-$1]","$e[102;999]-?=$e[1;$1-100]"],
                 "correction": "value",
                 "answer": "decimal",
-                "defaultDelay": 1,
+                "defaultDelay": 10,
                 "point": 1
               }
             ]
@@ -275,7 +275,7 @@
                 "expressions": ["$e[2;9]*$e[2;9]" ],
                 "correction": "value",
                 "answer": "decimal",
-                "defaultDelay": 1,
+                "defaultDelay": 10,
                 "point": 1
               },
               {
@@ -285,7 +285,7 @@
                 "expressions": ["$e[2;9]*$e{2;2}", "$e{2;2}*$e[2;9]"],
                 "correction": "value",
                 "answer": "decimal",
-                "defaultDelay": 1,
+                "defaultDelay": 10,
                 "point": 1
               },
               {
@@ -295,7 +295,7 @@
                 "expressions": ["$e[2;9]*$e{3;3}", "$e{3;3}*$e[2;9]"],
                 "correction": "value",
                 "answer": "decimal",
-                "defaultDelay": 1,
+                "defaultDelay": 10,
                 "point": 1
               }
             ]
@@ -310,7 +310,7 @@
                 "expressions": ["?*$e[2;9]=${$1*$e[2;9]}","$e[2;9]*?=${$1*$e[2;9]}" ],
                 "correction": "value",
                 "answer": "decimal",
-                "defaultDelay": 1,
+                "defaultDelay": 10,
                 "point": 1
               },
               {
@@ -320,7 +320,7 @@
                 "expressions": ["?*$e[2;9]=${$1*$e{2;2}}","$e[2;9]*?=${$1*$e{2;2}}", "?*$e{2;2}=${$1*$e[2;9]}", "$e{2;2}*?=${$1*$e[2;9]}"],
                 "correction": "value",
                 "answer": "decimal",
-                "defaultDelay": 1,
+                "defaultDelay": 10,
                 "point": 1
               },
               {
@@ -330,7 +330,7 @@
                 "expressions": ["?*$e[2;9]=${$1*$e{3;3}}","$e[2;9]*?=${$1*$e{3;3}}", "?*$e{3;3}=${$1*$e[2;9]}", "$e{3;3}*?=${$1*$e[2;9]}"],
                 "correction": "value",
                 "answer": "decimal",
-                "defaultDelay": 1,
+                "defaultDelay": 10,
                 "point": 1
               }
             ]
@@ -349,7 +349,7 @@
                   ],
                 "correction": "value",
                 "answer": "decimal",
-                "defaultDelay": 1,
+                "defaultDelay": 10,
                 "point": 1
               }
             ]
@@ -364,7 +364,7 @@
                 "expressions": ["${$e[2;9]*$e[3;9]}=?*?", "${$l{3;5;7;9}*$l{3;5;7;9}}=?*?", "?*?=${$e[2;9]*$e[3;9]}","?*?=${$l{3;5;7;9}*$l{3;5;7;9}}"],
                 "correction": "value",
                 "answer": "decimal",
-                "defaultDelay": 1,
+                "defaultDelay": 10,
                 "point": 1
               },
               {
@@ -374,7 +374,7 @@
                 "expressions": ["$l{4;9;16;25;36;49;64;81;100;121;144;169;196;225}=?*?", "?*?=$l{4;9;16;25;36;49;64;81;100;121;144;169;196;225}"],
                 "correction": "value",
                 "answer": "decimal",
-                "defaultDelay": 1,
+                "defaultDelay": 10,
                 "point": 1
               }
             ]
@@ -389,7 +389,7 @@
                 "expressions": ["$e[2;15]^2"],
                 "correction": "value",
                 "answer": "decimal",
-                "defaultDelay": 1,
+                "defaultDelay": 10,
                 "point": 1
               }
             ]
@@ -404,7 +404,7 @@
                 "expressions": ["50*$e[2;10]", "$e[2;10]*50"],
                 "correction": "value",
                 "answer": "decimal",
-                "defaultDelay": 1,
+                "defaultDelay": 10,
                 "point": 1
               },
               {
@@ -414,7 +414,7 @@
                 "expressions": ["50*$e[11;20]", "$e[11;20]*50"],
                 "correction": "value",
                 "answer": "decimal",
-                "defaultDelay": 1,
+                "defaultDelay": 10,
                 "point": 1
               }
             ]
@@ -429,7 +429,7 @@
                 "expressions": ["25*$e[2;10]", "$e[2;10]*25"],
                 "correction": "value",
                 "answer": "decimal",
-                "defaultDelay": 1,
+                "defaultDelay": 10,
                 "point": 1
               },
               {
@@ -439,7 +439,7 @@
                 "expressions": ["25*$e[11;15]", "$e[11;15]*25"],
                 "correction": "value",
                 "answer": "decimal",
-                "defaultDelay": 1,
+                "defaultDelay": 10,
                 "point": 1
               }
             ]
@@ -454,7 +454,7 @@
                 "expressions": ["60*$e[2;10]", "$e[2;10]*60"],
                 "correction": "value",
                 "answer": "decimal",
-                "defaultDelay": 1,
+                "defaultDelay": 10,
                 "point": 1
               },
               {
@@ -464,7 +464,7 @@
                 "expressions": ["60*$e[11;15]", "$e[11;15]*60"],
                 "correction": "value",
                 "answer": "decimal",
-                "defaultDelay": 1,
+                "defaultDelay": 10,
                 "point": 1
               }
             ]
@@ -484,7 +484,7 @@
                 "expressions": ["${$e[2;9]*$e[3;9]}:$2"],
                 "correction": "value",
                 "answer": "decimal",
-                "defaultDelay": 1,
+                "defaultDelay": 10,
                 "point": 1
               }
             ]
@@ -499,7 +499,7 @@
                 "expressions": ["${$e[2;9]*$e[3;9]} : ? = $2 " ],
                 "correction": "value",
                 "answer": "decimal",
-                "defaultDelay": 1,
+                "defaultDelay": 10,
                 "point": 1
               },
               {
@@ -509,7 +509,7 @@
                 "expressions": ["? : $e[2;9] = $e[2;9]"],
                 "correction": "value",
                 "answer": "decimal",
-                "defaultDelay": 1,
+                "defaultDelay": 10,
                 "point": 1
               }
             ]
@@ -535,7 +535,7 @@
                 "expressions": "$e{1;1}+$e{1;1}",
                 "correction": "value",
                 "answer": "decimal",
-                "defaultDelay": 1,
+                "defaultDelay": 10,
                 "point": 1
               },
               {
@@ -545,7 +545,7 @@
                 "expressions": "$e{2;2}+$e{2;2}",
                 "correction": "value",
                 "answer": "decimal",
-                "defaultDelay": 1,
+                "defaultDelay": 10,
                 "point": 1
               },
               {
@@ -555,7 +555,7 @@
                 "expressions": "$e{3;3}+$e{3;3}",
                 "correction": "value",
                 "answer": "decimal",
-                "defaultDelay": 1,
+                "defaultDelay": 10,
                 "point": 1
               }
             ]
@@ -570,7 +570,7 @@
                 "expressions": "?+$e{1;1}",
                 "correction": "value",
                 "answer": "decimal",
-                "defaultDelay": 1,
+                "defaultDelay": 10,
                 "point": 1
               },
               {
@@ -580,7 +580,7 @@
                 "expressions": "?+$e{2;2}",
                 "correction": "value",
                 "answer": "decimal",
-                "defaultDelay": 1,
+                "defaultDelay": 10,
                 "point": 1
               },
               {
@@ -590,7 +590,7 @@
                 "expressions": "?+$e{3;3}",
                 "correction": "value",
                 "answer": "decimal",
-                "defaultDelay": 1,
+                "defaultDelay": 10,
                 "point": 1
               }
             ]
@@ -610,7 +610,7 @@
                 "expressions": "$e{1;1}-$e{1;1}",
                 "correction": "value",
                 "answer": "decimal",
-                "defaultDelay": 1,
+                "defaultDelay": 10,
                 "point": 1
               },
               {
@@ -620,7 +620,7 @@
                 "expressions": "$e{2;2}-$e{2;2}",
                 "correction": "value",
                 "answer": "decimal",
-                "defaultDelay": 1,
+                "defaultDelay": 10,
                 "point": 1
               },
               {
@@ -630,7 +630,7 @@
                 "expressions": "$e{3;3}-$e{3;3}",
                 "correction": "value",
                 "answer": "decimal",
-                "defaultDelay": 1,
+                "defaultDelay": 10,
                 "point": 1
               }
             ]
@@ -645,7 +645,7 @@
                 "expressions": "?-$e{1;1}",
                 "correction": "value",
                 "answer": "decimal",
-                "defaultDelay": 1,
+                "defaultDelay": 10,
                 "point": 1
               },
               {
@@ -655,7 +655,7 @@
                 "expressions": "?-$e{2;2}",
                 "correction": "value",
                 "answer": "decimal",
-                "defaultDelay": 1,
+                "defaultDelay": 10,
                 "point": 1
               },
               {
@@ -665,7 +665,7 @@
                 "expressions": "?-$e{3;3}",
                 "correction": "value",
                 "answer": "decimal",
-                "defaultDelay": 1,
+                "defaultDelay": 10,
                 "point": 1
               }
             ]
@@ -690,7 +690,7 @@
                 "expressions": "$e{1;1}+$e{1;1}",
                 "correction": "value",
                 "answer": "decimal",
-                "defaultDelay": 1,
+                "defaultDelay": 10,
                 "point": 1
               },
               {
@@ -700,7 +700,7 @@
                 "expressions": "$e{2;2}+$e{2;2}",
                 "correction": "value",
                 "answer": "decimal",
-                "defaultDelay": 1,
+                "defaultDelay": 10,
                 "point": 1
               },
               {
@@ -710,7 +710,7 @@
                 "expressions": "$e{3;3}+$e{3;3}",
                 "correction": "value",
                 "answer": "decimal",
-                "defaultDelay": 1,
+                "defaultDelay": 10,
                 "point": 1
               }
             ]
@@ -725,7 +725,7 @@
                 "expressions": "?+$e{1;1}",
                 "correction": "value",
                 "answer": "decimal",
-                "defaultDelay": 1,
+                "defaultDelay": 10,
                 "point": 1
               },
               {
@@ -735,7 +735,7 @@
                 "expressions": "?+$e{2;2}",
                 "correction": "value",
                 "answer": "decimal",
-                "defaultDelay": 1,
+                "defaultDelay": 10,
                 "point": 1
               },
               {
@@ -745,7 +745,7 @@
                 "expressions": "?+$e{3;3}",
                 "correction": "value",
                 "answer": "decimal",
-                "defaultDelay": 1,
+                "defaultDelay": 10,
                 "point": 1
               }
             ]
@@ -765,7 +765,7 @@
                 "expressions": "$e{1;1}-$e{1;1}",
                 "correction": "value",
                 "answer": "decimal",
-                "defaultDelay": 1,
+                "defaultDelay": 10,
                 "point": 1
               },
               {
@@ -775,7 +775,7 @@
                 "expressions": "$e{2;2}-$e{2;2}",
                 "correction": "value",
                 "answer": "decimal",
-                "defaultDelay": 1,
+                "defaultDelay": 10,
                 "point": 1
               },
               {
@@ -785,7 +785,7 @@
                 "expressions": "$e{3;3}-$e{3;3}",
                 "correction": "value",
                 "answer": "decimal",
-                "defaultDelay": 1,
+                "defaultDelay": 10,
                 "point": 1
               }
             ]
@@ -800,7 +800,7 @@
                 "expressions": "?-$e{1;1}",
                 "correction": "value",
                 "answer": "decimal",
-                "defaultDelay": 1,
+                "defaultDelay": 10,
                 "point": 1
               },
               {
@@ -810,7 +810,7 @@
                 "expressions": "?-$e{2;2}",
                 "correction": "value",
                 "answer": "decimal",
-                "defaultDelay": 1,
+                "defaultDelay": 10,
                 "point": 1
               },
               {
@@ -820,7 +820,7 @@
                 "expressions": "?-$e{3;3}",
                 "correction": "value",
                 "answer": "decimal",
-                "defaultDelay": 1,
+                "defaultDelay": 10,
                 "point": 1
               }
             ]

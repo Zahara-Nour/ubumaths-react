@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react'
+import React, { useState, useCallback, useEffect } from 'react'
 import CorrectionItem from './CorrectionItem'
 import List from 'react-bulma-components/lib/components/list'
 import Columns from 'react-bulma-components/lib/components/columns'
@@ -7,16 +7,25 @@ import Heading from 'react-bulma-components/lib/components/heading'
 import Container from 'react-bulma-components/lib/components/container'
 import Hero from 'react-bulma-components/lib/components/hero'
 import max from '../../assets/img/max.svg'
-import { useSelector } from 'react-redux'
-import { selectAnswers } from './mentalSlice'
+import { useSelector, useDispatch } from 'react-redux'
+import { selectAnswers, selectMarked, selectAssessmentId, saveMarkAsync } from './mentalSlice'
 import Level from 'react-bulma-components/lib/components/level'
+import { selectUser } from 'features/auth/authSlice'
 
 export default function Correction({ questions }) {
   const answers = useSelector(selectAnswers)
   const [score, setScore] = useState(0)
   const fontSize = 20
+  const marked = useSelector(selectMarked)
+  const dispatch = useDispatch()
+  const userId = useSelector(selectUser).email
+  const assessmentId = useSelector(selectAssessmentId)
 
   const handleAddPoint = useCallback(() => setScore((s) => s + 1), [setScore])
+
+  useEffect(() => {
+    if (marked) dispatch(saveMarkAsync(userId, assessmentId, score))
+  })
 
   return (
     <>

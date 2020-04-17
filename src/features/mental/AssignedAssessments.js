@@ -1,15 +1,12 @@
 import React, { useEffect, useState } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import {
-  loadAssignedAssessmentsThunk,
+  loadAssignedAssessmentsAsync,
   launchAssessment,
-  loadBasketThunk,
+  loadBasketAsync,
   selectRawQuestions,
 } from 'features/mental/mentalSlice'
-import {
-  selectFetched,
-  FETCH_ASSIGNED_ASSESSMENTS,
-} from 'features/db/dbSlice'
+import { selectFetched, FETCH_ASSIGNED_ASSESSMENTS } from 'features/db/dbSlice'
 
 import Box from 'react-bulma-components/lib/components/box/box'
 import List from 'react-bulma-components/lib/components/list'
@@ -21,25 +18,32 @@ import Button from 'react-bulma-components/lib/components/button'
 export default function AssignedAssessments({ userId }) {
   const list = useSelector(selectFetched(FETCH_ASSIGNED_ASSESSMENTS))
   const dispatch = useDispatch()
-  const [selectedAssessment, setSelectedAssessment] = useState(0)
+  const [selectedAssessment, setSelectedAssessment] = useState(null)
+  const questions = useSelector(selectRawQuestions)
+  const [marked, setMarked] = useState(false)
 
-  useEffect(() => dispatch(loadAssignedAssessmentsThunk({ userId })), [
+  useEffect(() => dispatch(loadAssignedAssessmentsAsync({ userId })), [
     dispatch,
     userId,
   ])
 
-  const questions = useSelector(selectRawQuestions)
-  console.log('questions')
-  console.log(questions)
+  useEffect(() => {
+    if (selectedAssessment !==null && questions.length > 0) {
+      console.log(list[selectedAssessment].id)
+      dispatch(launchAssessment({ marked, assessmentId: list[selectedAssessment].id }))
+    }
+  })
 
   const handleClickLaunch = (index) => {
-    dispatch(loadBasketThunk({ id: list[index].id }))
+    dispatch(loadBasketAsync(list[index].id ))
     setSelectedAssessment(index)
+    setMarked(true)
   }
 
-  const handleClickTrain = (index) => {}
-  if (questions.length > 0) {
-    dispatch(launchAssessment())
+  const handleClickTrain = (index) => {
+    dispatch(loadBasketAsync(list[index].id ))
+    setSelectedAssessment(index)
+    setMarked(false)
   }
 
   if (!list)
@@ -54,7 +58,6 @@ export default function AssignedAssessments({ userId }) {
         }}
       />
     )
-    
 
   return (
     <Box>

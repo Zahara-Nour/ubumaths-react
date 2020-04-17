@@ -13,21 +13,14 @@ import {
   Help,
 } from 'react-bulma-components/lib/components/form'
 import { useSelector, useDispatch } from 'react-redux'
-import {
-
-  saveBasketThunk,
-  
-  loadClassesThunk,
-} from 'features/mental/mentalSlice'
+import { saveBasketAsync, loadClassesAsync } from 'features/mental/mentalSlice'
 import {
   selectSaving,
-
   saveReset,
   selectSaved,
   selectSaveError,
   selectFetched,
   FETCH_CLASSES,
-
 } from 'features/db/dbSlice'
 
 import AssessmentsList from 'features/mental/AssessmentsList'
@@ -37,7 +30,7 @@ import ChooseStudents from './ChooseStudents'
 
 export default function ButtonModalSaveBasket({ questions }) {
   const dispatch = useDispatch()
- 
+
   const [title, setTitle] = useState('Titre')
   const [show, setShow] = useState(false)
   const [radioValue, setRadioValue] = useState('Modèle')
@@ -63,13 +56,13 @@ export default function ButtonModalSaveBasket({ questions }) {
   useEffect(() => setTitleExists(titles.current.includes(title)), [title])
   useEffect(() => {
     if (radioValue === 'Evaluation') {
-      dispatch(loadClassesThunk())
+      dispatch(loadClassesAsync())
     }
   }, [radioValue, dispatch])
 
   return (
     <>
-      <Button color="link" onClick={open}>
+      <Button color='link' onClick={open}>
         Sauvegarder
       </Button>
 
@@ -85,33 +78,34 @@ export default function ButtonModalSaveBasket({ questions }) {
               <Control>
                 <Input
                   color={title === '' || titleExists ? 'danger' : null}
-                  placeholder="Titre"
+                  placeholder='Titre'
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                 />
-                {title === '' && <Help color="danger">Entrez un titre !</Help>}
+                {title === '' && <Help color='danger'>Entrez un titre !</Help>}
                 {titleExists && (
-                  <Help color="danger">
+                  <Help color='danger'>
                     Cet enregistrement existe déjà ! Vous allez l'écraser !!!
                   </Help>
                 )}
               </Control>
             </Field>
             <Level>
-              <Level.Side align="left">
+              <Level.Side align='left'>
                 <Level.Item>
                   <Button
                     disabled={saving}
-                    color="link"
+                    color='link'
                     onClick={() => {
+                      console.log('questions', questions)
                       dispatch(
-                        saveBasketThunk({
+                        saveBasketAsync(
                           questions,
                           title,
-                          template: radioValue === 'Modèle',
-                          classes: selectedClasses,
-                          students: selectedStudents,
-                        }),
+                          radioValue === 'Modèle',
+                          selectedClasses,
+                          selectedStudents,
+                        ),
                       )
                     }}
                   >
@@ -120,22 +114,22 @@ export default function ButtonModalSaveBasket({ questions }) {
                 </Level.Item>
                 {saving && <Loader />}
               </Level.Side>
-              <Level.Side align="right">
+              <Level.Side align='right'>
                 <Level.Item>
                   <Control>
                     <Radio
                       onChange={radioOnChange}
                       checked={radioValue === 'Modèle'}
-                      value="Modèle"
-                      name="type"
+                      value='Modèle'
+                      name='type'
                     >
                       Modèle
                     </Radio>
                     <Radio
                       onChange={radioOnChange}
                       checked={radioValue === 'Evaluation'}
-                      value="Evaluation"
-                      name="type"
+                      value='Evaluation'
+                      name='type'
                     >
                       Evaluation
                     </Radio>
@@ -145,7 +139,7 @@ export default function ButtonModalSaveBasket({ questions }) {
             </Level>
             {saved && (
               <Notification
-                color="success"
+                color='success'
                 onClick={() => dispatch(saveReset())}
               >
                 Enregistrement réussi !
@@ -153,7 +147,7 @@ export default function ButtonModalSaveBasket({ questions }) {
             )}
             {saveError && (
               <Notification
-                color="danger"
+                color='danger'
                 onClick={() => dispatch(saveReset())}
               >
                 L'enregistrement à échoué !{saveError}
@@ -162,7 +156,7 @@ export default function ButtonModalSaveBasket({ questions }) {
 
             {radioValue === 'Evaluation' && (
               <Level>
-                <Level.Side align="left">
+                <Level.Side align='left'>
                   <Level.Item>
                     <ChooseClasses
                       classes={classes}
@@ -186,11 +180,11 @@ export default function ButtonModalSaveBasket({ questions }) {
             style={{ alignItems: 'center', justifyContent: 'center' }}
           >
             {/* <ScrollArea height="300px"> */}
-              <AssessmentsList
-                template={radioValue === 'Modèle'}
-                clickCB={setTitle}
-                loadCB={(t) => (titles.current = t)}
-              />
+            <AssessmentsList
+              template={radioValue === 'Modèle'}
+              clickCB={setTitle}
+              loadCB={(t) => (titles.current = t)}
+            />
             {/* </ScrollArea> */}
           </Modal.Card.Foot>
         </Modal.Card>

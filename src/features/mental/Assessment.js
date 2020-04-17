@@ -10,7 +10,7 @@ function Assessment() {
   const questions = useSelector(selectGeneratedQuestions)
   
 
-  if (finished) return <Correction questions={questions} />
+  if (finished) return <Correction questions={questions}/>
 
   return <Questions questions={questions} />
 }
