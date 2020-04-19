@@ -1,5 +1,5 @@
 import React from 'react'
-import Button from 'react-bulma-components/lib/components/button'
+import Button from 'components/CustomButtons/Button'
 import { GoogleLogin, GoogleLogout } from 'react-google-login'
 import { useDispatch, useSelector } from 'react-redux'
 import {

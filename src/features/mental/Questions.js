@@ -12,7 +12,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faFont } from '@fortawesome/free-solid-svg-icons'
 import MathField from 'react-mathfield'
 import math from 'tinycas'
-import {useInterval} from 'hooks'
+import {useInterval} from 'app/hooks'
 import './mental.css'
 
 function Questions({ questions }) {
