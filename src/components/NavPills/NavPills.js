@@ -22,6 +22,7 @@ export default function NavPills(props) {
   const [active, setActive] = React.useState(props.active);
   const handleChange = (event, active) => {
     setActive(active);
+    if (props.onChange) props.onChange(active)
   };
   const handleChangeIndex = index => {
     setActive(index);

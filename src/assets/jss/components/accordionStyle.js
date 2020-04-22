@@ -1,5 +1,5 @@
 import {
-  primaryColor,
+  warningColor,
   grayColor
 } from "assets/jss/main-jss.js";
 
@@ -26,11 +26,11 @@ const accordionStyle = theme => ({
     borderTopRightRadius: "3px",
     color: grayColor[2],
     "&:hover": {
-      color: primaryColor[0]
+      color: warningColor[0]
     }
   },
   expansionPanelSummaryExpaned: {
-    color: primaryColor[0],
+    color: warningColor[0],
     "& $expansionPanelSummaryExpandIcon": {
       [theme.breakpoints.up("md")]: {
         top: "auto !important"

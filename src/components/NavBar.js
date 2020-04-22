@@ -27,10 +27,21 @@ import Fingerprint from '@material-ui/icons/Fingerprint'
 // core components
 import Button from 'components/CustomButtons/Button'
 
-import styles from 'assets/jss/components/authNavbarStyle.js'
+import styles from 'assets/jss/components/navbarStyle.js'
+import { ListItemAvatar, Avatar } from '@material-ui/core'
 
 const useStyles = makeStyles(styles)
 
+const flexContainerColumn = {
+  display: 'flex',
+  flexDirection: 'column',
+}
+
+const flexContainerRow = {
+  display: 'flex',
+  flexDirection: 'row',
+  alignItems: 'center',
+}
 function NavBar(props) {
   const connected = useSelector(selectConnected)
   const user = useSelector(selectUser)
@@ -40,7 +51,7 @@ function NavBar(props) {
   const classes = useStyles()
 
   const listLeft = (
-    <List>
+    <>
       <ListItem className={classes.listItem}>
         <NavLink to={'/games'} className={classes.navLink}>
           <Dashboard className={classes.listItemIcon} />
@@ -51,7 +62,6 @@ function NavBar(props) {
           />
         </NavLink>
       </ListItem>
-
       <ListItem className={classes.listItem}>
         <NavLink to={'/calcul-mental'} className={classes.navLink}>
           <Dashboard className={classes.listItemIcon} />
@@ -62,11 +72,11 @@ function NavBar(props) {
           />
         </NavLink>
       </ListItem>
-    </List>
+    </>
   )
 
   const listRight = (
-    <List>
+    <>
       <ListItem className={classes.listItem}>
         <NavLink to={'/admin/dashboard'} className={classes.navLink}>
           <Dashboard className={classes.listItemIcon} />
@@ -79,24 +89,33 @@ function NavBar(props) {
       </ListItem>
       {connected && (
         <ListItem className={classes.listItem}>
-          <img alt='profile' src={user.imageUrl} />
+          <ListItemAvatar>
+            <Avatar alt={user.name} src={user.imageUrl} />
+          </ListItemAvatar>
         </ListItem>
       )}
       {connected && (
         <ListItem className={classes.listItem}>
-          <strong>{user.name}</strong>
+          <ListItemText primary={user.name} className={classes.listItemText} style={{marginLeft:'10px' , marginRight:'10px'}} />
         </ListItem>
       )}
-    </List>
+
+      <ListItem className={classes.listItem}>
+        <AuthButton />
+      </ListItem>
+    </>
   )
 
   return (
     <AppBar position='static' className={classes.appBar}>
-      <Toolbar className={classes.container}>
+      <Toolbar disableGutters className={classes.container}>
         <NavLink to={'/'} className={classes.navLink}>
           <FontAwesomeIcon icon={faInfinity} />
         </NavLink>
-        <Hidden smDown>{listLeft}</Hidden>
+
+        <Hidden smDown>
+          <List className={classes.list}>{listLeft}</List>
+        </Hidden>
         <div className={classes.flex}></div>
         <Hidden smDown>{listRight}</Hidden>
         <Hidden mdUp>
@@ -123,8 +142,15 @@ function NavBar(props) {
               keepMounted: true, // Better open performance on mobile.
             }}
           >
-            {listLeft}
-            {listRight}
+            <List style={flexContainerColumn}>
+              {listLeft}
+            </List>
+            <List
+              
+              style={{ ...flexContainerColumn, alignItems: 'center' }}
+            >
+              {listRight}
+            </List>
           </Drawer>
         </Hidden>
       </Toolbar>

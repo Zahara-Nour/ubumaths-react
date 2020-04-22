@@ -18,6 +18,7 @@ export default function Accordion(props) {
   const [active, setActive] = React.useState(props.active);
   const handleChange = panel => (event, expanded) => {
     setActive(expanded ? panel : -1);
+    if (props.onChange) props.onChange(expanded)
   };
   const classes = useStyles();
   const { collapses } = props;

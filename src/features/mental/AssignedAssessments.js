@@ -7,13 +7,19 @@ import {
   selectRawQuestions,
 } from 'features/mental/mentalSlice'
 import { selectFetched, FETCH_ASSIGNED_ASSESSMENTS } from 'features/db/dbSlice'
+import { CircularProgress, List, ListItem } from '@material-ui/core'
+import Card from 'components/Card/Card'
+import CardHeader from 'components/Card/CardHeader'
+import CardIcon from 'components/Card/CardIcon'
+import CardBody from 'components/Card/CardBody'
+import Button from 'components/CustomButtons/Button'
+import AssignmentIcon from '@material-ui/icons/Assignment';
+import  {grayColor} from 'assets/jss/main-jss'
 
-import Box from 'react-bulma-components/lib/components/box/box'
-import List from 'react-bulma-components/lib/components/list'
-import Loader from 'react-bulma-components/lib/components/loader'
-import Heading from 'react-bulma-components/lib/components/heading'
-import Level from 'react-bulma-components/lib/components/level'
-import Button from 'react-bulma-components/lib/components/button'
+const listItemAssessmentStyle = {
+  marginLeft:'10px',
+  marginRight:'10px'
+}
 
 export default function AssignedAssessments({ userId }) {
   const list = useSelector(selectFetched(FETCH_ASSIGNED_ASSESSMENTS))
@@ -28,63 +34,58 @@ export default function AssignedAssessments({ userId }) {
   ])
 
   useEffect(() => {
-    if (selectedAssessment !==null && questions.length > 0) {
-      console.log(list[selectedAssessment].id)
-      dispatch(launchAssessment({ marked, assessmentId: list[selectedAssessment].id }))
+    if (selectedAssessment !== null && questions.length > 0) {
+
+      dispatch(
+        launchAssessment({ marked, assessmentId: list[selectedAssessment].id }),
+      )
     }
   })
 
   const handleClickLaunch = (index) => {
-    dispatch(loadBasketAsync(list[index].id ))
+    dispatch(loadBasketAsync(list[index].id))
     setSelectedAssessment(index)
     setMarked(true)
   }
 
   const handleClickTrain = (index) => {
-    dispatch(loadBasketAsync(list[index].id ))
+    dispatch(loadBasketAsync(list[index].id))
     setSelectedAssessment(index)
     setMarked(false)
   }
 
-  if (!list)
-    return (
-      <Loader
-        style={{
-          width: 50,
-          height: 50,
-          border: '4px solid blue',
-          borderTopColor: 'transparent',
-          borderRightColor: 'transparent',
-        }}
-      />
-    )
+  if (!list) return <CircularProgress />
 
   return (
-    <Box>
-      <Heading size={4}>Evaluations à faire </Heading>
-      <List hoverable>
+    <Card>
+      <CardHeader color='success' icon>
+        <CardIcon color='success'>
+          <AssignmentIcon />
+        </CardIcon>
+      </CardHeader>
+      <CardBody>
+      <h3>Evaluations à faire </h3>
+      <List>
         {list.map(({ title }, index) => (
-          <List.Item key={index}>
-            <Level>
-              <Level.Side align='left'>
-                <Level.Item>{title}</Level.Item>
-              </Level.Side>
-              <Level.Side align='right'>
-                <Level.Item>
-                  <Button color='link' onClick={() => handleClickTrain(index)}>
+          <ListItem key={index}>
+        
+                <h4 style={listItemAssessmentStyle}>{title}</h4>
+           
+                  <Button style={{...listItemAssessmentStyle, backgroundColor:grayColor[3]}} size='sm'  onClick={() => handleClickTrain(index)}>
                     S'entraîner
                   </Button>
-                </Level.Item>
-                <Level.Item>
-                  <Button color='link' onClick={() => handleClickLaunch(index)}>
+           
+                  <Button style={listItemAssessmentStyle} size='sm' color='danger' onClick={() => handleClickLaunch(index)}>
                     Faire
                   </Button>
-                </Level.Item>
-              </Level.Side>
-            </Level>
-          </List.Item>
+              
+          </ListItem>
         ))}
       </List>
-    </Box>
+      </CardBody>
+    </Card>
+    
+     
+   
   )
 }

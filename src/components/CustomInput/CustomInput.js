@@ -14,6 +14,8 @@ import styles from "assets/jss/components/customInputStyle.js";
 
 const useStyles = makeStyles(styles);
 
+
+
 export default function CustomInput(props) {
   const classes = useStyles();
   const {
@@ -28,6 +30,10 @@ export default function CustomInput(props) {
     success,
     helperText
   } = props;
+
+  const handleChange = (evt) => {
+    if (props.onChange) props.onChange(evt) 
+  }
 
   const labelClasses = classNames({
     [" " + classes.labelRootError]: error,
@@ -65,6 +71,7 @@ export default function CustomInput(props) {
         <InputLabel
           className={classes.labelRoot + " " + labelClasses}
           htmlFor={id}
+          onChange={handleChange}
           {...labelProps}
         >
           {labelText}
@@ -77,6 +84,7 @@ export default function CustomInput(props) {
           disabled: classes.disabled,
           underline: underlineClasses
         }}
+        onChange={handleChange}
         id={id}
         {...inputProps}
       />
@@ -98,6 +106,7 @@ CustomInput.propTypes = {
   inputRootCustomClasses: PropTypes.string,
   error: PropTypes.bool,
   success: PropTypes.bool,
+  warning: PropTypes.bool,
   white: PropTypes.bool,
   helperText: PropTypes.node
 };

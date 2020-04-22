@@ -1,13 +1,21 @@
 import React from 'react'
-import Level from 'react-bulma-components/lib/components/level'
-import Box from 'react-bulma-components/lib/components/box'
-import { Checkbox } from 'react-bulma-components/lib/components/form'
+import {
+  FormControl,
+  FormGroup,
+  FormControlLabel,
+  Checkbox,
+} from '@material-ui/core'
 
-export default function ChooseClasses({ classes, selected, onChange }) {
+export default function ChooseClasses({
+  classes,
+  selected,
+  onChange,
+  ...rest
+}) {
   const list = [].concat(selected)
 
   const handleChange = (evt) => {
-    const index = parseInt(evt.target.name,10)
+    const index = parseInt(evt.target.name, 10)
     if (list.includes(classes[index])) {
       list.splice(list.indexOf(classes[index]), 1)
     } else {
@@ -15,24 +23,24 @@ export default function ChooseClasses({ classes, selected, onChange }) {
     }
     onChange(list)
   }
-  
+
   return (
-    <Box>
-      {classes.map((c, index) => (
-        <Level key={'level' + index}>
-          <Level.Side align="left">
-            <Level.Item>
+    <FormControl component='fieldset' className={classes.formControl} {...rest}>
+      <FormGroup>
+        {classes.map((c, index) => (
+          <FormControlLabel
+            key='index'
+            control={
               <Checkbox
-                name={index.toString()}
-                onChange={handleChange}
                 checked={selected.includes(classes[index])}
-              >
-                {c.id}
-              </Checkbox>
-            </Level.Item>
-          </Level.Side>
-        </Level>
-      ))}
-    </Box>
+                onChange={handleChange}
+                name={index.toString()}
+              />
+            }
+            label={c.id}
+          />
+        ))}
+      </FormGroup>
+    </FormControl>
   )
 }

@@ -1,12 +1,25 @@
 import React, { useState } from 'react'
-import Level from 'react-bulma-components/lib/components/level'
-import Box from 'react-bulma-components/lib/components/box'
-import { Checkbox, Select } from 'react-bulma-components/lib/components/form'
+import styles from 'assets/jss/customSelectStyle.js'
+import {
+  makeStyles,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+
+  FormGroup,
+  FormControlLabel,
+  Checkbox,
+} from '@material-ui/core'
+
+const useStyles = makeStyles(styles)
 
 export default function ChooseStudents({ classes, selected, onChange }) {
+  const classeNames = useStyles()
   const [selectedClass, setSelectedclass] = useState(0)
 
   const selectedStudents = [].concat(selected)
+  
   const handleChangeClass = (evt) => {
     const value = evt.target.value
     setSelectedclass(value)
@@ -22,32 +35,71 @@ export default function ChooseStudents({ classes, selected, onChange }) {
     }
     onChange(selectedStudents)
   }
-  console.log(classes)
+
   return (
-    <Box>
-      <Select onChange={handleChangeClass} name="class" value={selectedClass}>
-        {classes.map((c, index) => (
-          <option key={'select' + index} value={index}>
-            {c.id}
-          </option>
-        ))}
-      </Select>
-      {classes.length>0 && classes[selectedClass].students &&
-        classes[selectedClass].students.map((student, index) => (
-          <Level key={'level' + index}>
-            <Level.Side align="left">
-              <Level.Item>
-                <Checkbox
-                  name={student}
-                  onChange={handleChange}
-                  checked={selected.includes(student)}
-                >
-                  {student}
-                </Checkbox>
-              </Level.Item>
-            </Level.Side>
-          </Level>
-        ))}
-    </Box>
+    <div>
+      <FormControl fullWidth className={classeNames.selectFormControl}>
+        <InputLabel htmlFor='simple-select' className={classeNames.selectLabel}>
+          Classe
+        </InputLabel>
+        <Select
+          MenuProps={{
+            className: classeNames.selectMenu,
+          }}
+          classes={{
+            select: classeNames.select,
+          }}
+          value={selectedClass}
+          onChange={handleChangeClass}
+          inputProps={{
+            name: 'choose-class',
+            id: 'choose-class',
+          }}
+        >
+          <MenuItem
+            key={'select-title'}
+            disabled
+            classes={{
+              root: classeNames.selectMenuItem,
+            }}
+          >
+            Classe
+          </MenuItem>
+          {classes.map((c, index) => (
+            <MenuItem
+              key={index}
+              classes={{
+                root: classeNames.selectMenuItem,
+                selected: classeNames.selectMenuItemSelected,
+              }}
+              value={index}
+            >
+              {c.id}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+
+      <FormControl component='fieldset' className={classeNames.formControl}>
+        
+        <FormGroup>
+          {classes.length > 0 &&
+            classes[selectedClass].students &&
+            classes[selectedClass].students.map((student, index) => (
+              <FormControlLabel
+                key='index'
+                control={
+                  <Checkbox
+                    checked={selected.includes(student)}
+                    onChange={handleChange}
+                    name={student}
+                  />
+                }
+                label={student}
+              />
+            ))}
+        </FormGroup>
+      </FormControl>
+    </div>
   )
 }

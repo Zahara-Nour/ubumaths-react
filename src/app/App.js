@@ -5,15 +5,18 @@ import { Switch, Route } from 'react-router-dom'
 // import Mental from 'features/mental/Mental'
 
 import Mental from 'features/mental/Mental'
-import Auth from 'layouts/Auth'
+import { Container } from '@material-ui/core'
+
 
 
 function App() {
   return (
+   <Container fixed>
     <Switch>
       <Route path='/' component={Mental} />
      
     </Switch>
+    </Container>
   )
 }
 

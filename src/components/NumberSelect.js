@@ -1,6 +1,6 @@
 import React from 'react'
-import Level from 'react-bulma-components/lib/components/level'
-import Button from 'react-bulma-components/lib/components/button'
+import Button from 'components/CustomButtons/Button'
+import {grayColor} from 'assets/jss/main-jss'
 
 export default function NumberSelect({ name, value, onClick }) {
   const handlePlus = (e) => {
@@ -14,21 +14,34 @@ export default function NumberSelect({ name, value, onClick }) {
     onClick(value - 1)
   }
 
+  const flexContainerColumn = {
+    display: 'flex',
+    flexDirection: 'column'
+
+  }
+
+  const flexContainerRow = {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems:'center'
+  }
+
+
+
   return (
-    <Level>
-      <Level.Item>
-        {name}: {value}
-      </Level.Item>
-      <Level.Item>
-        <Button.Group>
-          <Button size="small" onClick={handlePlus}>
-            +
-          </Button>
-          <Button size="small" onClick={handleMinus}>
-            -
-          </Button>
-        </Button.Group>
-      </Level.Item>
-    </Level>
+    <div style={flexContainerRow}>
+      
+     
+      <Button style= {{margin:'5px', backgroundColor:grayColor[3] }} color='secondary' size='sm' onClick={handlePlus}>
+        +
+      </Button>
+      <Button style= {{margin:'5px', backgroundColor:grayColor[3] }} color='secondary' size='sm' onClick={handleMinus}>
+        -
+      </Button>
+      <div style= {{margin:'5px'}}>
+      {name}: {value}
+      </div>
+     
+    </div>
   )
 }

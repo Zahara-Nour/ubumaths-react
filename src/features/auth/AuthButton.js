@@ -40,7 +40,7 @@ export default function AuthButton() {
         clientId="702572178697-3pdjj0caro5u0ttpft17ppc0fnlmol1p.apps.googleusercontent.com"
         render={(renderProps) => (
           <Button
-            color="primary"
+            color="success"
             onClick={() => {
               dispatch(logoutRequest())
               renderProps.onClick()

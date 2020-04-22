@@ -1,7 +1,5 @@
 import React, { useState, memo } from 'react'
-import Button from 'react-bulma-components/lib/components/button'
-import Level from 'react-bulma-components/lib/components/level'
-import Menu from 'react-bulma-components/lib/components/menu'
+
 import { faCartArrowDown } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { addToBasket, launchAssessment, setBasket } from '../mental/mentalSlice'
@@ -9,33 +7,64 @@ import Description from './Description'
 import NumberSelect from 'components/NumberSelect'
 import { useSelector, useDispatch } from 'react-redux'
 import { selectUser } from 'features/auth/authSlice'
+import List from '@material-ui/core/List'
+import ListItem from '@material-ui/core/ListItem'
+import Button from 'components/CustomButtons/Button'
+import { makeStyles } from '@material-ui/core'
+import LevelButtons from './LevelButtons'
 
 
-export default memo(function Subsubcategory({
-  active,
-  subsubcategory,
-  onClick,
-  name,
-}) {
+
+const listStyle = (theme) => ({
+  flexContainer: {
+    display: 'flex',
+    flexDirection: 'row',
+    padding: 0,
+    alignItems: 'center',
+    [theme.breakpoints.down('md')]: {
+      flexDirection: 'column',
+      justifyContent: 'center',
+      alignContent: 'center',
+    },
+  },
+  listItem: {
+    root: {
+      background:'black',
+      backgroundColor:'black',
+      '&$selected, &$selected:hover': {
+        backgroundColor: 'warning',
+      },
+    },
+  },
+})
+
+const flexContainerColumn = {
+  display: 'flex',
+  flexDirection: 'column',
+}
+
+const flexContainerRow = {
+  display: 'flex',
+  flexDirection: 'row',
+  alignItems: 'center',
+}
+
+const useStyles = makeStyles(listStyle)
+
+function Subsubcategory({ active, subsubcategory, onClickLevel, name, level }) {
   const dispatch = useDispatch()
   const user = useSelector(selectUser)
   const [nbQuestions, setNbQuestions] = useState(1)
-  const [level, setLevel] = useState(0)
   const levels = subsubcategory.levels
 
-  const [question,setQuestion] = useState({
+  const classes = useStyles()
+
+  const [question, setQuestion] = useState({
     ...levels[level],
   })
 
   const [delay, setDelay] = useState(question.defaultDelay)
 
-  const handleClickLevel = (evt) => {
-    const index = parseInt(evt.target.name, 10)
-    console.log(evt.target.name)
-    evt.stopPropagation()
-    setLevel(index)
-    setQuestion({...levels[index]})
-  }
 
   const handleClickBasket = () => {
     const questions = []
@@ -58,81 +87,58 @@ export default memo(function Subsubcategory({
     }
     dispatch(setBasket({ questions: [] }))
     dispatch(addToBasket({ questions }))
-    dispatch(launchAssessment())
+    dispatch(launchAssessment({ marked: false }))
   }
 
   return (
-    <Menu.List.Item active={active} onClick={onClick}>
-      <Level renderAs="div">
-        <Level.Side align="left">
-          <Level.Item style={active ? { color: 'white' } : { color: 'blue' }}>
-            {subsubcategory.label}
-          </Level.Item>
-          {active && (
-            <Level.Item>
-              <Description question={question} />
-            </Level.Item>
+    <List className={classes.flexContainer}>
+      {!active && <ListItem>{subsubcategory.label}</ListItem>}
+      {active && (
+        <ListItem  style={flexContainerColumn}>
+          <Description question={question} label={subsubcategory.label} >
+
+          {levels.length > 0 &&   <LevelButtons levels={levels} level={level} onChange={onClickLevel}/>}
+          </Description>
+            
+          
+        </ListItem>
+      )}
+
+      {active && (
+        <ListItem style={flexContainerColumn}>
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+            }}
+          >
+            <NumberSelect name='Délais' value={delay} onClick={setDelay} />
+            {user.role === 'teacher' && (
+              <NumberSelect
+                name='Quantité'
+                value={nbQuestions}
+                onClick={setNbQuestions}
+              />
+            )}
+          </div>
+        </ListItem>
+      )}
+
+      {active && (
+        <ListItem style={flexContainerColumn}>
+          {user.role === 'teacher' && (
+            <Button color='warning' size='sm' onClick={handleClickBasket}>
+              <FontAwesomeIcon icon={faCartArrowDown} />
+            </Button>
           )}
 
-          {active && levels.length > 1 && (
-            <Level.Item>
-              <Button.Group>
-                {levels.map((q, index) => {
-                  return (
-                    <Button
-                      key={index.toString()}
-                      name={index.toString()}
-                      size="small"
-                      color={level === index ? 'primary' : ''}
-                      onClick={handleClickLevel}
-                    >
-                      {index + 1}
-                    </Button>
-                  )
-                })}
-              </Button.Group>
-            </Level.Item>
-          )}
-
-          {active && (
-            <Level.Item>
-              <div
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                }}
-              >
-                <NumberSelect name="Délais" value={delay} onClick={setDelay} />
-                {user.role === 'teacher' && (
-                  <NumberSelect
-                    name="Quantité"
-                    value={nbQuestions}
-                    onClick={setNbQuestions}
-                  />
-                )}
-              </div>
-            </Level.Item>
-          )}
-        </Level.Side>
-        <Level.Side align="right">
-          {active && (
-            <Level.Item>
-              <Button color="link" onClick={handleClickBasket}>
-                {user.role === 'teacher' && (
-                  <FontAwesomeIcon icon={faCartArrowDown} />
-                )}
-              </Button>
-            </Level.Item>
-          )}
-          {active && (
-            <Level.Item>
-              <Button color="link" onClick={handleClickGo}>
-                Go !
-              </Button>
-            </Level.Item>
-          )}
-        </Level.Side>
-      </Level>
-    </Menu.List.Item>
+          <Button color='danger' size='sm' onClick={handleClickGo}>
+            Go !
+          </Button>
+        </ListItem>
+      )}
+    </List>
   )
-})
+}
+
+export default Subsubcategory
