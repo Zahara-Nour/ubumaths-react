@@ -9,7 +9,7 @@ import MathField from 'react-mathfield'
 import math from 'tinycas'
 import { useInterval } from 'app/hooks'
 import './mental.css'
-import { Button, Container } from '@material-ui/core'
+import { Button } from '@material-ui/core'
 import CircularProgressBar from 'components/CircularProgressBar'
 
 function Questions({ questions }) {
@@ -55,7 +55,7 @@ function Questions({ questions }) {
         setIsRunning(false)
 
         mfRef.current.$perform('deleteAll')
-        console.log('delete', mfRef.current.$text())
+        
       }
     }
   }, [hasToChange, current, questions.length])
@@ -89,10 +89,10 @@ function Questions({ questions }) {
   const mfConfig = {
     onKeystroke: (el, key, evt) => {
       const content = mfRef.current.$text('ASCIIMath') // latex output fails after deletinf mathfield content
-      console.log('stoke text', content)
+     
       if (key === 'Enter' || key === 'NumpadEnter') {
         if (content) {
-          console.log('content not empty', content)
+         
           setHasToChange(true)
         }
       }
@@ -114,6 +114,8 @@ function Questions({ questions }) {
     setFont((s) => s - 10)
     mfRef.current.$focus()
   }
+
+
 
   return (
     <div>

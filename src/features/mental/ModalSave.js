@@ -1,5 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react'
-import { saveBasketAsync, loadClassesAsync } from 'features/mental/mentalSlice'
+
+import { saveBasket } from 'features/mental/mentalSlice'
+
+// db ccess
+
 // @material-ui/core components
 import { makeStyles } from '@material-ui/core/styles'
 import Slide from '@material-ui/core/Slide'
@@ -13,7 +17,7 @@ import RadioGroup from '@material-ui/core/RadioGroup'
 import Close from '@material-ui/icons/Close'
 // core components
 import Button from 'components/CustomButtons/Button.js'
-import {grayColor} from 'assets/jss/main-jss'
+import { grayColor } from 'assets/jss/main-jss'
 
 import modalStyle from 'assets/jss/modalStyle.js'
 import radioStyle from 'assets/jss/customCheckboxRadioSwitch.js'
@@ -23,8 +27,8 @@ import {
   selectSaved,
   selectSaveError,
   selectFetched,
-  FETCH_CLASSES,
   saveReset,
+  FETCH_STUDENTS,
 } from 'features/db/dbSlice'
 
 import {
@@ -32,11 +36,14 @@ import {
   FormControlLabel,
   TextField,
   Divider,
+  CircularProgress,
 } from '@material-ui/core'
 import ChooseClasses from './ChooseClasses'
 import ChooseStudents from './ChooseStudents'
 import AssessmentsList from './AssessmentsList'
 import SnackbarContent from 'components/Snackbar/SnackbarContent'
+import { selectUser } from 'features/auth/authSlice'
+import { useStudents } from 'app/hooks'
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction='down' ref={ref} {...props} />
@@ -62,6 +69,7 @@ const useStyles = makeStyles({
 
 export default function ModalSave({ questions }) {
   const dispatch = useDispatch()
+  const user = useSelector(selectUser)
   const [modal, setModal] = useState(false)
   const classeNames = useStyles()
   const [title, setTitle] = useState('')
@@ -71,23 +79,46 @@ export default function ModalSave({ questions }) {
   const saving = useSelector(selectSaving)
   const saved = useSelector(selectSaved)
   const saveError = useSelector(selectSaveError)
-  const classes = useSelector(selectFetched(FETCH_CLASSES)) || []
+  const students = useStudents()[0]
   const [selectedClasses, setSelectedClasses] = useState([])
   const [selectedStudents, setSelectedStudents] = useState([])
+  const [allSelectedStudents, setAllSelectedStudents] = useState([])
 
-  useEffect(() => setTitleExists(titles.current.includes(title)), [title])
-  const radioOnChange = (evt) => setRadioValue(evt.target.value)
+  const classes = user.classes
+
+  useEffect(() => setTitleExists(titles.current.includes(title)), [
+    title,
+    radioValue,
+  ])
+
   useEffect(() => {
-    if (radioValue === 'Evaluation') {
-      dispatch(loadClassesAsync())
+   
+    if (students) {
+      let allSelected = []
+      selectedClasses.forEach((c) => {
+        allSelected = allSelected.concat(students[c])
+      })
+
+      selectedStudents.forEach((student) => {
+        if (!allSelected.includes(student)) {
+          allSelected.push(student)
+        }
+      })
+
+      setAllSelectedStudents(allSelected)
     }
-  }, [radioValue, dispatch])
+  }, [students, selectedClasses, selectedStudents])
+
+  const radioOnChange = (evt) => setRadioValue(evt.target.value)
 
   return (
     <div>
-      <Button style={{
-            backgroundColor:  grayColor[3],
-          }} onClick={() => setModal(true)}>
+      <Button
+        style={{
+          backgroundColor: grayColor[3],
+        }}
+        onClick={() => setModal(true)}
+      >
         Enregistrer
       </Button>
       <Dialog
@@ -168,6 +199,13 @@ export default function ModalSave({ questions }) {
               value={radioValue}
               onChange={radioOnChange}
             >
+              {user.admin && (
+                <FormControlLabel
+                  value='Modèle global'
+                  control={<Radio />}
+                  label='Modèle global'
+                />
+              )}
               <FormControlLabel
                 value='Modèle'
                 control={<Radio />}
@@ -197,19 +235,32 @@ export default function ModalSave({ questions }) {
                 onChange={setSelectedClasses}
               />
 
-              <ChooseStudents
-                classes={classes}
-                selected={selectedStudents}
-                onChange={setSelectedStudents}
-              />
+              {students ? (
+                <ChooseStudents
+                  students={classes.reduce(
+                    (prev, current) =>
+                      selectedClasses.includes(current)
+                        ? prev
+                        : {...prev, [current]:students[current]},
+
+                    {},
+                  )}
+                  selected={selectedStudents}
+                  selectedClasses={selectedClasses}
+                  onChange={setSelectedStudents}
+                />
+              ) : (
+                <CircularProgress />
+              )}
             </div>
           )}
           <Divider />
           <AssessmentsList
-            template={radioValue === 'Modèle'}
+            type={radioValue}
             onSelect={setTitle}
             onLoad={(t) => (titles.current = t)}
             selected={title}
+            saved={saved}
           />
         </DialogContent>
 
@@ -228,12 +279,12 @@ export default function ModalSave({ questions }) {
             color='info'
             onClick={() => {
               dispatch(
-                saveBasketAsync(
+                saveBasket(
+                  user,
                   questions,
                   title,
-                  radioValue === 'Modèle',
-                  selectedClasses,
-                  selectedStudents,
+                  radioValue,
+                  allSelectedStudents,
                 ),
               )
             }}

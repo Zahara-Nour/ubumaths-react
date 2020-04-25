@@ -63,9 +63,10 @@ const dbSlice = createSlice({
 const FETCH_ASSESSMENTS = 'assessments'
 const FETCH_ASSESSMENT = 'assessment'
 const FETCH_CLASSES = 'classes'
+const FETCH_STUDENTS = 'students'
 const FETCH_USER = 'user'
 const FETCH_ASSIGNED_ASSESSMENTS = 'assigned-assessments'
-export { FETCH_ASSESSMENT, FETCH_ASSESSMENTS, FETCH_CLASSES, FETCH_USER, FETCH_ASSIGNED_ASSESSMENTS }
+export { FETCH_ASSESSMENT, FETCH_ASSESSMENTS, FETCH_CLASSES, FETCH_USER, FETCH_ASSIGNED_ASSESSMENTS, FETCH_STUDENTS }
 
 export const {
  

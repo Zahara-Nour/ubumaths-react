@@ -12,6 +12,7 @@ import {
   FETCH_ASSIGNED_ASSESSMENTS,
   FETCH_ASSESSMENT,
   FETCH_ASSESSMENTS,
+  FETCH_STUDENTS,
 } from 'features/db/dbSlice'
 
 function generateQuestions(questions) {
@@ -63,6 +64,9 @@ const mentalSlice = createSlice({
       state.answers = action.payload.answers
     },
 
+    correctionFinished(state, action) {
+      state.ready = false
+    },
     addToBasket(state, action) {
       state.rawQuestions = state.rawQuestions.concat(action.payload.questions)
     },
@@ -80,6 +84,7 @@ const mentalSlice = createSlice({
 export const {
   launchAssessment,
   assessmentFinished,
+  correctionFinished,
   prepareQuestions,
   addToBasket,
   removeFromBasket,
@@ -106,9 +111,9 @@ export {
 
 function saveMarkAsync(userId, assessmentId, mark) {
   return function (dispatch) {
-    db.collection('users')
+    db.collection('Users')
       .doc(userId)
-      .collection('assessments')
+      .collection('Assessments')
       .doc(assessmentId)
       .get()
       .then((doc) => {
@@ -127,9 +132,9 @@ function saveMarkAsync(userId, assessmentId, mark) {
       })
       .then((data) => {
         console.log('trying to save')
-        db.collection('users')
+        db.collection('Users')
           .doc(userId)
-          .collection('assessments')
+          .collection('Assessments')
           .doc(assessmentId)
           .set(data)
           .then(() => console.log('Note enregisrée pour ' + userId))
@@ -138,61 +143,90 @@ function saveMarkAsync(userId, assessmentId, mark) {
   }
 }
 
-function saveBasketAsync( questions, title, template, classes, students) {
-  const collection = template ? 'mental-templates' : 'mental-assessments'
+function saveBasket(user, questions, title, type, students) {
+  let collectionRef
 
-  const allStudents = classes.reduce(
-    (prev, current) => prev.concat(current),
-    [],
-  )
-  students.forEach((student) => {
-    if (!allStudents.includes(student)) allStudents.push(student)
-  })
-
-  const assignAssessment = () => {
-    allStudents.forEach((student) => {
-      db.collection('users')
-        .doc(student)
-        .collection('assessments')
-        .doc(title)
-        .set({ id: title, results: [], best: 0 })
-        .then(() =>
-          console.log('Evaluation ' + title + ' enregisrée pour ' + student),
-        )
-        .catch((error) => console.error('Error writing document: ', error))
-    })
-  }
-
-  const saveAssessment = (dispatch) => {
+  return (dispatch) => {
     dispatch(saveRequest())
-    db.collection(collection)
-      .doc(title)
-      .set({ questions })
-      .then(() => dispatch(saveSuccess()))
-      .then(() => {
-        console.log('Enregistrement réussi')
-        if (!template) assignAssessment()
+    switch (type) {
+      case 'Modèle global':
+        collectionRef = db.collection('Templates')
+        break
+      case 'Modèle':
+        collectionRef = db
+          .collection('Users')
+          .doc(user.email)
+          .collection('Templates')
+        break
+      default:
+        collectionRef = db
+          .collection('Users')
+          .doc(user.email)
+          .collection('Assessments')
+    }
+
+    const assignAssessment = () => {
+      students.forEach((student) => {
+        db.collection('Users')
+          .doc(student)
+          .collection('Assessments')
+          .doc(title)
+          .set({ title, results: [], best: 0 })
+          .then(() =>
+            console.log('Evaluation ' + title + ' enregisrée pour ' + student),
+          )
+          .catch((error) => {
+            console.error('Error writing document: ', error)
+            throw error
+          })
       })
-      .catch(function (error) {
-        dispatch(saveFailure({ error }))
-        console.error('Error writing document: ', error)
-      })
+    }
+
+    const saveAssessment = () => {
+      dispatch(saveRequest())
+      collectionRef
+        .doc(title)
+        .set({ title, questions })
+        .then(() => {
+          if (type === 'Evaluation') assignAssessment()
+        })
+        .then(dispatch(saveSuccess()))
+        .catch(function (error) {
+          dispatch(saveFailure({ error }))
+          console.error('Error writing document: ', error)
+        })
+    }
+    saveAssessment()
   }
-  return saveAssessment
 }
 
-function loadBasketAsync( id, template=false) {
-  const collection = template ? 'mental-templates' : 'mental-assessments'
-
+function loadBasket(userId, id, type) {
+  let collectionRef
+  switch (type) {
+    case 'Modèle global':
+      collectionRef = db.collection('Templates')
+      break
+    case 'Modèle':
+      collectionRef = db
+        .collection('Users')
+        .doc(userId)
+        .collection('Templates')
+      break
+    default:
+      collectionRef = db
+        .collection('Users')
+        .doc(userId)
+        .collection('Assessments')
+  }
   return function (dispatch) {
     dispatch(fetchRequest({ type: FETCH_ASSESSMENT }))
 
-    db.collection(collection)
+    return collectionRef
       .doc(id)
       .get()
       .then(function (doc) {
         if (doc.exists) {
-          console.log('Document data:', doc.data())
+   
           dispatch(fetchSuccess({ data: doc.data(), type: FETCH_ASSESSMENT }))
           dispatch(setBasket({ questions: doc.data().questions }))
           console.log('Document successfully loaded!')
@@ -208,29 +242,8 @@ function loadBasketAsync( id, template=false) {
         }
       })
       .catch(function (error) {
-        //dispatch(fetchFailure({ error }))
+        dispatch(fetchFailure({ error }))
         console.error('Error loading document: ', error)
-      })
-  }
-}
-
-function loadAssessmentsAsync(template) {
-  const collection = template ? 'mental-templates' : 'mental-assessments'
-  return function (dispatch) {
-    dispatch(fetchRequest({ type: FETCH_ASSESSMENTS }))
-    db.collection(collection)
-      .get()
-      .then(function (querySnapshot) {
-        const datas = []
-        querySnapshot.forEach(function (doc) {
-          datas.push({ ...doc.data(), title: doc.id })
-          console.log(doc.id, ' => ', doc.data())
-        })
-        dispatch(fetchSuccess({ data: datas, type: FETCH_ASSESSMENTS }))
-      })
-      .catch(function (error) {
-        console.log('Error getting documents: ', error)
-        // dispatch(fetchFailure({ error }))
       })
   }
 }
@@ -238,7 +251,7 @@ function loadAssessmentsAsync(template) {
 function loadAssignedAssessmentsAsync({ userId }) {
   return function (dispatch) {
     dispatch(fetchRequest({ type: FETCH_ASSIGNED_ASSESSMENTS }))
-    db.collection('users')
+    db.collection('Users')
       .doc(userId)
       .collection('assessments')
       .get()
@@ -246,7 +259,7 @@ function loadAssignedAssessmentsAsync({ userId }) {
         const datas = []
         querySnapshot.forEach(function (doc) {
           datas.push({ ...doc.data(), title: doc.id })
-          console.log(doc.id, ' => ', doc.data())
+    
         })
         dispatch(
           fetchSuccess({ data: datas, type: FETCH_ASSIGNED_ASSESSMENTS }),
@@ -259,32 +272,36 @@ function loadAssignedAssessmentsAsync({ userId }) {
   }
 }
 
-function loadClassesAsync() {
-  return function (dispatch) {
+
+
+function fetchClasses(user) {
+  return (dispatch) => {
     dispatch(fetchRequest({ type: FETCH_CLASSES }))
-    db.collection('classes')
+    db.collection('Users')
+      .doc(user.email)
       .get()
-      .then(function (querySnapshot) {
-        const datas = []
-        querySnapshot.forEach(function (doc) {
-          datas.push({ ...doc.data(), id: doc.id })
-          console.log(doc.id, ' => ', doc.data())
-        })
-        dispatch(fetchSuccess({ data: datas, type: FETCH_CLASSES }))
+      .then((doc) => {
+        if (doc.exists) {
+          dispatch(
+            fetchSuccess({ data: doc.data().classes, type: FETCH_CLASSES }),
+          )
+        } else {
+          dispatch(fetchFailure(`${user.email} doesn't exist`))
+        }
       })
       .catch(function (error) {
         console.log('Error getting documents: ', error)
-        //dispatch(fetchFailure({ error }))
+        dispatch(fetchFailure({ error }))
       })
   }
 }
 
 export {
-  saveBasketAsync,
+  // fetchAssessments,
+  saveBasket,
   saveMarkAsync,
-  loadAssessmentsAsync,
-  loadBasketAsync,
-  loadClassesAsync,
+  loadBasket,
+  fetchClasses,
   loadAssignedAssessmentsAsync,
 }
 

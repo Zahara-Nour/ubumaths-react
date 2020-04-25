@@ -43,13 +43,11 @@ function Mental(props) {
       <NavBar {...rest} />
       <GridContainer>
         <GridItem xs={12} sm={12} md={6}>
-          <QuestionsList />
+          {user.role === 'teacher' && <QuestionsList />}
         </GridItem>
         <GridItem xs={12} sm={12} md={6}>
           {user.role === 'teacher' && <Basket />}
-          {user.role === 'student' && (
-                <AssignedAssessments userId={user.email} />
-              )}
+          {user.role === 'student' && <AssignedAssessments />}
         </GridItem>
       </GridContainer>
     </div>

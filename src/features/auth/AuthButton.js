@@ -17,10 +17,10 @@ export default function AuthButton() {
   const connected = useSelector(selectConnected)
 
   const handleLoginSuccess = (response) => {
-    console.log(response.profileObj)
+  
     const user = response.profileObj
     dispatch(loginSuccess({ user }))
-    console.log(user)
+   
     dispatch(fetchUserThunk({id:user.email}))
   }
 

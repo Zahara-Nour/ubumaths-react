@@ -51,17 +51,18 @@ const flexContainerRow = {
 
 const useStyles = makeStyles(listStyle)
 
-function Subsubcategory({ active, subsubcategory, onClickLevel, name, level }) {
+function Subsubcategory({ active, subsubcategory, name }) {
   const dispatch = useDispatch()
   const user = useSelector(selectUser)
   const [nbQuestions, setNbQuestions] = useState(1)
   const levels = subsubcategory.levels
+  const [level, setLevel] = useState(0)
 
   const classes = useStyles()
 
-  const [question, setQuestion] = useState({
-    ...levels[level],
-  })
+  const  question ={
+    ...levels[level]
+  }
 
   const [delay, setDelay] = useState(question.defaultDelay)
 
@@ -97,7 +98,7 @@ function Subsubcategory({ active, subsubcategory, onClickLevel, name, level }) {
         <ListItem  style={flexContainerColumn}>
           <Description question={question} label={subsubcategory.label} >
 
-          {levels.length > 0 &&   <LevelButtons levels={levels} level={level} onChange={onClickLevel}/>}
+          {levels.length > 0 &&   <LevelButtons levels={levels} level={level} onChange={setLevel}/>}
           </Description>
             
           

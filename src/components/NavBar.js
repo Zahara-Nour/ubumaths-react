@@ -52,7 +52,7 @@ function NavBar(props) {
 
   const listLeft = (
     <>
-      <ListItem className={classes.listItem}>
+      {/* <ListItem className={classes.listItem}>
         <NavLink to={'/games'} className={classes.navLink}>
           <Dashboard className={classes.listItemIcon} />
           <ListItemText
@@ -61,7 +61,7 @@ function NavBar(props) {
             className={classes.listItemText}
           />
         </NavLink>
-      </ListItem>
+      </ListItem> */}
       <ListItem className={classes.listItem}>
         <NavLink to={'/calcul-mental'} className={classes.navLink}>
           <Dashboard className={classes.listItemIcon} />
@@ -77,8 +77,8 @@ function NavBar(props) {
 
   const listRight = (
     <>
-      <ListItem className={classes.listItem}>
-        <NavLink to={'/admin/dashboard'} className={classes.navLink}>
+      {/* <ListItem className={classes.listItem}>
+        <NavLink to={'/dashboard'} className={classes.navLink}>
           <Dashboard className={classes.listItemIcon} />
           <ListItemText
             primary={'Dashboard'}
@@ -86,7 +86,7 @@ function NavBar(props) {
             className={classes.listItemText}
           />
         </NavLink>
-      </ListItem>
+      </ListItem> */}
       {connected && (
         <ListItem className={classes.listItem}>
           <ListItemAvatar>

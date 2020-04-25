@@ -2,10 +2,16 @@ import React, { useState, useCallback, useEffect } from 'react'
 import CorrectionItem from './CorrectionItem'
 import max from 'assets/img/max.svg'
 import { useSelector, useDispatch } from 'react-redux'
-import { selectAnswers, selectMarked, selectAssessmentId, saveMarkAsync } from './mentalSlice'
+import {
+  selectAnswers,
+  selectMarked,
+  selectAssessmentId,
+  saveMarkAsync,
+  correctionFinished,
+} from './mentalSlice'
 import { selectUser } from 'features/auth/authSlice'
 import { List, ListItem, Divider } from '@material-ui/core'
-import Heading from 'components/Heading/Heading'
+import { useHistory } from 'react-router-dom'
 
 export default function Correction({ questions }) {
   const answers = useSelector(selectAnswers)
@@ -17,6 +23,7 @@ export default function Correction({ questions }) {
   const assessmentId = useSelector(selectAssessmentId)
 
   const handleAddPoint = useCallback(() => setScore((s) => s + 1), [setScore])
+  const history = useHistory()
 
   useEffect(() => {
     if (marked) dispatch(saveMarkAsync(userId, assessmentId, score))
@@ -26,7 +33,7 @@ export default function Correction({ questions }) {
     display: 'flex',
     flexDirection: 'column',
   }
-  
+
   const flexContainerRow = {
     display: 'flex',
     flexDirection: 'row',
@@ -35,32 +42,21 @@ export default function Correction({ questions }) {
   return (
     //  <img src={max} alt='Max' />
     <>
-     
-            <h1>Correction</h1>
-            <Divider/>
-     
-      
-     
-                  Score :
-                
-                {score} sur {questions.length}
-          
-             
-       
-            <List style={flexContainerColumn}>
-              
-              {questions.map((question, index) => (
-                <CorrectionItem
-                  key={index}
-                  question={question}
-                  answer={answers[index]}
-                  number={index + 1}
-                  addPoint={handleAddPoint}
-                />
-              ))}
-          
-            </List>
-          
+      <h1>Correction</h1>
+      <button onClick={() => dispatch(correctionFinished())}>Retour au calcul mental</button>
+      <Divider />
+      Score :{score} sur {questions.length}
+      <List style={flexContainerColumn}>
+        {questions.map((question, index) => (
+          <CorrectionItem
+            key={index}
+            question={question}
+            answer={answers[index]}
+            number={index + 1}
+            addPoint={handleAddPoint}
+          />
+        ))}
+      </List>
     </>
   )
 }

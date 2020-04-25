@@ -1,30 +1,36 @@
-import React, { useEffect } from 'react'
-import { useSelector, useDispatch } from 'react-redux'
-import { loadAssessmentsAsync } from 'features/mental/mentalSlice'
-import { selectFetched, FETCH_ASSESSMENTS } from 'features/db/dbSlice'
-
+import React from 'react'
 import { CircularProgress, List, ListItem } from '@material-ui/core'
+import Button from 'components/CustomButtons/Button'
+import { useAssessments } from 'app/hooks'
+import { grayColor } from 'assets/jss/main-jss'
+import { useSelector } from 'react-redux'
+import { selectUser } from 'features/auth/authSlice'
+const listItemAssessmentStyle = {
+  marginLeft: '10px',
+  marginRight: '10px',
+}
 
-function AssessmentsList({ template, onSelect, onLoad, selected }) {
-  const list = useSelector(selectFetched(FETCH_ASSESSMENTS))
-  const dispatch = useDispatch()
+function AssessmentsList({ type, onSelect, onLoad, selected, saved }) {
+  const lists = {}
+  const user = useSelector(selectUser)
+  lists['Modèle global'] = useAssessments({ type: 'Modèle global', saved })[0]
+  lists['Modèle'] = useAssessments({ type: 'Modèle', saved })[0]
+  lists['Evaluation'] = useAssessments({ type: 'Evaluation', saved })[0]
 
-  useEffect(() => dispatch(loadAssessmentsAsync(template)), [
-    dispatch,
-    template,
-  ])
+  console.log(user.role)
+  if (user.role==='student') console.log(`lists[${type}]`, lists[type])
 
-  if (!list) return <CircularProgress />
+  if (!lists[type]) return <CircularProgress />
 
-  if (onLoad) {
-    onLoad(list.map(({ title }) => title))
+  if (onLoad && lists[type]) {
+    onLoad(lists[type].map(({ title }) => title))
   }
 
-  return (
-    <List hoverable>
-      {list.map(({ title }, index) => (
+  return lists[type] ? (
+    <List>
+      {lists[type].map(({ title }, index) => (
         <ListItem
-        selected={title === selected}
+          selected={title === selected}
           key={index}
           button
           disableRipple
@@ -34,11 +40,34 @@ function AssessmentsList({ template, onSelect, onLoad, selected }) {
             }
           }}
         >
-          {title}
+          <h4 style={listItemAssessmentStyle}>{title}</h4>
+          {user.role === 'student' && (
+            <div>
+              <Button
+                style={{
+                  ...listItemAssessmentStyle,
+                  backgroundColor: grayColor[3],
+                }}
+                size='sm'
+                onClick={(e) => onSelect(e, lists[type][index].title, false)}
+              >
+                S'entraîner
+              </Button>
+
+              <Button
+                style={listItemAssessmentStyle}
+                size='sm'
+                color='danger'
+                onClick={(e) => onSelect(e, lists[type][index].title, true)}
+              >
+                Faire
+              </Button>
+            </div>
+          )}
         </ListItem>
       ))}
     </List>
-  )
+  ) : null
 }
 
 export default AssessmentsList

@@ -23,8 +23,9 @@ import {
   selectFetchError,
   fetchReset,
   FETCH_ASSESSMENT,
+  selectSaved,
 } from 'features/db/dbSlice'
-import { loadBasketAsync } from './mentalSlice'
+import { loadBasket } from './mentalSlice'
 import {
   CircularProgress,
   FormControl,
@@ -34,6 +35,7 @@ import {
 } from '@material-ui/core'
 import AssessmentsList from './AssessmentsList'
 import SnackbarContent from 'components/Snackbar/SnackbarContent'
+import { selectUser } from 'features/auth/authSlice'
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction='down' ref={ref} {...props} />
@@ -71,6 +73,8 @@ function ModalLoad() {
 
   const fetchError = useSelector(selectFetchError(FETCH_ASSESSMENT))
   const classes = useStyles()
+  const user = useSelector(selectUser)
+  const saved = useSelector(selectSaved)
 
   const text = 'Charger'
   const [title, setTitle] = useState('')
@@ -147,6 +151,13 @@ function ModalLoad() {
               value={radioValue}
               onChange={radioOnChange}
             >
+              {user.admin && (
+                <FormControlLabel
+                  value='Modèle global'
+                  control={<Radio />}
+                  label='Modèle global'
+                />
+              )}
               <FormControlLabel
                 value='Modèle'
                 control={<Radio />}
@@ -161,9 +172,10 @@ function ModalLoad() {
           </FormControl>
 
           <AssessmentsList
-            template={radioValue === 'Modèle'}
+            type={radioValue}
             onSelect={setTitle}
             selected={title}
+            saved={saved}
           />
         </DialogContent>
         <DialogActions className={classes.modalFooter}>
@@ -179,7 +191,7 @@ function ModalLoad() {
             disabled={!!fetching || !title}
             color='primary'
             onClick={() => {
-              dispatch(loadBasketAsync(title, radioValue === 'Modèle'))
+              dispatch(loadBasket(user.email, title, radioValue))
             }}
           >
             {text}

@@ -16,6 +16,7 @@ const useStyles = makeStyles(styles)
 
 function Description({ question, label, children }) {
   const classes = useStyles()
+ 
   const string =
     question.expressions[
       Math.floor(Math.random() * question.expressions.length)
@@ -26,6 +27,8 @@ function Description({ question, label, children }) {
   const mathString = exp.string === 'Error' ? exp.string : exp.generate().string
 
   if (!question) return <div />
+
+ 
 
   return (
     <Card style={{ width: '15rem' }}>

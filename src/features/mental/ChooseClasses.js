@@ -37,7 +37,7 @@ export default function ChooseClasses({
                 name={index.toString()}
               />
             }
-            label={c.id}
+            label={c}
           />
         ))}
       </FormGroup>

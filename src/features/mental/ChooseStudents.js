@@ -14,7 +14,7 @@ import {
 
 const useStyles = makeStyles(styles)
 
-export default function ChooseStudents({ classes, selected, onChange }) {
+export default function ChooseStudents({ students, selected, onChange }) {
   const classeNames = useStyles()
   const [selectedClass, setSelectedclass] = useState(0)
 
@@ -35,6 +35,9 @@ export default function ChooseStudents({ classes, selected, onChange }) {
     }
     onChange(selectedStudents)
   }
+
+  const classes = Object.getOwnPropertyNames(students)
+ 
 
   return (
     <div>
@@ -67,35 +70,33 @@ export default function ChooseStudents({ classes, selected, onChange }) {
           </MenuItem>
           {classes.map((c, index) => (
             <MenuItem
-              key={index}
+              key={c}
               classes={{
                 root: classeNames.selectMenuItem,
                 selected: classeNames.selectMenuItemSelected,
               }}
               value={index}
             >
-              {c.id}
+              {c}
             </MenuItem>
           ))}
         </Select>
       </FormControl>
 
-      <FormControl component='fieldset' className={classeNames.formControl}>
+      <FormControl  component='fieldset' className={classeNames.formControl}>
         
         <FormGroup>
-          {classes.length > 0 &&
-            classes[selectedClass].students &&
-            classes[selectedClass].students.map((student, index) => (
+          {students[classes[selectedClass]].map((student, index) => (
               <FormControlLabel
-                key='index'
+                key={student.email}
                 control={
                   <Checkbox
-                    checked={selected.includes(student)}
+                    checked={selected.includes(student.email)}
                     onChange={handleChange}
-                    name={student}
+                    name={student.email}
                   />
                 }
-                label={student}
+                label={student.email}
               />
             ))}
         </FormGroup>
