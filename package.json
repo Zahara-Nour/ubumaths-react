@@ -34,7 +34,8 @@
     "react-scripts": "3.4.1",
     "react-swipeable-views": "^0.13.9",
     "react-table": "^7.0.4",
-    "react-tagsinput": "^3.19.0"
+    "react-tagsinput": "^3.19.0",
+    "redux-persist": "^6.0.0"
   },
   "scripts": {
     "install:clean": "rm -rf node_modules/ && rm -rf package-lock.json && npm install && npm start",
