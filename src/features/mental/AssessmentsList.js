@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { CircularProgress, List, ListItem } from '@material-ui/core'
 import Button from 'components/CustomButtons/Button'
 import { useAssessments } from 'app/hooks'
@@ -16,6 +16,7 @@ function AssessmentsList({ type, onSelect, onLoad, selected, saved }) {
   lists['Modèle global'] = useAssessments({ type: 'Modèle global', saved })[0]
   lists['Modèle'] = useAssessments({ type: 'Modèle', saved })[0]
   lists['Evaluation'] = useAssessments({ type: 'Evaluation', saved })[0]
+  const [clicked, setClicked] = useState(true)
 
   console.log(user.role)
   if (user.role==='student') console.log(`lists[${type}]`, lists[type])
@@ -49,7 +50,10 @@ function AssessmentsList({ type, onSelect, onLoad, selected, saved }) {
                   backgroundColor: grayColor[3],
                 }}
                 size='sm'
-                onClick={(e) => onSelect(e, lists[type][index].title, false)}
+                disable={clicked}
+                onClick={(e) => {
+                  onSelect(e, lists[type][index].title, false)
+                setClicked(true)}}
               >
                 S'entraîner
               </Button>
@@ -58,7 +62,10 @@ function AssessmentsList({ type, onSelect, onLoad, selected, saved }) {
                 style={listItemAssessmentStyle}
                 size='sm'
                 color='danger'
-                onClick={(e) => onSelect(e, lists[type][index].title, true)}
+                disable={clicked}
+                onClick={(e) => {
+                  setClicked(true)
+                  onSelect(e, lists[type][index].title, true)}}
               >
                 Faire
               </Button>
