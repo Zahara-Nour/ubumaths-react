@@ -143,7 +143,7 @@ function saveMarkAsync(userId, assessmentId, mark) {
   }
 }
 
-function saveBasket(user, questions, title, type, students) {
+function saveBasket(user, questions, title, type, oneShot, students) {
   let collectionRef
 
   return (dispatch) => {
@@ -171,7 +171,7 @@ function saveBasket(user, questions, title, type, students) {
           .doc(student)
           .collection('Assessments')
           .doc(title)
-          .set({ title, results: [], best: 0 })
+          .set({ title, results: [], best: 0, done:false })
           .then(() =>
             console.log('Evaluation ' + title + ' enregisrée pour ' + student),
           )
@@ -186,7 +186,7 @@ function saveBasket(user, questions, title, type, students) {
       dispatch(saveRequest())
       collectionRef
         .doc(title)
-        .set({ title, questions })
+        .set({ title, questions, oneShot })
         .then(() => {
           if (type === 'Evaluation') assignAssessment()
         })

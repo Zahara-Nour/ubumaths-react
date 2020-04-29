@@ -37,6 +37,7 @@ import {
   TextField,
   Divider,
   CircularProgress,
+  Checkbox,
 } from '@material-ui/core'
 import ChooseClasses from './ChooseClasses'
 import ChooseStudents from './ChooseStudents'
@@ -83,6 +84,7 @@ export default function ModalSave({ questions }) {
   const [selectedClasses, setSelectedClasses] = useState([])
   const [selectedStudents, setSelectedStudents] = useState([])
   const [allSelectedStudents, setAllSelectedStudents] = useState([])
+  const [oneShot, setOneShot] = useState(false)
 
   const classes = user.classes
 
@@ -92,7 +94,6 @@ export default function ModalSave({ questions }) {
   ])
 
   useEffect(() => {
-   
     if (students) {
       let allSelected = []
       selectedClasses.forEach((c) => {
@@ -110,6 +111,7 @@ export default function ModalSave({ questions }) {
   }, [students, selectedClasses, selectedStudents])
 
   const radioOnChange = (evt) => setRadioValue(evt.target.value)
+  const handleChangeOneShot = () => setOneShot(c => !c)
 
   return (
     <div>
@@ -228,6 +230,23 @@ export default function ModalSave({ questions }) {
                 alignItems: 'flex-start',
               }}
             >
+              
+              <FormControl
+                component='fieldset'
+                className={classes.formControl}
+              >
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={oneShot}
+                      onChange={handleChangeOneShot}
+                      name={'One Shot'}
+                    />
+                  }
+                  label='one shot !'
+                />
+              </FormControl>
+              <div>
               <ChooseClasses
                 style={{ marginRight: '8em' }}
                 classes={classes}
@@ -241,7 +260,7 @@ export default function ModalSave({ questions }) {
                     (prev, current) =>
                       selectedClasses.includes(current)
                         ? prev
-                        : {...prev, [current]:students[current]},
+                        : { ...prev, [current]: students[current] },
 
                     {},
                   )}
@@ -252,6 +271,7 @@ export default function ModalSave({ questions }) {
               ) : (
                 <CircularProgress />
               )}
+              </div>
             </div>
           )}
           <Divider />
@@ -284,6 +304,7 @@ export default function ModalSave({ questions }) {
                   questions,
                   title,
                   radioValue,
+                  oneShot,
                   allSelectedStudents,
                 ),
               )

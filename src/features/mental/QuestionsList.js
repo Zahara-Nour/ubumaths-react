@@ -36,6 +36,8 @@ function QuestionsList() {
                     content: (
                       <Subsubcategories
                         key={sindex}
+                        category={category.label}
+                        subcategory={subcategory.label}
                         subsubcategories={subcategory.subsubcategories}
                       />
                     ),

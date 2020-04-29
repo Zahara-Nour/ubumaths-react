@@ -21,10 +21,10 @@ const styles = {
 }
 const useStyles = makeStyles(styles)
 
-function Subsubcategories({subsubcategories}) {
+function Subsubcategories({ subsubcategories, category, subcategory }) {
   const classes = useStyles()
   const [subsubcategoryId, setSubsubcategoryId] = useState(0)
-  
+
   const handleClickSubsubcategory = (id) => {
     setSubsubcategoryId(id)
   }
@@ -42,6 +42,8 @@ function Subsubcategories({subsubcategories}) {
           onMouseDown={(e) => e.stopPropagation()} // workaround : https://github.com/mui-org/material-ui/issues/5104#issuecomment-521976038
         >
           <Subsubcategory
+            category={category}
+            subcategory={subcategory}
             subsubcategory={subsubcategory}
             active={subsubcategoryId === index}
           />

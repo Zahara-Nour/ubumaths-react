@@ -29,12 +29,9 @@ function Questions({ questions }) {
     border: '2px solid #1C6EA4',
   })
   const mfRef = useRef()
+  const question = questions[current]
 
-  useEffect(() => {
-    if (isFinished) {
-      dispatch(assessmentFinished({ answers: answersRef.current }))
-    }
-  })
+  
 
   useEffect(() => {
     if (hasToChange) {
@@ -46,9 +43,11 @@ function Questions({ questions }) {
       answersRef.current.push({
         ASCIIMath: answerASCIIMath,
         latex: answerLatex,
+        time: Date.now()-start
       })
 
       if (current === questions.length - 1) {
+        setIsRunning(false)
         setIsFinished(true)
       } else {
         setCurrent((current) => current + 1)
@@ -58,7 +57,7 @@ function Questions({ questions }) {
         
       }
     }
-  }, [hasToChange, current, questions.length])
+  }, [hasToChange, current, questions.length, start])
 
   useInterval(
     () => {
@@ -69,12 +68,18 @@ function Questions({ questions }) {
   useInterval(countDown, isRunning ? 10 : null)
 
   useEffect(() => {
-    if (!isRunning) {
-      setDelay(questions[current].delay)
+    if (!isRunning && !isFinished) {
+      setDelay(question.delay)
       setIsRunning(true)
       setStart(Date.now())
     }
-  }, [current, isRunning, questions])
+  }, [current, isRunning, questions, isFinished, question.delay])
+
+  useEffect(() => {
+    if (isFinished) {
+      dispatch(assessmentFinished({ answers: answersRef.current }))
+    }
+  })
 
   const handleChange = () => {
     const answerASCIIMath = mfRef.current.$text('ASCIIMath')
@@ -141,7 +146,7 @@ function Questions({ questions }) {
       </Button>
       </div>
        <div style={{textAlign:'center', marginTop:'10em', marginBottom:'10em'}}>
-      <Question text={questions[current].text} fontSize={font} style={{}}/>
+      <Question text={question.text} fontSize={font} style={{}}/>
       </div>
   
      

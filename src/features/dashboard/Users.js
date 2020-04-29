@@ -173,6 +173,7 @@ function Users() {
       class: className,
       role: 'student',
       email,
+      teacher:user.email
     }
 
     return db

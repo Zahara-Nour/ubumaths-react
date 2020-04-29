@@ -10,6 +10,7 @@ import QuestionNumber from './QuestionNumber'
 
 
 function CorrectionItem({ question, number, answer, addPoint }) {
+  console.log('question.text',question.text)
   const q = math(question.text)
   question = q.latex
   const empty = !answer.ASCIIMath

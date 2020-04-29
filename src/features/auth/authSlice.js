@@ -12,14 +12,14 @@ const initialState = {
   connecting: false,
   disconnecting: false,
   connected: false,
-  user: {role:"guest"},
-  // user: {
-  //   email: 'd.lejolly@voltairedoha.com',
-  //   role: 'teacher',
-  //   school: 'Voltaire-Doha-Qatar',
-  //   admin: true,
-  //   classes: ['6B West Bay', '6C West Bay','5A West Bay','5B West Bay']
-  // },
+  // user: {role:"guest"},
+  user: {
+    email: 'd.lejolly@voltairedoha.com',
+    role: 'teacher',
+    school: 'Voltaire-Doha-Qatar',
+    admin: true,
+    classes: ['6B West Bay', '6C West Bay','5A West Bay','5B West Bay']
+  },
   loginError: '',
 }
 

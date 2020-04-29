@@ -13,8 +13,6 @@ import Button from 'components/CustomButtons/Button'
 import { makeStyles } from '@material-ui/core'
 import LevelButtons from './LevelButtons'
 
-
-
 const listStyle = (theme) => ({
   flexContainer: {
     display: 'flex',
@@ -29,8 +27,8 @@ const listStyle = (theme) => ({
   },
   listItem: {
     root: {
-      background:'black',
-      backgroundColor:'black',
+      background: 'black',
+      backgroundColor: 'black',
       '&$selected, &$selected:hover': {
         backgroundColor: 'warning',
       },
@@ -51,7 +49,13 @@ const flexContainerRow = {
 
 const useStyles = makeStyles(listStyle)
 
-function Subsubcategory({ active, subsubcategory, name }) {
+function Subsubcategory({
+  active,
+  subsubcategory,
+  category,
+  subcategory,
+  name,
+}) {
   const dispatch = useDispatch()
   const user = useSelector(selectUser)
   const [nbQuestions, setNbQuestions] = useState(1)
@@ -60,12 +64,12 @@ function Subsubcategory({ active, subsubcategory, name }) {
 
   const classes = useStyles()
 
-  const  question ={
-    ...levels[level]
+  const question = {
+    ...levels[level],
+    id:`${category} - ${subcategory} - Niveau ${level+1}`
   }
 
   const [delay, setDelay] = useState(question.defaultDelay)
-
 
   const handleClickBasket = () => {
     const questions = []
@@ -95,13 +99,12 @@ function Subsubcategory({ active, subsubcategory, name }) {
     <List className={classes.flexContainer}>
       {!active && <ListItem>{subsubcategory.label}</ListItem>}
       {active && (
-        <ListItem  style={flexContainerColumn}>
-          <Description question={question} label={subsubcategory.label} >
-
-          {levels.length > 0 &&   <LevelButtons levels={levels} level={level} onChange={setLevel}/>}
+        <ListItem style={flexContainerColumn}>
+          <Description question={question} label={subsubcategory.label}>
+            {levels.length > 0 && (
+              <LevelButtons levels={levels} level={level} onChange={setLevel} />
+            )}
           </Description>
-            
-          
         </ListItem>
       )}
 
