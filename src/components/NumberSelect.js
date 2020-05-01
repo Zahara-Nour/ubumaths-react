@@ -32,10 +32,10 @@ export default function NumberSelect({ name, value, onClick }) {
     <div style={flexContainerRow}>
       
      
-      <Button style= {{margin:'5px', backgroundColor:grayColor[3] }} color='secondary' size='sm' onClick={handlePlus}>
+      <Button style= {{margin:'5px', backgroundColor:grayColor[3] }}  size='sm' onClick={handlePlus}>
         +
       </Button>
-      <Button style= {{margin:'5px', backgroundColor:grayColor[3] }} color='secondary' size='sm' onClick={handleMinus}>
+      <Button style= {{margin:'5px', backgroundColor:grayColor[3] }}  size='sm' onClick={handleMinus}>
         -
       </Button>
       <div style= {{margin:'5px'}}>

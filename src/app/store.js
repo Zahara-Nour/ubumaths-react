@@ -6,33 +6,34 @@ import { persistReducer, persistStore } from 'redux-persist'
 import storage from 'redux-persist/lib/storage'
 
 
-// const reducers = combineReducers({
-//   auth:authReducer,
-//   mental:mentalReducer,
-//   db:dbReducer
-// })
-
-// const persistConfig = {
-//   key: 'root',
-//   storage
-// }
-
-// const persistedReducer = persistReducer(persistConfig, reducers)
-
-
-// const store = configureStore({
-//   reducer: persistedReducer,
-// })
-
-// const persistore = persistStore(store)
-
-// export {store, persistore}
-
-export default configureStore({
-  reducer: {
-    auth:authReducer,
-    mental:mentalReducer,
-    db:dbReducer
-  }
+const reducers = combineReducers({
+  auth:authReducer,
+  mental:mentalReducer,
+  db:dbReducer
 })
+
+const persistConfig = {
+  key: 'root',
+  storage,
+  blacklist: ['auth', 'mental', 'db']
+}
+
+const persistedReducer = persistReducer(persistConfig, reducers)
+
+
+const store = configureStore({
+  reducer: persistedReducer,
+})
+
+const persistore = persistStore(store)
+
+export {store, persistore}
+
+// export default configureStore({
+//   reducer: {
+//     auth:authReducer,
+//     mental:mentalReducer,
+//     db:dbReducer
+//   }
+// })
 

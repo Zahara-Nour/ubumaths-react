@@ -12,14 +12,14 @@ const initialState = {
   connecting: false,
   disconnecting: false,
   connected: false,
-  // user: {role:"guest"},
-  user: {
-    email: 'd.lejolly@voltairedoha.com',
-    role: 'teacher',
-    school: 'Voltaire-Doha-Qatar',
-    admin: true,
-    classes: ['6B West Bay', '6C West Bay','5A West Bay','5B West Bay']
-  },
+  user: { role: 'guest' },
+  // user: {
+  //   email: 'd.lejolly@voltairedoha.com',
+  //   role: 'teacher',
+  //   school: 'Voltaire-Doha-Qatar',
+  //   admin: true,
+  //   classes: ['6B West Bay', '6C West Bay','5A West Bay','5B West Bay']
+  // },
   loginError: '',
 }
 
@@ -48,6 +48,10 @@ const authSlice = createSlice({
       state.connected = false
       state.user = { role: 'guest' }
     },
+    logoutFailure(state, action) {
+      state.disconnecting = false
+      state.logOutError = action.payload.error
+    },
 
     updateUser(state, action) {
       Object.assign(state.user, action.payload.user)
@@ -61,6 +65,7 @@ export const {
   loginFailure,
   logoutRequest,
   logoutSuccess,
+  logoutFailure,
   updateUser,
 } = authSlice.actions
 
@@ -69,7 +74,7 @@ const selectConnected = (state) => state.auth.connected
 
 export { selectUser, selectConnected }
 
-function fetchUserThunk({ id }) {
+function fetchUser({ id }) {
   return function (dispatch) {
     dispatch(fetchRequest({ type: FETCH_USER }))
     db.collection('Users')
@@ -77,12 +82,9 @@ function fetchUserThunk({ id }) {
       .get()
       .then(function (doc) {
         if (doc.exists) {
-          console.log('Document data:', doc.data())
           dispatch(fetchSuccess({ data: doc.data(), type: FETCH_USER }))
-          console.log('updating user')
-          dispatch(updateUser({ user: doc.data() }))
 
-          console.log('Document successfully loaded!')
+          dispatch(updateUser({ user: doc.data() }))
         } else {
           // doc.data() will be undefined in this case
           dispatch(
@@ -95,32 +97,13 @@ function fetchUserThunk({ id }) {
         }
       })
       .catch(function (error) {
-        //dispatch(fetchFailure({ error }))
+        dispatch(fetchFailure({ error }))
         console.error('Error loading document: ', error)
       })
   }
 }
 
-export { fetchUserThunk }
+export { fetchUser }
 
-// export function verifyAuth() {
-//   return dispatch => {
-//     dispatch(verifyAuthRequest())
-//     const user = localStorage.getItem('myPage.expectSignIn')
-//     if (user) dispatch(loginSuccess({ user }))
-//     console.log('user')
-//     console.log(user)
-
-//     firebase.auth().onAuthStateChanged(user => {
-//       if (user) {
-//         localStorage.setItem('myPage.expectSignIn', user.email)
-//       } else {
-//         localStorage.removeItem('myPage.expectSignIn')
-//       }
-//     })
-
-//     dispatch(verifyAuthSuccess())
-//   }
-// }
 
 export default authSlice.reducer

@@ -16,10 +16,10 @@ function App() {
   return (
     <Container fixed>
       <Switch>
-        {/* <PrivateRoute path='/dashboard'>
+        <PrivateRoute path='/dashboard'>
           <Dashboard />
-        </PrivateRoute> */}
-        <Route path='/dashboard' component={Dashboard} />
+        </PrivateRoute>
+        {/* <Route path='/dashboard' component={Dashboard} /> */}
         <Route path='/calcul-mental' component={Mental} />
         <Route path='/' component={Home} />
       </Switch>
@@ -36,9 +36,9 @@ function PrivateRoute({ children, ...rest }) {
       {...rest}
       render={() =>
         user.role !== 'guest' ? (
-          {
-            children,
-          }
+          
+            children
+          
         ) : (
           <div>
             <NavBar />

@@ -18,7 +18,6 @@ function AssessmentsList({ type, onSelect, onLoad, selected, saved }) {
   lists['Evaluation'] = useAssessments({ type: 'Evaluation', saved })[0]
   const [clicked, setClicked] = useState(true)
 
-  console.log(user.role)
   if (user.role==='student') console.log(`lists[${type}]`, lists[type])
 
   if (!lists[type]) return <CircularProgress />

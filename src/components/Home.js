@@ -7,6 +7,7 @@ function Home() {
         <div>
             <NavBar />
         <h1> Bienvenue sur le site de M. Le Jolly !</h1>
+       
         </div>
     )
 }

@@ -35,7 +35,7 @@ function Description({ question, label, children }) {
       <CardBody>
         <h6 className={classes.cardSubtitle}>{label}</h6>
 
-        <p>
+        
           <div
             dangerouslySetInnerHTML={{
               __html:
@@ -44,7 +44,7 @@ function Description({ question, label, children }) {
                 mathString,
             }}
           />
-        </p>
+   
         {children}
       </CardBody>
     </Card>

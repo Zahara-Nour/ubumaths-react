@@ -290,7 +290,7 @@ export default function ModalSave({ questions }) {
               dispatch(saveReset())
               setModal(false)
             }}
-            color='secondary'
+            
           >
             Fermer
           </Button>
