@@ -7,8 +7,11 @@ import {
   fetchSuccess,
   fetchFailure,
   FETCH_STUDENTS,
+  FETCH_CARDS,
+  FETCH_CARDS_THEMES,
+  FETCH_SUBJECTS
 } from 'features/db/dbSlice'
-import { fetchAssessments, fetchStudents } from './db'
+import { fetchAssessments, fetchStudents, fetchCards, fetchCardsThemes, fetchSubjects } from './db'
 
 function useInterval(callback, delay) {
   const savedCallback = useRef()
@@ -53,7 +56,7 @@ const useAssessments = ({type, saved}) => {
         setData(result)
         dispatch(fetchSuccess({ data: result, type: FETCH_ASSESSMENTS }))
       } catch (error) {
-        setIsError(true)
+        setIsError(error)
         dispatch(fetchFailure({ error }))
       }
       setIsLoading(false)
@@ -84,7 +87,7 @@ const useStudents = () => {
         setData(result)
         dispatch(fetchSuccess({ data: result, type: FETCH_STUDENTS }))
       } catch (error) {
-        setIsError(true)
+        setIsError(error)
         dispatch(fetchFailure({ error }))
       }
       setIsLoading(false)
@@ -94,6 +97,94 @@ const useStudents = () => {
   return [data, isLoading, isError]
 }
 
+
+const useCards = (subject, theme) => {
+  const dispatch = useDispatch()
+  const [data, setData] = useState([])
+
+  const [isLoading, setIsLoading] = useState(false)
+  const [isError, setIsError] = useState(false)
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsError(false)
+      setIsLoading(true)
+     
+      dispatch(fetchRequest({ type: FETCH_CARDS }))
+      try {
+        const result = await fetchCards(subject, theme)
+        setData(result)
+        dispatch(fetchSuccess({ data: result, type: FETCH_CARDS }))
+      } catch (error) {
+        setIsError(error)
+        dispatch(fetchFailure({ error }))
+      }
+      setIsLoading(false)
+    }
+    fetchData()
+  }, [dispatch, theme])
+
+  return [data, isLoading, isError]
+}
+
+
+const useCardsThemes = (subject) => {
+  const dispatch = useDispatch()
+  const [data, setData] = useState([])
+
+  const [isLoading, setIsLoading] = useState(false)
+  const [isError, setIsError] = useState(false)
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsError(false)
+      setIsLoading(true)
+     
+      dispatch(fetchRequest({ type: FETCH_CARDS_THEMES }))
+      try {
+        const result = await fetchCardsThemes(subject)
+        setData(result)
+        dispatch(fetchSuccess({ data: result, type: FETCH_CARDS_THEMES }))
+      } catch (error) {
+        setIsError(error)
+        dispatch(fetchFailure({ error }))
+      }
+      setIsLoading(false)
+    }
+    fetchData()
+  }, [dispatch, subject])
+
+  return [data, isLoading, isError]
+}
+
+const useSubjects = () => {
+  const dispatch = useDispatch()
+  const [data, setData] = useState([])
+
+  const [isLoading, setIsLoading] = useState(false)
+  const [isError, setIsError] = useState(false)
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsError(false)
+      setIsLoading(true)
+     
+      dispatch(fetchRequest({ type: FETCH_SUBJECTS }))
+      try {
+        const result = await fetchSubjects()
+        setData(result)
+        dispatch(fetchSuccess({ data: result, type: FETCH_SUBJECTS }))
+      } catch (error) {
+        setIsError(error)
+        dispatch(fetchFailure({ error }))
+      }
+      setIsLoading(false)
+    }
+    fetchData()
+  }, [dispatch])
+
+  return [data, isLoading, isError]
+}
 
 
 let cachedScripts = [];
@@ -162,4 +253,4 @@ function useScript(src) {
 
 
 
-export { useInterval, useAssessments, useStudents, useScript }
+export { useSubjects, useInterval, useAssessments, useStudents, useScript, useCards, useCardsThemes }

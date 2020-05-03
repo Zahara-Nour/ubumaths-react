@@ -13,7 +13,6 @@ const dbSlice = createSlice({
   name: 'db',
   initialState: initialState,
   reducers: {
-    
     saveRequest(state) {
       state.saving = true
       state.saved = false
@@ -66,36 +65,47 @@ const FETCH_CLASSES = 'classes'
 const FETCH_STUDENTS = 'students'
 const FETCH_USER = 'user'
 const FETCH_ASSIGNED_ASSESSMENTS = 'assigned-assessments'
-export { FETCH_ASSESSMENT, FETCH_ASSESSMENTS, FETCH_CLASSES, FETCH_USER, FETCH_ASSIGNED_ASSESSMENTS, FETCH_STUDENTS }
+const FETCH_CARDS = 'cards'
+const FETCH_CARDS_THEMES = 'cards-themes'
+const FETCH_SUBJECTS = 'subjects'
+
+export {
+  FETCH_ASSESSMENT,
+  FETCH_ASSESSMENTS,
+  FETCH_CLASSES,
+  FETCH_USER,
+  FETCH_ASSIGNED_ASSESSMENTS,
+  FETCH_STUDENTS,
+  FETCH_CARDS,
+  FETCH_CARDS_THEMES,
+  FETCH_SUBJECTS
+}
 
 export const {
- 
-    saveFailure,
-    saveRequest,
-    saveSuccess,
-    saveReset,
-    fetchRequest,
-    fetchSuccess,
-    fetchFailure,
-    fetchReset,
-  } = dbSlice.actions
-  
-  
-  const selectFetching = (type) => (state) => state.db.fetching[type]
-  const selectFetched = (type) => (state) => state.db.fetched[type]
-  const selectFetchError = (type) => (state) => state.db.fetchError[type]
-  const selectSaving = (state) => state.db.saving
-  const selectSaved = (state) => state.db.saved
-  const selectSaveError = (state) => state.db.saveError
+  saveFailure,
+  saveRequest,
+  saveSuccess,
+  saveReset,
+  fetchRequest,
+  fetchSuccess,
+  fetchFailure,
+  fetchReset,
+} = dbSlice.actions
 
-  
-  export {
-    selectSaving,
-    selectSaveError,
-    selectSaved,
-    selectFetched,
-    selectFetching,
-    selectFetchError,
-  }
+const selectFetching = (type) => (state) => state.db.fetching[type]
+const selectFetched = (type) => (state) => state.db.fetched[type]
+const selectFetchError = (type) => (state) => state.db.fetchError[type]
+const selectSaving = (state) => state.db.saving
+const selectSaved = (state) => state.db.saved
+const selectSaveError = (state) => state.db.saveError
 
-  export default dbSlice.reducer
+export {
+  selectSaving,
+  selectSaveError,
+  selectSaved,
+  selectFetched,
+  selectFetching,
+  selectFetchError,
+}
+
+export default dbSlice.reducer

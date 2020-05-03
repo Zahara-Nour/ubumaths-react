@@ -66,5 +66,46 @@ function fetchStudents(user) {
     })
 }
 
-export { fetchAssessments, fetchStudents }
+function fetchCards(subject, theme) {
+  const cards = []
+
+
+  return db
+    .collection('FlashCards')
+    .where('theme', '==', theme)
+    .where('subject', '==', subject)
+    .get()
+    .then((docs) => {
+      docs.forEach((doc) => {
+        cards.push(doc.data())
+      })
+      return cards
+    })
+}
+
+function fetchCardsThemes(subject) {
+
+  return db
+    .collection('Globals')
+    .doc('cards-themes')
+    .get()
+    .then((doc) => {
+      
+      return doc.data()[subject]
+    })
+}
+
+function fetchSubjects() {
+
+  return db
+    .collection('Globals')
+    .doc('subjects')
+    .get()
+    .then((doc) => {
+      
+      return doc.data().list
+    })
+}
+
+export { fetchAssessments, fetchStudents, fetchCards, fetchCardsThemes, fetchSubjects }
 export default db

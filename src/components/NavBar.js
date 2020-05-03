@@ -72,6 +72,16 @@ function NavBar(props) {
           />
         </NavLink>
       </ListItem>
+      <ListItem className={classes.listItem}>
+        <NavLink to={'/flash-cards'} className={classes.navLink}>
+          <Dashboard className={classes.listItemIcon} />
+          <ListItemText
+            primary={'Flash Cards'}
+            disableTypography={true}
+            className={classes.listItemText}
+          />
+        </NavLink>
+      </ListItem>
     </>
   )
 
