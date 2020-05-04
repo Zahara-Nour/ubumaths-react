@@ -22,8 +22,6 @@ function DisplayFlashCards({ match }) {
     }
   }
 
-  console.log('cards', cards)
-  console.log('card', card)
 
  if (isError) return (
     <SnackbarContent
@@ -43,7 +41,11 @@ function DisplayFlashCards({ match }) {
      <h2> {match.params.theme}</h2>
       {cards.length > 0 && <FlashCard card={cards[card]} onNext={handleNext} />}
       <p/>
+      <p style={{color:'white'}}>
+        .
+    </p>
     </div>
+    
   )
 }
 

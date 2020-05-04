@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { selectUser } from 'features/auth/authSlice'
+import {shuffle} from 'app/utils'
 import {
   fetchRequest,
   FETCH_ASSESSMENTS,
@@ -113,6 +114,7 @@ const useCards = (subject, theme) => {
       dispatch(fetchRequest({ type: FETCH_CARDS }))
       try {
         const result = await fetchCards(subject, theme)
+        shuffle(result)
         setData(result)
         dispatch(fetchSuccess({ data: result, type: FETCH_CARDS }))
       } catch (error) {
@@ -122,7 +124,9 @@ const useCards = (subject, theme) => {
       setIsLoading(false)
     }
     fetchData()
-  }, [dispatch, theme])
+  }, [dispatch, theme, subject])
+
+  // return [shuffle(data.slice()), isLoading, isError]
 
   return [data, isLoading, isError]
 }

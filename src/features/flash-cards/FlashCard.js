@@ -27,7 +27,7 @@ export default function FlashCard({ card, onNext }) {
   const classes = useStyles()
   const [activeRotate, setActiveRotate] = useState('')
   const [pending, setPending] = useState(false)
-  const answer = pending ? "" : card.answer
+  const answer = pending ? '' : card.answer
 
   // const enounce = card.enounce.replace(/\$\$(.+)\$\$/g, `<span>$1</span>`)
   const enounce = card.enounce
@@ -45,8 +45,11 @@ export default function FlashCard({ card, onNext }) {
       var rotatingWrapper = rotatingCard.parentElement
       var cardWidth = rotatingCard.parentElement.offsetWidth
       // var cardHeight = rotatingCard.children[0].children[0].offsetHeight
-      console.log(rotatingCard)
-       var cardHeight = Math.max(rotatingCard.children[0].children[0].offsetHeight,rotatingCard.children[1].children[0].offsetHeight)
+     
+      var cardHeight = Math.max(
+        rotatingCard.children[0].children[0].offsetHeight,
+        rotatingCard.children[1].children[0].offsetHeight,
+      )
       //  var cardHeight = Math.max(rotatingCard.children[0].children[0].offsetHeight,rotatingCard.children[1].children[0].offsetHeight)
       rotatingWrapper.style.height = cardHeight + 'px'
       rotatingWrapper.style['margin-bottom'] = 30 + 'px'
@@ -119,13 +122,13 @@ export default function FlashCard({ card, onNext }) {
                       {card.explanation}
                     </p>
                   )}
-               
+
                   {card.warning && (
                     <p className={classes.cardDescription}>
                       <Warning>{card.warning}</Warning>
                     </p>
                   )}
-                  
+
                   <div className={classes.textCenter}>
                     <Button
                       round
@@ -139,7 +142,11 @@ export default function FlashCard({ card, onNext }) {
                       color='success'
                       onClick={() => {
                         setPending(true)
-                        setInterval(() => {console.log('top');setPending(false)}, 600)
+                        const id = setInterval(() => {
+                          clearInterval(id)
+                          console.log('top')
+                          setPending(false)
+                        }, 600)
                         setActiveRotate('')
                         onNext()
                       }}
@@ -153,7 +160,6 @@ export default function FlashCard({ card, onNext }) {
           </div>
         </GridItem>
       </GridContainer>
-      
     </>
   )
 }

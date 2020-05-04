@@ -23,4 +23,5 @@ const shuffle = function (array) {
   return array
 }
 
+
 export {shuffle}

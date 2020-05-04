@@ -38,7 +38,7 @@ function Home() {
   const [themes, isLoadingThemes, isErrorThemes] = useCardsThemes(subject)
 
   const handleChangeSubject = (evt) => setSubject(evt.target.value)
-  console.log('themes', themes)
+ 
 
   useEffect(() => {
     if (subjects.length > 0) setSubject(subjects[0])
