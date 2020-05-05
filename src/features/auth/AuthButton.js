@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react'
+import firebase from 'firebase/app'
+import 'firebase/auth';
 import { useScript } from 'app/hooks'
 import Button from 'components/CustomButtons/Button'
 import { useDispatch, useSelector } from 'react-redux'
@@ -22,10 +24,47 @@ export default function AuthButton() {
     '702572178697-3pdjj0caro5u0ttpft17ppc0fnlmol1p.apps.googleusercontent.com'
 
   const handleLoginSuccess = useCallback(
-    (response) => {
-     
-      const profile = response.getBasicProfile()
-      const authResponse = response.getAuthResponse()
+    (googleUser) => {
+      console.log('Google Auth Response', googleUser)
+      // We need to register an Observer on Firebase Auth to make sure auth is initialized.
+      const profile = googleUser.getBasicProfile()
+      const authResponse = googleUser.getAuthResponse()
+
+      if (!profile.getEmail().includes('@voltairedoha.com')) {
+        console.log("Erreur connexion avec un mail n'appartenant pas au domaine voltairedoha.com")
+        return
+      }
+      var unsubscribe = firebase
+        .auth()
+        .onAuthStateChanged(function (firebaseUser) {
+          unsubscribe()
+          // Check if we are already signed-in Firebase with the correct user.
+          if (!isUserEqual(googleUser, firebaseUser)) {
+            // Build Firebase credential with the Google ID token.
+            var credential = firebase.auth.GoogleAuthProvider.credential(
+              authResponse.id_token,
+            )
+            // Sign in with credential from the Google user.
+            firebase
+              .auth()
+              .signInWithCredential(credential)
+              .catch(function (error) {
+                // Handle Errors here.
+                var errorCode = error.code
+                var errorMessage = error.message
+                // The email of the user's account used.
+                var email = error.email
+                // The firebase.auth.AuthCredential type that was used.
+                var credential = error.credential
+                // ...
+                console.error("error while authenticating in Firebase", error)
+              })
+          } else {
+            console.log('User already signed-in Firebase.')
+          }
+        })
+
+      
       const userProfile = {
         googleId: profile.getId(),
         imageUrl: profile.getImageUrl(),
@@ -50,7 +89,6 @@ export default function AuthButton() {
 
   const handleLoginFailure = useCallback(
     (response) => {
-     
       dispatch(loginFailure({ error: response.error }))
     },
     [dispatch],
@@ -58,7 +96,6 @@ export default function AuthButton() {
 
   const handleLogoutSuccess = useCallback(
     (response) => {
-    
       dispatch(logoutSuccess())
     },
     [dispatch],
@@ -66,7 +103,6 @@ export default function AuthButton() {
 
   const handleLogoutFailure = useCallback(
     (response) => {
-   
       dispatch(logoutFailure())
     },
     [dispatch],
@@ -98,6 +134,11 @@ export default function AuthButton() {
           (res) => handleLogoutSuccess(res),
           (err) => handleLogoutFailure(err),
         )
+        firebase.auth().signOut().then(function(res) {
+          handleLogoutSuccess(res)
+        }).catch(function(error) {
+          handleLogoutFailure(error)
+        });
       }}
     >
       Logout
@@ -119,6 +160,23 @@ export default function AuthButton() {
       Login
     </Button>
   )
+}
+
+function isUserEqual(googleUser, firebaseUser) {
+  if (firebaseUser) {
+    var providerData = firebaseUser.providerData
+    for (var i = 0; i < providerData.length; i++) {
+      if (
+        providerData[i].providerId ===
+          firebase.auth.GoogleAuthProvider.PROVIDER_ID &&
+        providerData[i].uid === googleUser.getBasicProfile().getId()
+      ) {
+        // We don't need to reauth the Firebase connection.
+        return true
+      }
+    }
+  }
+  return false
 }
 
 // <div id='loginButton'></div>
