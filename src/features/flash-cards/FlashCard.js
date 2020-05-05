@@ -1,4 +1,5 @@
-import React, { useEffect, useCallback, useState } from 'react'
+import React, { useEffect, useCallback, useState, useRef } from 'react'
+
 import { makeStyles } from '@material-ui/core/styles'
 import Icon from '@material-ui/core/Icon'
 // @material-ui icons
@@ -23,14 +24,24 @@ const style = {
 
 const useStyles = makeStyles(style)
 
+
+
+
+
 export default function FlashCard({ card, onNext }) {
   const classes = useStyles()
   const [activeRotate, setActiveRotate] = useState('')
   const [pending, setPending] = useState(false)
-  const answer = pending ? '' : card.answer
+  
 
-  // const enounce = card.enounce.replace(/\$\$(.+)\$\$/g, `<span>$1</span>`)
-  const enounce = card.enounce
+  useEffect(() => {
+    addStylesForRotatingCards()
+    return function cleanup() {}
+  })
+
+  useEffect(() => {
+    Mathlive.renderMathInDocument()
+  })
 
   const addStylesForRotatingCards = useCallback(() => {
     var rotatingCards = document.getElementsByClassName(classes.cardRotate)
@@ -45,7 +56,7 @@ export default function FlashCard({ card, onNext }) {
       var rotatingWrapper = rotatingCard.parentElement
       var cardWidth = rotatingCard.parentElement.offsetWidth
       // var cardHeight = rotatingCard.children[0].children[0].offsetHeight
-     
+
       var cardHeight = Math.max(
         rotatingCard.children[0].children[0].offsetHeight,
         rotatingCard.children[1].children[0].offsetHeight,
@@ -95,7 +106,9 @@ export default function FlashCard({ card, onNext }) {
                     </h5>
                   </Info>
                   <br />
-                  <h4 className={classes.cardTitle}>{enounce}</h4>
+                  <h4 className={classes.cardTitle}>
+                    {card.enounce}
+                  </h4>
                   <br />
 
                   <div className={classes.textCenter}>
@@ -115,7 +128,9 @@ export default function FlashCard({ card, onNext }) {
                     <h4>Réponse</h4>
                   </Success>
                   <br />
-                  <h2 className={classes.cardTitle}>{answer}</h2>
+                  <h2 className={classes.cardTitle}>
+                    {pending ? '' : card.answer}
+                  </h2>
                   <br />
                   {card.explanation && (
                     <p className={classes.cardDescription}>
@@ -147,8 +162,9 @@ export default function FlashCard({ card, onNext }) {
                           console.log('top')
                           setPending(false)
                         }, 600)
-                        setActiveRotate('')
+                        
                         onNext()
+                        setActiveRotate('')
                       }}
                     >
                       <NavigateNextIcon /> Suivante
