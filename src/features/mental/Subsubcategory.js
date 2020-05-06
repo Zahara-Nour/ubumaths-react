@@ -12,6 +12,8 @@ import ListItem from '@material-ui/core/ListItem'
 import Button from 'components/CustomButtons/Button'
 import { makeStyles } from '@material-ui/core'
 import LevelButtons from './LevelButtons'
+import LinkIcon from '@material-ui/icons/Link'
+import Clipboard from 'react-clipboard.js'
 
 const listStyle = (theme) => ({
   flexContainer: {
@@ -66,7 +68,7 @@ function Subsubcategory({
 
   const question = {
     ...levels[level],
-    id:`${category} - ${subcategory} - Niveau ${level+1}`
+    id: `${category} - ${subcategory} - Niveau ${level + 1}`,
   }
 
   const [delay, setDelay] = useState(question.defaultDelay)
@@ -93,6 +95,16 @@ function Subsubcategory({
     dispatch(setBasket({ questions: [] }))
     dispatch(addToBasket({ questions }))
     dispatch(launchAssessment({ marked: false }))
+  }
+
+  const handleLink = () => {
+    // const link = encodeURI(`https://mathereal.lejolly.me/calcul-mental/${category}/${subcategory}/${subsubcategory.label}/${level+1}`)
+    const link = encodeURI(
+      `localhost:3000/calcul-mental/${category}/${subcategory}/${
+        subsubcategory.label
+      }/${level + 1}`,
+    )
+    console.log(link)
   }
 
   return (
@@ -139,6 +151,19 @@ function Subsubcategory({
           <Button color='danger' size='sm' onClick={handleClickGo}>
             Go !
           </Button>
+          {user.role === 'teacher' && (
+            <Clipboard
+              data-clipboard-text={encodeURI(
+                `localhost:3000/calcul-mental/${category}/${subcategory}/${
+                  subsubcategory.label
+                }/${level + 1}`,
+              )}
+            >
+              <Button color='warning' size='sm'>
+                <LinkIcon />
+              </Button>
+            </Clipboard>
+          )}
         </ListItem>
       )}
     </List>

@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback, useState, useRef } from 'react'
+import React, { useEffect, useCallback, useState } from 'react'
 
 import { makeStyles } from '@material-ui/core/styles'
 import Icon from '@material-ui/core/Icon'
