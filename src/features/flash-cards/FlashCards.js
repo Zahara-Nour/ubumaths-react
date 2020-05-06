@@ -14,11 +14,15 @@ import {
   ListItem,
 } from '@material-ui/core'
 import styles from 'assets/jss/customSelectStyle.js'
+import { useSelector } from 'react-redux'
+import { selectMaintenanceMode } from 'features/maintenance/maintenanceSlice'
 
 const useStyles = makeStyles(styles)
 
 
 function FlashCards({ match }) {
+  const maintenance = useSelector(selectMaintenanceMode)
+  if (maintenance) return <h2>Le site est en cours de maintenance</h2>
   return (
     <Switch>
       {/* <Route path={`${match.url}/select`} component={SelectFlashCards}/> */}

@@ -8,6 +8,7 @@ import { Redirect } from 'react-router-dom'
 
 function generateCard(card) {
   // firestore returns objects with read-only properties
+  if (!card.variables) return card
 
   let tempCard = {
     enounce: card.enounce,

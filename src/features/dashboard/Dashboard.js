@@ -6,7 +6,7 @@ import { Switch, Route } from 'react-router-dom'
 import { makeStyles } from '@material-ui/core/styles'
 
 // core components
-import AdminNavbar from 'components/Navbars/AdminNavbar.js'
+import AdminNavbar from 'components/AdminNavbar.js'
 import Footer from 'components/Footer/Footer.js'
 import Sidebar from 'components/Sidebar/Sidebar.js'
 
