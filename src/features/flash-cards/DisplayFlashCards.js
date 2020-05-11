@@ -1,66 +1,27 @@
 import React, { useState } from 'React'
-import { math } from 'tinycas/build/math/math'
+
 import { useCards } from 'app/hooks'
-import { CircularProgress } from '@material-ui/core'
+import { CircularProgress, Container } from '@material-ui/core'
+import GridContainer from 'components/Grid/GridContainer.js'
+import GridItem from 'components/Grid/GridItem.js'
 import SnackbarContent from 'components/Snackbar/SnackbarContent'
 import FlashCard from './FlashCard'
 import { Redirect } from 'react-router-dom'
+import NavBar from 'components/NavBar'
+import generateCard from './generateCard'
 
-function generateCard(card) {
-  // firestore returns objects with read-only properties
-  if (!card.variables) return card
 
-  let tempCard = {
-    enounce: card.enounce,
-    variables: {},
-    answer: card.answer,
-    explanation: card.explanation,
-    warning: card.warning,
-    theme: card.theme,
-    subject: card.subject,
-  }
-
-  Object.getOwnPropertyNames(card.variables).forEach((variable) => {
-    tempCard.variables[variable] = math(
-      card.variables[variable],
-    ).generate().string
-    tempCard.enounce = tempCard.enounce.replace(
-      variable,
-      '$$$$' + tempCard.variables[variable] + '$$$$',
-    )
-
-    tempCard.answer = tempCard.answer.replace(
-      variable,
-      tempCard.variables[variable],
-    )
-    if (tempCard.explanation) {
-      tempCard.explanation = tempCard.explanation.replace(
-        variable,
-        '$$$$' + tempCard.variables[variable] + '$$$$',
-      )
-    }
-  })
-  console.log(tempCard)
-  tempCard.answer = '$$' + math(tempCard.answer).generate().string + '$$'
-  tempCard.enounce = tempCard.enounce.replace(/\*\*(.*?)\*\*/g, '$$$$$1$$$$')
-  if (tempCard.explanation) {
-    tempCard.explanation = tempCard.explanation.replace(
-      /\*\*(.*?)\*\*/g,
-      '$$$$$1$$$$',
-    )
-  }
-  return tempCard
-}
 
 function DisplayFlashCards({ match }) {
   const theme = match.params.theme
   const subject = match.params.subject
-  const [cards, isLoading, isError] = useCards(subject, theme)
+  const domain = match.params.domain
+  const level = match.params.level
+  const [cards, isLoading, isError] = useCards(subject, domain, theme, level)
   const [card, setCard] = useState(0)
   const [IsFinished, setIsFinished] = useState(false)
 
   const handleNext = () => {
-    console.log('next')
     if (card < cards.length - 1) {
       setCard((c) => c + 1)
     } else {
@@ -79,16 +40,21 @@ function DisplayFlashCards({ match }) {
 
   if (IsFinished) return <Redirect to='/flash-cards/' />
 
-  return isLoading ? (
-    <CircularProgress />
-  ) : (
+  return (
     <div>
+      <NavBar />
+      <Container fixed>
       <h2> {match.params.theme}</h2>
       {cards.length > 0 && (
-        <FlashCard card={generateCard(cards[card])} onNext={handleNext} />
+        <GridContainer>
+          <GridItem xs={12} sm={12} md={8} lg={6}>
+            <FlashCard card={generateCard(cards[card])} onNext={handleNext} />
+
+            <p style={{ color: 'white' }}>.</p>
+          </GridItem>
+        </GridContainer>
       )}
-      <p />
-      <p style={{ color: 'white' }}>.</p>
+      </Container>
     </div>
   )
 }

@@ -1,5 +1,6 @@
 import firebase from 'firebase/app'
 import 'firebase/firestore'
+import { card } from 'assets/jss/main-jss'
 
 const firebaseConfig = {
   apiKey: 'AIzaSyAMnIlAk2yqGItw5EfTCLqj2SdJF6Q5620',
@@ -40,7 +41,7 @@ function fetchAssessments(user, type) {
     docs.forEach((doc) => {
       result.push(doc.data())
     })
-   
+
     return result
   })
 }
@@ -66,46 +67,215 @@ function fetchStudents(user) {
     })
 }
 
-function fetchCards(subject, theme) {
+function fetchCards(subject, domain, theme, level) {
   const cards = []
+  const filters = [
+    ['subject', subject],
+    ['domain', domain],
+    ['theme', theme],
+    ['level', level],
+  ]
+  let request = db.collection('FlashCards')
+  for (let i = 0; i < filters.length; i++) {
+    if (filters[i][1]) {
+      request = request.where(filters[i][0], '==', filters[i][1])
+    } else {
+      break
+    }
+  }
 
-
-  return db
-    .collection('FlashCards')
-    .where('theme', '==', theme)
-    .where('subject', '==', subject)
+  request = request
     .get()
     .then((docs) => {
       docs.forEach((doc) => {
-        cards.push(doc.data())
+        cards.push({ ...doc.data(), id: doc.id })
+      })
+      cards.sort((a, b) => {
+        if (a.title < b.title) return -1
+        if (a.title > b.title) return 1
+        return 0
       })
       return cards
     })
+    .catch((error) =>
+      console.error('Error while fetching cards : ', error.message),
+    )
+
+  return request
 }
 
-function fetchCardsThemes(subject) {
+function listenCards(subject, domain, theme, level, onChange) {
+  let cards = []
+  const filters = [
+    ['subject', subject],
+    ['domain', domain],
+    ['theme', theme],
+    ['level', level],
+  ]
+  let request = db.collection('FlashCards')
+  for (let i = 0; i < filters.length; i++) {
+    if (filters[i][1]) {
+      request = request.where(filters[i][0], '==', filters[i][1])
+    } else {
+      break
+    }
+  }
+
+  request = request.onSnapshot(
+    (docs) => {
+      cards = []
+      docs.forEach((doc) => {
+        cards.push({ ...doc.data(), id: doc.id })
+      })
+      cards.sort((a, b) => {
+        if (a.title < b.title) return -1
+        if (a.title > b.title) return 1
+        return 0
+      })
+      onChange(cards)
+    },
+    (error) => console.error('Error while listening cards : ', error.message),
+  )
+
+  return request
+}
+
+function fetchCardsLevels(subject, domain) {
+  const levelCards = []
 
   return db
+    .collection('FlashCards')
+    .where('subject', '==', subject)
+    .where('domain', '==', domain)
+    .get()
+    .then((docs) => {
+      docs.forEach((doc) => {
+        const data = doc.data()
+        const { level, theme, grade } = data
+        const levelCard = levelCards.find(
+          (card) =>
+            card.theme === theme &&
+            card.subject === subject &&
+            card.domain === domain,
+        )
+        if (levelCard) {
+          levelCard.levels[grade] = levelCard.levels[grade].includes(level)
+            ? levelCard.levels[grade]
+            : levelCard.levels[grade].concat(level).sort((a, b) => a - b)
+        } else {
+          levelCards.push({
+            subject,
+            domain,
+            theme,
+            levels: { [grade]: [level] },
+          })
+        }
+      })
+      return levelCards
+    })
+    .catch((error) =>
+      console.error('Error while fetching cardsLevels : ', error.message),
+    )
+}
+
+function fetchGrades() {
+  return db
     .collection('Globals')
-    .doc('cards-themes')
+    .doc('structure')
     .get()
     .then((doc) => {
-      
-      return doc.data()[subject]
+      if (doc.exists) {
+        return doc.data().grades
+      } else {
+        console.error("document doesn't exist")
+        return []
+      }
     })
+    .catch((error) =>
+      console.error('Error while fetching grades : ', error.message),
+    )
 }
 
 function fetchSubjects() {
-
+  const subjects = []
   return db
     .collection('Globals')
-    .doc('subjects')
+    .doc('curriculum')
+    .collection('Subjects')
     .get()
-    .then((doc) => {
-      
-      return doc.data().list
+    .then((docs) => {
+      docs.forEach((doc) => subjects.push(doc.data().label))
+      return subjects
     })
+    .catch((error) =>
+      console.error('Error while fetching subjects : ', error.message),
+    )
 }
 
-export { fetchAssessments, fetchStudents, fetchCards, fetchCardsThemes, fetchSubjects }
+function fetchDomains(subject) {
+  const domains = []
+  return db
+    .collection('Globals')
+    .doc('curriculum')
+    .collection('Domains')
+    .where('subject', '==', subject)
+    .get()
+    .then((docs) => {
+      docs.forEach((doc) => domains.push(doc.data().label))
+      return domains
+    })
+    .catch((error) =>
+      console.error('Error while fetching domains : ', error.message),
+    )
+}
+
+function fetchThemes(subject, domain) {
+  const themes = []
+  return db
+    .collection('Globals')
+    .doc('curriculum')
+    .collection('Themes')
+    .where('subject', '==', subject)
+    .where('domain', '==', domain)
+    .get()
+    .then((docs) => {
+      docs.forEach((doc) => themes.push({ ...doc.data(), id: doc.id }))
+      return themes
+    })
+    .catch((error) =>
+      console.error('Error while fetching themes : ', error.message),
+    )
+}
+
+function saveCard(card) {
+  
+  if (card.id) {
+    const { id, ...rest } = card
+    return db
+      .collection('FlashCards')
+      .doc(id)
+      .set(rest)
+      .catch((error) =>
+        console.error(`Error while saving card n° ${id}`, error.message),
+      )
+  } else
+    return db
+      .collection('FlashCards')
+      .doc()
+      .set(card)
+      .catch((error) => console.error(`Error while saving card`, error.message))
+}
+
+export {
+  listenCards,
+  saveCard,
+  fetchAssessments,
+  fetchStudents,
+  fetchCards,
+  fetchSubjects,
+  fetchDomains,
+  fetchThemes,
+  fetchGrades,
+  fetchCardsLevels,
+}
 export default db

@@ -13,12 +13,14 @@ import {
   fetchUser,
   logoutFailure,
 } from './authSlice'
-import { selectConnected } from './authSlice'
+import { selectIsLoggedIn } from './authSlice'
+import {RiLoginBoxLine} from 'react-icons/ri'
+import {RiLogoutBoxRLine} from 'react-icons/ri'
 
 export default function AuthButton() {
   const [auth2, setAuth2] = useState()
   const dispatch = useDispatch()
-  const connected = useSelector(selectConnected)
+  const isLoggedIn = useSelector(selectIsLoggedIn)
   const [loaded, error] = useScript('https://apis.google.com/js/api.js')
   const ClientId =
     '702572178697-3pdjj0caro5u0ttpft17ppc0fnlmol1p.apps.googleusercontent.com'
@@ -125,9 +127,15 @@ export default function AuthButton() {
     }
   }, [loaded, handleLoginSuccess])
 
-  return connected ? (
+  if (!auth2) return null
+
+  return isLoggedIn ? (
     <Button
+   
       color='success'
+      justIcon
+      round
+      disabled={!loaded}
       onClick={() => {
         dispatch(logoutRequest())
         auth2.signOut().then(
@@ -141,10 +149,13 @@ export default function AuthButton() {
         });
       }}
     >
-      Logout
+      <RiLogoutBoxRLine/>
     </Button>
   ) : (
     <Button
+    disabled={!auth2}
+    justIcon
+    round
       color='danger'
       onClick={() => {
         dispatch(loginRequest())
@@ -157,7 +168,7 @@ export default function AuthButton() {
         )
       }}
     >
-      Login
+      <RiLoginBoxLine/>
     </Button>
   )
 }

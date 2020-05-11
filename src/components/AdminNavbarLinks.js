@@ -299,23 +299,27 @@ export default function HeaderLinks(props) {
       </div>
       {maintenanceMode ? (
         <Button
+          justIcon
+          round
           color='danger'
           size='sm'
           onClick={() => {
             dispatch(trigerMaintenanceMode())
           }}
         >
-          <BuildIcon/>
+          <BuildIcon />
         </Button>
       ) : (
         <Button
+          justIcon
+          round
           color='success'
           size='sm'
           onClick={() => {
             dispatch(trigerMaintenanceMode())
           }}
         >
-          <BuildIcon/>
+          <BuildIcon />
         </Button>
       )}
     </div>

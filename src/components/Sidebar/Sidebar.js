@@ -1,5 +1,5 @@
 /*eslint-disable*/
-import React from 'react'
+import React, { useState, useRef } from 'react'
 import PropTypes from 'prop-types'
 // javascript plugin used to create scrollbars on windows
 import PerfectScrollbar from 'perfect-scrollbar'
@@ -15,6 +15,7 @@ import ListItemText from '@material-ui/core/ListItemText'
 import Hidden from '@material-ui/core/Hidden'
 
 import Icon from '@material-ui/core/Icon'
+import logo from 'assets/img/gidouille.svg'
 
 // core components
 import AdminNavbarLinks from 'components/Navbars/AdminNavbarLinks.js'
@@ -22,24 +23,23 @@ import AdminNavbarLinks from 'components/Navbars/AdminNavbarLinks.js'
 import sidebarStyle from 'assets/jss/components/sidebarStyle.js'
 
 import avatar from 'assets/img/faces/avatar.jpg'
+import { useSelector } from 'react-redux'
+import { selectUser } from 'features/auth/authSlice'
+import GidouilleIcon from 'assets/Icons/GidouilleIcon'
 
-class Sidebar extends React.Component {
-  constructor(props) {
-    super(props)
-    this.state = {
-      openAvatar: false,
-      miniActive: true,
-    }
-  }
+function Sidebar(props) {
+  const [openAvatar, setOpenAvatar] = useState(false)
+  const [miniActive, setMiniActive] = useState(true)
+  const user = useSelector(selectUser)
 
   // verifies if routeName is the one active (in browser input)
-  activeRoute = (routeName) => {
+  const activeRoute = (routeName) => {
     return window.location.href.indexOf(routeName) > -1 ? 'active' : ''
   }
 
   // this function creates the links and collapses that appear in the sidebar (left menu)
-  createLinks = (routes) => {
-    const { classes, color, rtlActive } = this.props
+  const createLinks = (routes) => {
+    const { classes, color, rtlActive } = props
     return routes.map((prop, key) => {
       if (prop.redirect) {
         return null
@@ -49,16 +49,15 @@ class Sidebar extends React.Component {
         classes.itemLink +
         ' ' +
         cx({
-          [' ' + classes[color]]: this.activeRoute(prop.path),
+          [' ' + classes[color]]: activeRoute(prop.path),
         })
       const itemText =
         classes.itemText +
         ' ' +
         cx({
-          [classes.itemTextMini]:
-            this.props.miniActive && this.state.miniActive,
+          [classes.itemTextMini]: props.miniActive && miniActive,
           [classes.itemTextMiniRTL]:
-            rtlActive && this.props.miniActive && this.state.miniActive,
+            rtlActive && props.miniActive && miniActive,
           [classes.itemTextRTL]: rtlActive,
         })
 
@@ -74,7 +73,7 @@ class Sidebar extends React.Component {
           className={cx({ [classes.item]: prop.icon !== undefined })}
         >
           <NavLink
-            to={prop.layout + prop.path}
+            to={'/dashboard' + prop.path}
             className={cx({ [navLinkClasses]: prop.icon !== undefined })}
           >
             {prop.icon !== undefined ? (
@@ -96,168 +95,154 @@ class Sidebar extends React.Component {
       )
     })
   }
-  render() {
-    const {
-      classes,
-      logo,
 
-      logoText,
-      routes,
-      bgColor,
-      rtlActive,
-    } = this.props
-    const itemText =
-      classes.itemText +
-      ' ' +
-      cx({
-        [classes.itemTextMini]: this.props.miniActive && this.state.miniActive,
-        [classes.itemTextMiniRTL]:
-          rtlActive && this.props.miniActive && this.state.miniActive,
-        [classes.itemTextRTL]: rtlActive,
-      })
+  const { classes, logoText, routes, bgColor, rtlActive } = props
+  const itemText =
+    classes.itemText +
+    ' ' +
+    cx({
+      [classes.itemTextMini]: props.miniActive && miniActive,
+      [classes.itemTextMiniRTL]: rtlActive && props.miniActive && miniActive,
+      [classes.itemTextRTL]: rtlActive,
+    })
 
-    const userWrapperClass =
-      classes.user +
-      ' ' +
-      cx({
-        [classes.whiteAfter]: bgColor === 'white',
-      })
-    const caret =
-      classes.caret +
-      ' ' +
-      cx({
-        [classes.caretRTL]: rtlActive,
-      })
+  const userWrapperClass =
+    classes.user +
+    ' ' +
+    cx({
+      [classes.whiteAfter]: bgColor === 'white',
+    })
+  const caret =
+    classes.caret +
+    ' ' +
+    cx({
+      [classes.caretRTL]: rtlActive,
+    })
 
-    const photo =
-      classes.photo +
-      ' ' +
-      cx({
-        [classes.photoRTL]: rtlActive,
-      })
-    var user = (
-      <div className={userWrapperClass}>
-        <div className={photo}>
-          <img src={avatar} className={classes.avatarImg} alt='...' />
-        </div>
-        <List className={classes.list}>
-          <ListItem className={classes.item + ' ' + classes.userItem}>
-            <NavLink
-              to={'#'}
-              className={classes.itemLink + ' ' + classes.userCollapseButton}
-              onClick={() => {}}
-            >
-              <ListItemText
-                primary={rtlActive ? 'تانيا أندرو' : 'Tania Andrew'}
-                disableTypography={true}
-                className={itemText + ' ' + classes.userItemText}
-              />
-            </NavLink>
-          </ListItem>
-        </List>
+  const photo =
+    classes.photo +
+    ' ' +
+    cx({
+      [classes.photoRTL]: rtlActive,
+    })
+  const userInfo = (
+    <div className={userWrapperClass}>
+      <div className={photo}>
+        <img
+          alt={user.name}
+          src={user.imageUrl}
+          className={classes.avatarImg}
+        />
       </div>
-    )
-    var links = <List className={classes.list}>{this.createLinks(routes)}</List>
-
-    const logoNormal =
-      classes.logoNormal +
-      ' ' +
-      cx({
-        [classes.logoNormalSidebarMini]:
-          this.props.miniActive && this.state.miniActive,
-        [classes.logoNormalSidebarMiniRTL]:
-          rtlActive && this.props.miniActive && this.state.miniActive,
-        [classes.logoNormalRTL]: rtlActive,
-      })
-    const logoMini =
-      classes.logoMini +
-      ' ' +
-      cx({
-        [classes.logoMiniRTL]: rtlActive,
-      })
-    const logoClasses =
-      classes.logo +
-      ' ' +
-      cx({
-        [classes.whiteAfter]: bgColor === 'white',
-      })
-    var brand = (
-      <div className={logoClasses}>
-        <a
-          href='https://www.creative-tim.com?ref=mdpr-sidebar'
-          target='_blank'
-          className={logoMini}
-        >
-          <img src={logo} alt='logo' className={classes.img} />
-        </a>
-        <a
-          href='https://www.creative-tim.com?ref=mdpr-sidebar'
-          target='_blank'
-          className={logoNormal}
-        >
-          {logoText}
-        </a>
-      </div>
-    )
-    const drawerPaper =
-      classes.drawerPaper +
-      ' ' +
-      cx({
-        [classes.drawerPaperMini]:
-          this.props.miniActive && this.state.miniActive,
-        [classes.drawerPaperRTL]: rtlActive,
-      })
-    const sidebarWrapper =
-      classes.sidebarWrapper +
-      ' ' +
-      cx({
-        [classes.drawerPaperMini]:
-          this.props.miniActive && this.state.miniActive,
-      })
-    return (
-      <div>
-        <Hidden mdUp implementation='css'>
-          <Drawer
-            variant='temporary'
-            anchor={rtlActive ? 'left' : 'right'}
-            open={this.props.open}
-            classes={{
-              paper: drawerPaper + ' ' + classes[bgColor + 'Background'],
-            }}
-            onClose={this.props.handleDrawerToggle}
-            ModalProps={{
-              keepMounted: true, // Better open performance on mobile.
-            }}
+      <List className={classes.list}>
+        <ListItem className={classes.item + ' ' + classes.userItem}>
+          <NavLink
+            to={'#'}
+            className={classes.itemLink + ' ' + classes.userCollapseButton}
+            onClick={() => {}}
           >
-            {brand}
-            <div className={sidebarWrapper}>
-              {user}
-              <AdminNavbarLinks rtlActive={rtlActive} />
-              {links}
-            </div>
-          </Drawer>
-        </Hidden>
-        <Hidden smDown implementation='css'>
-          <Drawer
-            onMouseOver={() => this.setState({ miniActive: false })}
-            onMouseOut={() => this.setState({ miniActive: true })}
-            anchor={rtlActive ? 'right' : 'left'}
-            variant='permanent'
-            open
-            classes={{
-              paper: drawerPaper + ' ' + classes[bgColor + 'Background'],
-            }}
-          >
-            {brand}
-            <div className={sidebarWrapper}>
-              {user}
-              {links}
-            </div>
-          </Drawer>
-        </Hidden>
+            <ListItemText
+              primary={
+                rtlActive
+                  ? 'تانيا أندرو'
+                  : `${user.familyName} ${user.givenName}`
+              }
+              disableTypography={true}
+              className={itemText + ' ' + classes.userItemText}
+            />
+          </NavLink>
+        </ListItem>
+      </List>
+    </div>
+  )
+  var links = <List className={classes.list}>{createLinks(routes)}</List>
+
+  const logoNormal =
+    classes.logoNormal +
+    ' ' +
+    cx({
+      [classes.logoNormalSidebarMini]: props.miniActive && miniActive,
+      [classes.logoNormalSidebarMiniRTL]:
+        rtlActive && props.miniActive && miniActive,
+      [classes.logoNormalRTL]: rtlActive,
+    })
+  const logoMini =
+    classes.logoMini +
+    ' ' +
+    cx({
+      [classes.logoMiniRTL]: rtlActive,
+    })
+  const logoClasses =
+    classes.logo +
+    ' ' +
+    cx({
+      [classes.whiteAfter]: bgColor === 'white',
+    })
+  var brand = (
+    <div className={logoClasses}>
+      <div className={logoMini}>
+      <GidouilleIcon color='#00acc1' size='2em' />
       </div>
-    )
-  }
+      <div className={logoNormal}>{logoText}</div>
+    </div>
+  )
+  const drawerPaper =
+    classes.drawerPaper +
+    ' ' +
+    cx({
+      [classes.drawerPaperMini]: props.miniActive && miniActive,
+      [classes.drawerPaperRTL]: rtlActive,
+    })
+  const sidebarWrapper =
+    classes.sidebarWrapper +
+    ' ' +
+    cx({
+      [classes.drawerPaperMini]: props.miniActive && miniActive,
+    })
+
+  return (
+    <div>
+      <Hidden mdUp implementation='css'>
+        <Drawer
+          variant='temporary'
+          anchor={rtlActive ? 'left' : 'right'}
+          open={props.open}
+          classes={{
+            paper: drawerPaper + ' ' + classes[bgColor + 'Background'],
+          }}
+          onClose={props.handleDrawerToggle}
+          ModalProps={{
+            keepMounted: true, // Better open performance on mobile.
+          }}
+        >
+          {brand}
+          <div className={sidebarWrapper}>
+            {userInfo}
+            <AdminNavbarLinks rtlActive={rtlActive} />
+            {links}
+          </div>
+        </Drawer>
+      </Hidden>
+      <Hidden smDown implementation='css'>
+        <Drawer
+          onMouseOver={() => setMiniActive(false)}
+          onMouseOut={() => setMiniActive(true)}
+          anchor={rtlActive ? 'right' : 'left'}
+          variant='permanent'
+          open
+          classes={{
+            paper: drawerPaper + ' ' + classes[bgColor + 'Background'],
+          }}
+        >
+          {brand}
+          <div className={sidebarWrapper}>
+            {userInfo}
+            {links}
+          </div>
+        </Drawer>
+      </Hidden>
+    </div>
+  )
 }
 
 Sidebar.defaultProps = {

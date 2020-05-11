@@ -1,24 +1,15 @@
-import React, { useState, useEffect } from 'react'
-
-import { Switch, Route, Link } from 'react-router-dom'
+import React, { useState, useCallback } from 'react'
+import { Switch, Route } from 'react-router-dom'
 import DisplayFlashCards from './DisplayFlashCards'
-import { useSubjects, useCardsThemes } from 'app/hooks'
-import {
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  makeStyles,
-  CircularProgress,
-  List,
-  ListItem,
-} from '@material-ui/core'
-import styles from 'assets/jss/customSelectStyle.js'
+import NavBar from 'components/NavBar'
 import { useSelector } from 'react-redux'
 import { selectMaintenanceMode } from 'features/maintenance/maintenanceSlice'
-
-const useStyles = makeStyles(styles)
-
+import SelectScope from './SelectScope'
+import SelectGrade from './SelectGrade'
+import ThemesList from './ThemesList'
+import { Container } from '@material-ui/core'
+import GridContainer from 'components/Grid/GridContainer'
+import GridItem from 'components/Grid/GridItem'
 
 function FlashCards({ match }) {
   const maintenance = useSelector(selectMaintenanceMode)
@@ -29,91 +20,41 @@ function FlashCards({ match }) {
       {/* <Route path={`${match.url}/edit`} component='EditFlashCards' />
     <Route path={`${match.url}/:id`} component='DisplayFlashCards' /> */}
       <Route exact path={`${match.url}`} render={() => <Home />} />
-      <Route path={`${match.url}/theme/:subject/:theme`} component={DisplayFlashCards} />
+      {/* <Route path={`${match.url}/edit`} component={EditFlashCards} />
+      <Route path={`${match.url}/create`} component={CreateFlashCards} /> */}
+      <Route
+        path={`${match.url}/:subject/:domain/:theme/:level`}
+        component={DisplayFlashCards}
+      />
       <Route render={() => <h1>Erreur</h1>} />
     </Switch>
   )
 }
 
 function Home() {
-  const classeNames = useStyles()
-  const [subjects, isLoadingSubjects, isErrorSubjects] = useSubjects()
   const [subject, setSubject] = useState('')
-  const [themes, isLoadingThemes, isErrorThemes] = useCardsThemes(subject)
+  const [domain, setDomain] = useState('')
+  const [grade, setGrade] = useState('')
 
-  const handleChangeSubject = (evt) => setSubject(evt.target.value)
- 
-
-  useEffect(() => {
-    if (subjects.length > 0) setSubject(subjects[0])
-  }, [subjects])
+  const handleSelectScope = useCallback(({ subject, domain }) => {
+    setDomain(domain)
+    setSubject(subject)
+  },[]) 
 
   return (
     <>
+      <NavBar />
+      <Container fixed>
+      <GridContainer>
+      <GridItem xs={12} sm={12} md={3} lg={3}>
       <h2>Flash Cards</h2>
-      {isLoadingSubjects ? (
-        <CircularProgress />
-      ) : (
-        <FormControl fullWidth className={classeNames.selectFormControl}>
-          <InputLabel
-            htmlFor='simple-select'
-            className={classeNames.selectLabel}
-          >
-            Matière
-          </InputLabel>
-          <Select
-            MenuProps={{
-              className: classeNames.selectMenu,
-            }}
-            classes={{
-              select: classeNames.select,
-            }}
-            value={subject}
-            onChange={handleChangeSubject}
-            inputProps={{
-              name: 'choose-subject',
-              id: 'choose-subject',
-            }}
-          >
-            <MenuItem
-              key={'select-title'}
-              disabled
-              classes={{
-                root: classeNames.selectMenuItem,
-              }}
-            >
-              Classe
-            </MenuItem>
-            {subjects.map((subject, index) => (
-              <MenuItem
-                key={subject}
-                classes={{
-                  root: classeNames.selectMenuItem,
-                  selected: classeNames.selectMenuItemSelected,
-                }}
-                value={subject}
-              >
-                {subject}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-      )}
-      {subjects.length > 0 &&
-        themes &&
-        (isLoadingThemes ? (
-          <CircularProgress />
-        ) : (
-          <List>
-            {themes.map((theme, index) => (
-              <ListItem key={index} button disableRipple onClick={() => {}}>
-                <Link to={encodeURI(`/flash-cards/theme/${subject}/${theme}`)}>
-                  <h4> {theme}</h4>
-                </Link>
-              </ListItem>
-            ))}
-          </List>
-        ))}
+
+      <SelectScope onChange={handleSelectScope} />
+      <SelectGrade onChange={setGrade} />
+      <ThemesList subject={subject} domain={domain} grade={grade} />
+      </GridItem>
+    </GridContainer>
+      </Container>
     </>
   )
 }
