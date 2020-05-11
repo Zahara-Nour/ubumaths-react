@@ -70,9 +70,9 @@ export const {
 } = authSlice.actions
 
 const selectUser = (state) => state.auth.user
-const selectConnected = (state) => state.auth.connected
+const selectIsLoggedIn = (state) => state.auth.connected
 
-export { selectUser, selectConnected }
+export { selectUser, selectIsLoggedIn }
 
 function fetchUser({ id }) {
   return function (dispatch) {

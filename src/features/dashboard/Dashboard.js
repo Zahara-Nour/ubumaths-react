@@ -10,7 +10,7 @@ import AdminNavbar from 'components/AdminNavbar.js'
 import Footer from 'components/Footer/Footer.js'
 import Sidebar from 'components/Sidebar/Sidebar.js'
 
-import routes from 'routes.js'
+import routes from 'app/routes.js'
 
 import styles from 'assets/jss/layouts/adminStyle.js'
 
@@ -22,7 +22,8 @@ export default function Dashboard(props) {
   const [mobileOpen, setMobileOpen] = React.useState(false)
   const [miniActive, setMiniActive] = React.useState(false)
 
-  const logo = require('assets/img/logo-white.svg')
+  
+  
   // styles
   const classes = useStyles()
   const mainPanelClasses =
@@ -52,9 +53,7 @@ export default function Dashboard(props) {
   const getActiveRoute = (routes) => {
     let activeRoute = 'DashBoard'
     for (let i = 0; i < routes.length; i++) {
-      if (
-        window.location.href.indexOf(routes[i].layout + routes[i].path) !== -1
-      ) {
+      if (window.location.href.indexOf(props.match.path + routes[i].path) !== -1) {
         return routes[i].name
       }
     }
@@ -62,9 +61,10 @@ export default function Dashboard(props) {
   }
   const getRoutes = (routes) => {
     return routes.map((prop, key) => {
+
       return (
         <Route
-          path={prop.layout + prop.path}
+          path={props.match.path+prop.path}
           component={prop.component}
           key={key}
         />
@@ -84,8 +84,7 @@ export default function Dashboard(props) {
     <div className={classes.wrapper}>
       <Sidebar
         routes={routes}
-        logoText={'Creative Tim'}
-        logo={logo}
+        logoText={'Ubu Maths'}
         handleDrawerToggle={handleDrawerToggle}
         open={mobileOpen}
         color={'blue'}
@@ -104,7 +103,15 @@ export default function Dashboard(props) {
 
         <div className={classes.content}>
           <div className={classes.container}>
-            <Switch>{getRoutes(routes)}</Switch>
+            <Switch>
+              <Route
+                exact
+                path={`${props.match.url}`}
+                render={() => <Home />}
+              />
+              {getRoutes(routes)}
+              <Route render={() => <h1>Erreur</h1>} />
+            </Switch>
           </div>
         </div>
 
@@ -112,4 +119,8 @@ export default function Dashboard(props) {
       </div>
     </div>
   )
+}
+
+function Home() {
+  return <h2>dashboard</h2>
 }

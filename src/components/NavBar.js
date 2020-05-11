@@ -1,13 +1,12 @@
 import React, { useState } from 'react'
 import PropTypes from 'prop-types'
 import { NavLink } from 'react-router-dom'
+import cx from 'classnames'
+import './NavBar.css'
 
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-
-import { faInfinity } from '@fortawesome/free-solid-svg-icons'
 import AuthButton from '../features/auth/AuthButton'
 import { useSelector } from 'react-redux'
-import { selectConnected, selectUser } from 'features/auth/authSlice'
+import { selectIsLoggedIn, selectUser } from 'features/auth/authSlice'
 
 // @material-ui/core components
 import { makeStyles } from '@material-ui/core/styles'
@@ -22,13 +21,16 @@ import ListItemText from '@material-ui/core/ListItemText'
 // @material-ui/icons
 import Dashboard from '@material-ui/icons/Dashboard'
 import Menu from '@material-ui/icons/Menu'
-import Fingerprint from '@material-ui/icons/Fingerprint'
+import { BsCardText } from 'react-icons/bs'
+import { AiOutlineCalculator } from 'react-icons/ai'
 
 // core components
 import Button from 'components/CustomButtons/Button'
 
 import styles from 'assets/jss/components/navbarStyle.js'
 import { ListItemAvatar, Avatar } from '@material-ui/core'
+import GidouilleIcon from 'assets/Icons/GidouilleIcon'
+import { selectIsLoading } from 'features/db/dbSlice'
 
 const useStyles = makeStyles(styles)
 
@@ -43,7 +45,8 @@ const flexContainerRow = {
   alignItems: 'center',
 }
 function NavBar(props) {
-  const connected = useSelector(selectConnected)
+  const IsLoading = useSelector(selectIsLoading)
+  const isLoggedIn = useSelector(selectIsLoggedIn)
   const user = useSelector(selectUser)
   const [open, setOpen] = useState(false)
   const handleDrawerToggle = () => setOpen(!open)
@@ -52,19 +55,19 @@ function NavBar(props) {
 
   const listLeft = (
     <>
-      {/* <ListItem className={classes.listItem}>
-        <NavLink to={'/games'} className={classes.navLink}>
+     { isLoggedIn && <ListItem className={classes.listItem}>
+        <NavLink to={'/dashboard'} className={classes.navLink}>
           <Dashboard className={classes.listItemIcon} />
           <ListItemText
-            primary={'Jeux'}
+            primary={'Dashboard'}
             disableTypography={true}
             className={classes.listItemText}
           />
         </NavLink>
-      </ListItem> */}
+      </ListItem>}
       <ListItem className={classes.listItem}>
         <NavLink to={'/calcul-mental'} className={classes.navLink}>
-          <Dashboard className={classes.listItemIcon} />
+          <AiOutlineCalculator className={classes.listItemIcon} />
           <ListItemText
             primary={'Calcul mental'}
             disableTypography={true}
@@ -74,7 +77,7 @@ function NavBar(props) {
       </ListItem>
       <ListItem className={classes.listItem}>
         <NavLink to={'/flash-cards'} className={classes.navLink}>
-          <Dashboard className={classes.listItemIcon} />
+          <BsCardText className={classes.listItemIcon} />
           <ListItemText
             primary={'Flash Cards'}
             disableTypography={true}
@@ -97,16 +100,20 @@ function NavBar(props) {
           />
         </NavLink>
       </ListItem> */}
-      {connected && (
+      {isLoggedIn && (
         <ListItem className={classes.listItem}>
           <ListItemAvatar>
             <Avatar alt={user.name} src={user.imageUrl} />
           </ListItemAvatar>
         </ListItem>
       )}
-      {connected && (
+      {isLoggedIn && (
         <ListItem className={classes.listItem}>
-          <ListItemText primary={user.name} className={classes.listItemText} style={{marginLeft:'10px' , marginRight:'10px'}} />
+          <ListItemText
+            primary={user.name}
+            className={classes.listItemText}
+            style={{ marginLeft: '10px', marginRight: '10px' }}
+          />
         </ListItem>
       )}
 
@@ -120,7 +127,9 @@ function NavBar(props) {
     <AppBar position='static' className={classes.appBar}>
       <Toolbar disableGutters className={classes.container}>
         <NavLink to={'/'} className={classes.navLink}>
-          <FontAwesomeIcon icon={faInfinity} />
+          {/* <FontAwesomeIcon icon={faInfinity} /> */}
+          {/* <Gidouille/> */}
+          <GidouilleIcon className={cx({ 'logo-spin': IsLoading })} />
         </NavLink>
 
         <Hidden smDown>
@@ -152,13 +161,8 @@ function NavBar(props) {
               keepMounted: true, // Better open performance on mobile.
             }}
           >
-            <List style={flexContainerColumn}>
-              {listLeft}
-            </List>
-            <List
-              
-              style={{ ...flexContainerColumn, alignItems: 'center' }}
-            >
+            <List style={flexContainerColumn}>{listLeft}</List>
+            <List style={{ ...flexContainerColumn, alignItems: 'center' }}>
               {listRight}
             </List>
           </Drawer>
