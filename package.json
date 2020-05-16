@@ -24,9 +24,12 @@
     "react-big-calendar": "^0.24.4",
     "react-bootstrap-sweetalert": "^5.1.9",
     "react-chartist": "^0.14.3",
+    "react-clipboard.js": "^2.0.16",
     "react-datetime": "^2.16.3",
     "react-dom": "^16.13.1",
+    "react-error-boundary": "^2.2.1",
     "react-google-maps": "^9.4.5",
+    "react-icons": "^3.10.0",
     "react-jvectormap": "0.0.16",
     "react-redux": "^7.2.0",
     "react-router-dom": "^5.1.2",
@@ -61,7 +64,6 @@
     ]
   },
   "devDependencies": {
-    "node-sass": "^4.13.1",
-    "typescript": "^3.8.3"
+    "node-sass": "^4.13.1"
   }
 }

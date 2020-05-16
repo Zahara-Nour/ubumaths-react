@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { selectUser } from 'features/auth/authSlice'
-import { shuffle } from 'app/utils'
+
 import {
   fetchDb,
   FETCH_ASSESSMENTS,
@@ -114,7 +114,7 @@ const useStudents = () => {
       }
       setIsLoading(false)
     }
-    fetchData()
+     fetchData()
   }, [dispatch, user])
   return [data, isLoading, isError]
 }
@@ -271,7 +271,6 @@ const useThemes = (subject, domain, grade) => {
       setIsLoading(false)
     }
     if (!themes && subject && domain) {
-      console.log('fetch')
       fetchData()
     } else if (themes) {
       setData(themes)

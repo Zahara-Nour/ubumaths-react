@@ -6,7 +6,7 @@ import { Switch, Route } from 'react-router-dom'
 
 import Mental from 'features/mental/Mental'
 import Dashboard from 'features/dashboard/Dashboard'
-import { selectUser, selectIsLoggedIn } from 'features/auth/authSlice'
+import { selectIsLoggedIn } from 'features/auth/authSlice'
 import { useSelector } from 'react-redux'
 import Home from 'components/Home'
 import NavBar from 'components/NavBar'

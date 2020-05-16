@@ -1,7 +1,6 @@
 import React, { useEffect, useCallback, useState } from 'react'
 
 import { makeStyles } from '@material-ui/core/styles'
-import Icon from '@material-ui/core/Icon'
 // @material-ui icons
 import NavigateNextIcon from '@material-ui/icons/NavigateNext'
 import RefreshIcon from '@material-ui/icons/Refresh'
