@@ -159,6 +159,10 @@ const behanceColor = '#1769ff'
 const dribbbleColor = '#ea4c89'
 const redditColor = '#ff4500'
 const instagramColor = "#125688";
+const firebaseColor = '#FFCA28'
+const reactColor = '#61DBFB'
+
+
 
 
 
@@ -469,6 +473,7 @@ export {
   twitterColor,
   facebookColor,
   googleColor,
+  reactColor,
   linkedinColor,
   pinterestColor,
   youtubeColor,
@@ -476,6 +481,7 @@ export {
   behanceColor,
   dribbbleColor,
   redditColor,
+  firebaseColor,
   instagramColor,
   primaryBoxShadow,
   infoBoxShadow,

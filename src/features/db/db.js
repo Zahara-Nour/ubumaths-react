@@ -1,5 +1,7 @@
 import firebase from 'firebase/app'
 import 'firebase/firestore'
+import { saveAs } from 'file-saver'
+import { lexicoSort } from 'app/utils'
 
 const firebaseConfig = {
   apiKey: 'AIzaSyAMnIlAk2yqGItw5EfTCLqj2SdJF6Q5620',
@@ -14,6 +16,70 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig)
 
 const db = firebase.firestore()
+
+const fetchCollection = ({ path, filters }) => {
+  path = [...path]
+  let documents = []
+  let request = db.collection(path.shift())
+  while (path.length > 0) {
+    request = request.doc(path.shift()).collection(path.shift())
+  }
+
+  filters.forEach((filter) => {
+    const name = Object.getOwnPropertyNames(filter)[0]
+    const value = filter[name]
+    request = request.where(name, '==', value)
+  })
+
+  request = request
+    .get()
+    .then((docs) => {
+      docs.forEach((doc) => {
+        documents.push({ ...doc.data(), id: doc.id })
+      })
+      documents.sort((a, b) => lexicoSort(a.name, b.name))
+      return documents
+    })
+    .catch((error) =>
+      console.error(`Error while fetching ${path.join('/')} : `, error.message),
+    )
+
+  return request
+}
+
+const listenCollection = ({ path, filters, onChange }) => {
+  path = [...path]
+  let request = db.collection(path.shift())
+  while (path.length > 0) {
+    request = request.doc(path.shift()).collection(path.shift())
+  }
+
+  filters.forEach((filter) => {
+    const name = Object.getOwnPropertyNames(filter)[0]
+    const value = filter[name]
+    request = request.where(name, '==', value)
+  })
+  console.log('listenCollection')
+ 
+    const unsubscribe = request.onSnapshot(
+      (docs) => {
+        const documents = []
+        docs.forEach((doc) => {
+          documents.push({ ...doc.data(), id: doc.id })
+        })
+        documents.sort((a, b) => lexicoSort(a.name, b.name))
+        console.log('documents', documents)
+        onChange(documents)
+      },
+      (error) =>
+        console.error(
+          `Error while listening ${path.join('/')} : `,
+          error.message,
+        ),
+    )
+  return unsubscribe
+}
+
 
 function fetchAssessments(user, type) {
   let collectionRef
@@ -68,12 +134,13 @@ function fetchStudents(user) {
 
 function fetchCards(subject, domain, theme, level) {
   const cards = []
-  const filters = [
-    ['subject', subject],
-    ['domain', domain],
-    ['theme', theme],
-    ['level', level],
-  ]
+  const filters = []
+
+  if (subject) filters.push(['subject', subject])
+  if (domain) filters.push(['domain', domain])
+  if (theme) filters.push(['theme', theme])
+  if (level) filters.push(['level', level])
+
   let request = db.collection('FlashCards')
   for (let i = 0; i < filters.length; i++) {
     if (filters[i][1]) {
@@ -247,7 +314,6 @@ function fetchThemes(subject, domain) {
 }
 
 function saveCard(card) {
-  
   if (card.id) {
     const { id, ...rest } = card
     return db
@@ -265,6 +331,31 @@ function saveCard(card) {
       .catch((error) => console.error(`Error while saving card`, error.message))
 }
 
+function saveToCollection({ path, document }) {
+  path = path.split('/')
+  const collection = path[path.length - 1]
+  let request = db.collection(path.shift())
+  while (path.length > 0) {
+    request = request.doc(path.shift()).collection(path.shift())
+  }
+  if (document.id) {
+    const { id, ...rest } = document
+    request = request
+      .doc(id)
+      .update(rest)
+      .then(() => `Document ${id} successfully updated in ${collection}`)
+  } else {
+    request = request
+      .doc()
+      .set(document)
+      .then(() => `Document  successfully added to ${collection}`)
+  }
+
+  return request.catch((error) =>
+    console.log(`Error while saving document in ${collection}`, error.message),
+  )
+}
+
 export {
   listenCards,
   saveCard,
@@ -276,5 +367,8 @@ export {
   fetchThemes,
   fetchGrades,
   fetchCardsLevels,
+  fetchCollection,
+  listenCollection,
+  saveToCollection,
 }
 export default db

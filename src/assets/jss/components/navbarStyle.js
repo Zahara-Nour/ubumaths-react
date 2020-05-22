@@ -17,12 +17,12 @@ import {
 } from 'assets/jss/main-jss.js'
 
 const pagesHeaderStyle = (theme) => ({
-  '@keyframes App-logo-spin': {
-    from: { rotate: '0deg' },
-    to: { rotate: '360deg' },
+  '@keyframes spin': {
+    from: { transform:'rotate(0deg)' },
+    to: { transform:'rotate(360deg)' },
   },
-  logo: {
-    animation: '$App-logo-spin infinite 20s linear',
+  gidouille: {
+    animation: '$spin infinite 2s linear',
   },
   appBar: {
     backgroundColor: 'transparent',

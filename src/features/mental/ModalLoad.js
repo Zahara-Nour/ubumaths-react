@@ -22,7 +22,7 @@ import {
   selectFetching,
   selectFetchError,
   fetchReset,
-  FETCH_ASSESSMENT,
+  FETCH_TYPES,
   selectSaved,
 } from 'features/db/dbSlice'
 import { loadBasket } from './mentalSlice'
@@ -67,11 +67,11 @@ function ModalLoad() {
 
   const radioOnChange = (evt) => setRadioValue(evt.target.value)
 
-  const fetched = useSelector(selectFetched(FETCH_ASSESSMENT))
+  const fetched = useSelector(selectFetched(FETCH_TYPES.FETCH_ASSESSMENT))
 
-  const fetching = useSelector(selectFetching(FETCH_ASSESSMENT))
+  const fetching = useSelector(selectFetching(FETCH_TYPES.FETCH_ASSESSMENT))
 
-  const fetchError = useSelector(selectFetchError(FETCH_ASSESSMENT))
+  const fetchError = useSelector(selectFetchError(FETCH_TYPES.FETCH_ASSESSMENT))
   const classes = useStyles()
   const user = useSelector(selectUser)
   const saved = useSelector(selectSaved)
@@ -93,7 +93,7 @@ function ModalLoad() {
         TransitionComponent={Transition}
         keepMounted
         onClose={() => {
-          dispatch(fetchReset({ type: FETCH_ASSESSMENT }))
+          dispatch(fetchReset({ type: FETCH_TYPES.FETCH_ASSESSMENT }))
           setModal(false)
         }}
         aria-labelledby='classic-modal-slide-title'
@@ -110,7 +110,7 @@ function ModalLoad() {
             key='close'
             aria-label='Close'
             onClick={() => {
-              dispatch(fetchReset({ type: FETCH_ASSESSMENT }))
+              dispatch(fetchReset({ type: FETCH_TYPES.FETCH_ASSESSMENT }))
               setModal(false)
             }}
           >
@@ -129,7 +129,7 @@ function ModalLoad() {
               close
               color='success'
               onClose={() => {
-                dispatch(fetchReset({ type: FETCH_ASSESSMENT }))
+                dispatch(fetchReset({ type: FETCH_TYPES.FETCH_ASSESSMENT }))
               }}
             />
           )}
@@ -138,7 +138,7 @@ function ModalLoad() {
               message={'Le chargement a échoué ! ' + fetchError}
               close
               color='danger'
-              onClose={() => dispatch(fetchReset({ type: FETCH_ASSESSMENT }))}
+              onClose={() => dispatch(fetchReset({ type: FETCH_TYPES.FETCH_ASSESSMENT }))}
             />
           )}
           {fetching === 'Assessment' && <CircularProgress />}
@@ -181,7 +181,7 @@ function ModalLoad() {
         <DialogActions className={classes.modalFooter}>
           <Button
             onClick={() => {
-              dispatch(fetchReset({ type: FETCH_ASSESSMENT }))
+              dispatch(fetchReset({ type: FETCH_TYPES.FETCH_ASSESSMENT }))
               setModal(false)
             }}
           >

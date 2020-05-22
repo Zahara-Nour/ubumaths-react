@@ -18,6 +18,13 @@ import {
 } from "assets/jss/main-jss.js";
 
 const sidebarStyle = theme => ({
+  '@keyframes spin': {
+    from: { transform:'rotate(0deg)' },
+    to: { transform:'rotate(360deg)' },
+  },
+  gidouille: {
+    animation: '$spin infinite 2s linear',
+  },
   drawerPaperRTL: {
     [theme.breakpoints.up("md")]: {
       left: "auto !important",

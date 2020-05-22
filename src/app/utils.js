@@ -23,5 +23,15 @@ const shuffle = function (array) {
   return array
 }
 
+const lexicoSort = (a, b) => {
+  if (a < b) return -1
+  if (a > b) return 1
+  return 0
+}
 
-export {shuffle}
+
+const compareArrays = (a,b) => {
+  if (a.length !== b.length) return false
+  return a.every((element,i) => element===b[i])
+}
+export {shuffle, lexicoSort, compareArrays}

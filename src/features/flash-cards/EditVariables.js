@@ -2,7 +2,7 @@ import React from 'react'
 import GridContainer from 'components/Grid/GridContainer'
 import GridItem from 'components/Grid/GridItem'
 import Button from 'components/CustomButtons/Button'
-import CardTextInput from './CardTextInput'
+import TextInput from '../../components/TextInput'
 
 import DeleteIcon from '@material-ui/icons/Delete'
 
@@ -27,7 +27,7 @@ function EditVariables({ variables, onAdd, onChange, onDelete }) {
         <GridContainer key={name} alignItems='center'>
           <GridItem xs={3}>{name}</GridItem>
           <GridItem xs={6}>
-            <CardTextInput
+            <TextInput
               label={name}
               text={variables[name]}
               onChange={(evt) => onChange(name)(evt.target.value)}

@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import PropTypes from 'prop-types'
 import { NavLink } from 'react-router-dom'
 import cx from 'classnames'
-import './NavBar.css'
+// import './NavBar.css'
 
 import AuthButton from '../features/auth/AuthButton'
 import { useSelector } from 'react-redux'
@@ -30,7 +30,7 @@ import Button from 'components/CustomButtons/Button'
 import styles from 'assets/jss/components/navbarStyle.js'
 import { ListItemAvatar, Avatar } from '@material-ui/core'
 import GidouilleIcon from 'assets/Icons/GidouilleIcon'
-import { selectIsLoading } from 'features/db/dbSlice'
+import { selectIsLoadingOrSaving } from 'features/db/dbSlice'
 
 const useStyles = makeStyles(styles)
 
@@ -45,7 +45,7 @@ const flexContainerRow = {
   alignItems: 'center',
 }
 function NavBar(props) {
-  const IsLoading = useSelector(selectIsLoading)
+  const IsLoadingOrSaving = useSelector(selectIsLoadingOrSaving)
   const isLoggedIn = useSelector(selectIsLoggedIn)
   const user = useSelector(selectUser)
   const [open, setOpen] = useState(false)
@@ -129,7 +129,7 @@ function NavBar(props) {
         <NavLink to={'/'} className={classes.navLink}>
           {/* <FontAwesomeIcon icon={faInfinity} /> */}
           {/* <Gidouille/> */}
-          <GidouilleIcon className={cx({ 'logo-spin': IsLoading })} />
+          <GidouilleIcon className={cx({ [classes.gidouille]: IsLoadingOrSaving })} />
         </NavLink>
 
         <Hidden smDown>

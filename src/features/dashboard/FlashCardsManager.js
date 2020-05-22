@@ -1,6 +1,6 @@
 import React from 'React'
 import { Switch, Route } from 'react-router-dom'
-import Edit from 'features/flash-cards/Edit'
+import Edit from 'features/dashboard/Edit'
 
 
 function FlashCardsManager({match}) {

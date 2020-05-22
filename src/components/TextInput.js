@@ -1,7 +1,7 @@
 import React from 'react'
 import CustomInput from 'components/CustomInput/CustomInput'
 
-function CardTextInput({label, text, onChange}) {
+function TextInput({label, text, onChange}) {
 
     return (
         <CustomInput
@@ -20,4 +20,4 @@ function CardTextInput({label, text, onChange}) {
 
 }
 
-export default CardTextInput
+export default TextInput

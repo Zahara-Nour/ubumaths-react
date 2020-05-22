@@ -1,18 +1,11 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useMemo, useCallback } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { selectUser } from 'features/auth/authSlice'
 
 import {
   fetchDb,
-  FETCH_ASSESSMENTS,
   fetchSuccess,
   fetchFailure,
-  FETCH_STUDENTS,
-  FETCH_CARDS,
-  FETCH_THEMES,
-  FETCH_DOMAINS,
-  FETCH_SUBJECTS,
-  FETCH_GRADES,
   selectSubjects,
   setSubjects,
   selectThemes,
@@ -22,8 +15,14 @@ import {
   selectGrades,
   setGrades,
   selectCardslevels,
-  FETCH_CARDS_LEVELS,
   addCardsLevels,
+  setCountries,
+  setCities,
+  setSchools,
+  FETCH_TYPES,
+  setCollection,
+  selectCollection,
+  update,
 } from 'features/db/dbSlice'
 import {
   fetchAssessments,
@@ -35,7 +34,15 @@ import {
   fetchGrades,
   fetchCardsLevels,
   listenCards,
-} from './db'
+  listenCountries,
+  fetchCountries,
+  fetchCities,
+  fetchSchools,
+  fetchCollection,
+  listenCollection,
+} from '../features/db/db'
+import { faCompressArrowsAlt } from '@fortawesome/free-solid-svg-icons'
+import { compareArrays } from './utils'
 
 function useInterval(callback, delay) {
   const savedCallback = useRef()
@@ -73,12 +80,18 @@ const useAssessments = ({ type, saved }) => {
       setIsError(false)
       setIsLoading(true)
 
-      const key = dispatch(fetchDb({ type: FETCH_ASSESSMENTS }))
+      const key = dispatch(fetchDb({ type: FETCH_TYPES.FETCH_ASSESSMENTS }))
       try {
         const result = await fetchAssessments(user, type)
 
         setData(result)
-        dispatch(fetchSuccess({ data: result, type: FETCH_ASSESSMENTS, key }))
+        dispatch(
+          fetchSuccess({
+            data: result,
+            type: FETCH_TYPES.FETCH_ASSESSMENTS,
+            key,
+          }),
+        )
       } catch (error) {
         setIsError(error.message)
         dispatch(fetchFailure({ error: error.message, key }))
@@ -103,18 +116,20 @@ const useStudents = () => {
       setIsError(false)
       setIsLoading(true)
 
-      const key = dispatch(fetchDb({ type: FETCH_STUDENTS }))
+      const key = dispatch(fetchDb({ type: FETCH_TYPES.FETCH_STUDENTS }))
       try {
         const result = await fetchStudents(user)
         setData(result)
-        dispatch(fetchSuccess({ data: result, type: FETCH_STUDENTS, key }))
+        dispatch(
+          fetchSuccess({ data: result, type: FETCH_TYPES.FETCH_STUDENTS, key }),
+        )
       } catch (error) {
         setIsError(error.message)
         dispatch(fetchFailure({ error: error.message, key }))
       }
       setIsLoading(false)
     }
-     fetchData()
+    fetchData()
   }, [dispatch, user])
   return [data, isLoading, isError]
 }
@@ -132,12 +147,14 @@ const useGrades = () => {
       setIsError(false)
       setIsLoading(true)
 
-      const key = dispatch(fetchDb({ type: FETCH_GRADES }))
+      const key = dispatch(fetchDb({ type: FETCH_TYPES.FETCH_GRADES }))
       try {
         const result = await fetchGrades()
         if (result.length !== 0) {
           setData(result)
-          dispatch(fetchSuccess({ data: result, type: FETCH_GRADES, key }))
+          dispatch(
+            fetchSuccess({ data: result, type: FETCH_TYPES.FETCH_GRADES, key }),
+          )
           dispatch(setGrades({ grades: result }))
         } else {
           throw new Error('Grades list is empty')
@@ -171,11 +188,13 @@ const useCards = ({ subject, domain, theme, level, listen }) => {
       setIsError(false)
       setIsLoading(true)
 
-      const key = dispatch(fetchDb({ type: FETCH_CARDS }))
+      const key = dispatch(fetchDb({ type: FETCH_TYPES.FETCH_CARDS }))
       try {
         let result = await fetchCards(subject, domain, theme, level)
         setData(result)
-        dispatch(fetchSuccess({ data: result, type: FETCH_CARDS, key }))
+        dispatch(
+          fetchSuccess({ data: result, type: FETCH_TYPES.FETCH_CARDS, key }),
+        )
         setFetched(true)
       } catch (error) {
         setIsError(error.message)
@@ -187,16 +206,142 @@ const useCards = ({ subject, domain, theme, level, listen }) => {
   }, [dispatch, theme, domain, subject, level])
 
   useEffect(() => {
-    
-    let unsubscribe=()=>{}
+    let unsubscribe = () => {}
     if (fetched && listen) {
-      console.log('listen')
       unsubscribe = listenCards(subject, domain, theme, level, setData)
     }
     return unsubscribe
   }, [subject, domain, theme, level, fetched, listen])
 
   return [data, isLoading, isError]
+}
+
+const useFilters = (filters) => {
+  const namesRef = useRef([])
+  const valuesRef = useRef([])
+  const filtersRef = useRef([])
+  const names = filters.map((filter) => Object.getOwnPropertyNames(filter)[0])
+  const values = filters.map((filter, index) => filter[names[index]])
+
+  if (
+    compareArrays(names, namesRef.current) &&
+    compareArrays(values, valuesRef.current)
+  ) {
+    // console.log('current filters', filtersRef.current)
+    return filtersRef.current
+  } else {
+    namesRef.current = names
+    valuesRef.current = values
+    filtersRef.current = filters
+    // console.log('new filters', filters)
+    return filters
+  }
+}
+
+const useCollection = ({ path, filters = [], listen = false }) => {
+  path = useMemo(() => path.split('/'), [path])
+  const collection = useMemo(() => path[path.length - 1], [path])
+  const type = useMemo(() => FETCH_TYPES['FETCH_' + collection.toUpperCase()], [
+    collection,
+  ])
+
+  
+  filters = useFilters(filters)
+  const documents = useSelector(selectCollection(collection, filters))
+
+  const dispatch = useDispatch()
+  const [isLoading, setIsLoading] = useState(false)
+  const [isError, setIsError] = useState(false)
+
+  const handleUpdate = useCallback(
+    (key, type) => {
+      let init = true
+      return (data) => {
+        if (init) {
+          init = false
+          dispatch(fetchSuccess({ data, type, key }))
+          setIsLoading(false)
+        } else {
+          dispatch(update({ data, type }))
+        }
+        dispatch(setCollection({ collection, documents: data, filters }))
+      }
+    },
+    [collection, dispatch, filters],
+  )
+
+
+// console.log('*** collection', collection)
+//   useWhyDidYouUpdate(collection, { path, filters, handleUpdate, listen, dispatch })
+//   console.log('documents', documents)
+//   console.log('***********')
+
+  useEffect(() => {
+    let unsubscribe = () => {}
+
+    if (
+      listen &&
+      !(
+        filters &&
+        filters.find((filter) => !filter[Object.getOwnPropertyNames(filter)[0]])
+      )
+    ) {
+      console.log('listen')
+
+      setIsError(false)
+      setIsLoading(true)
+      const key = dispatch(fetchDb({ type }))
+      try {
+        return listenCollection({
+          path,
+          filters,
+          onChange: handleUpdate(key, type),
+        })
+      } catch (error) {
+        setIsError(error.message)
+        setIsLoading(false)
+        dispatch(fetchFailure({ error: error.message, key }))
+      }
+      unsubscribe = listenCollection({ path, filters, onChange: handleUpdate })
+    }
+    return unsubscribe
+  }, [path, filters, handleUpdate, listen, dispatch, type])
+
+  useEffect(() => {
+    // console.log('useEffect collecttion')
+    const fetchData = async () => {
+      setIsError(false)
+      setIsLoading(true)
+
+      const key = dispatch(fetchDb({ type }))
+      try {
+        const result = await fetchCollection({ path, filters })
+        // console.log(`result ${collection}`, result)
+        dispatch(fetchSuccess({ data: result, type, key }))
+        dispatch(setCollection({ collection, documents: result, filters }))
+        setIsLoading(false)
+      } catch (error) {
+        console.error(`error fetching ${collection}`, error.message)
+        setIsError(error.message)
+        dispatch(fetchFailure({ error: error.message, key }))
+        setIsLoading(false)
+      }
+    }
+
+    if (
+      !listen &&
+      !documents &&
+      !(
+        filters &&
+        filters.find((filter) => !filter[Object.getOwnPropertyNames(filter)[0]])
+      )
+    ) {
+      console.log(`fetch ${collection}`)
+      fetchData()
+    }
+  }, [dispatch, documents, filters, listen, path, collection, type])
+
+  return [documents, isLoading, isError]
 }
 
 const useCardsLevels = (subject, domain) => {
@@ -212,10 +357,16 @@ const useCardsLevels = (subject, domain) => {
       setIsError(false)
       setIsLoading(true)
 
-      const key = dispatch(fetchDb({ type: FETCH_CARDS_LEVELS }))
+      const key = dispatch(fetchDb({ type: FETCH_TYPES.FETCH_CARDS_LEVELS }))
       try {
         const result = await fetchCardsLevels(subject, domain)
-        dispatch(fetchSuccess({ data: result, type: FETCH_CARDS_LEVELS, key }))
+        dispatch(
+          fetchSuccess({
+            data: result,
+            type: FETCH_TYPES.FETCH_CARDS_LEVELS,
+            key,
+          }),
+        )
         if (result.length > 0) {
           setData(result)
           dispatch(addCardsLevels({ cardsLevels: result }))
@@ -255,14 +406,16 @@ const useThemes = (subject, domain, grade) => {
     const fetchData = async () => {
       setIsError(false)
       setIsLoading(true)
-      const key = dispatch(fetchDb({ type: FETCH_THEMES }))
+      const key = dispatch(fetchDb({ type: FETCH_TYPES.FETCH_THEMES }))
       try {
         let result = await fetchThemes(subject, domain)
         if (result.length > 0 && grade) {
           result = result.filter((theme) => theme.grade === grade)
         }
         setData(result)
-        dispatch(fetchSuccess({ data: result, type: FETCH_THEMES, key }))
+        dispatch(
+          fetchSuccess({ data: result, type: FETCH_TYPES.FETCH_THEMES, key }),
+        )
         dispatch(setThemes({ themes: result, subject, domain }))
       } catch (error) {
         setIsError(error.message)
@@ -293,11 +446,13 @@ const useDomains = (subject) => {
       setIsError(false)
       setIsLoading(true)
 
-      const key = dispatch(fetchDb({ type: FETCH_DOMAINS }))
+      const key = dispatch(fetchDb({ type: FETCH_TYPES.FETCH_DOMAINS }))
       try {
         const result = await fetchDomains(subject)
         setData(result)
-        dispatch(fetchSuccess({ data: result, type: FETCH_DOMAINS, key }))
+        dispatch(
+          fetchSuccess({ data: result, type: FETCH_TYPES.FETCH_DOMAINS, key }),
+        )
         dispatch(setDomains({ domains: result, subject }))
       } catch (error) {
         setIsError(error.message)
@@ -328,11 +483,13 @@ const useSubjects = () => {
       setIsError(false)
       setIsLoading(true)
 
-      const key = dispatch(fetchDb({ type: FETCH_SUBJECTS }))
+      const key = dispatch(fetchDb({ type: FETCH_TYPES.FETCH_SUBJECTS }))
       try {
         const result = await fetchSubjects()
         setData(result)
-        dispatch(fetchSuccess({ data: result, type: FETCH_SUBJECTS, key }))
+        dispatch(
+          fetchSuccess({ data: result, type: FETCH_TYPES.FETCH_SUBJECTS, key }),
+        )
         dispatch(setSubjects({ subjects: result }))
       } catch (error) {
         setIsError(error.message)
@@ -415,6 +572,40 @@ function useScript(src) {
   return [state.loaded, state.error]
 }
 
+function useWhyDidYouUpdate(name,props) {
+  // Get a mutable ref object where we can store props ...
+  // ... for comparison next time this hook runs.
+  const previousProps = useRef()
+
+  useEffect(() => {
+    if (previousProps.current) {
+      // Get all keys from previous and current props
+      const allKeys = Object.keys({ ...previousProps.current, ...props })
+      // Use this object to keep track of changed props
+      const changesObj = {}
+      // Iterate through keys
+      allKeys.forEach((key) => {
+        // If previous is different from current
+        if (previousProps.current[key] !== props[key]) {
+          // Add to changesObj
+          changesObj[key] = {
+            from: previousProps.current[key],
+            to: props[key],
+          }
+        }
+      })
+
+      // If changesObj not empty then output to console
+      if (Object.keys(changesObj).length) {
+        console.log('[why-did-you-update]', name, changesObj)
+      }
+    }
+
+    // Finally update previousProps with current props for next hook call
+    previousProps.current = props
+  })
+}
+
 export {
   useSubjects,
   useThemes,
@@ -426,4 +617,7 @@ export {
   useCards,
   useGrades,
   useCardsLevels,
+  useCollection,
+  useFilters,
+  useWhyDidYouUpdate,
 }

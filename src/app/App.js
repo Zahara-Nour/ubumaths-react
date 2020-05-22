@@ -13,15 +13,19 @@ import NavBar from 'components/NavBar'
 import FlashCards from 'features/flash-cards/FlashCards'
 import DbCache from './DbCache'
 import Error404 from 'components/Error404'
+import Technical from 'components/Technical'
+
 
 function App() {
   return (
-    <div>
-      <DbCache />
+    <>
+      {/* <DbCache /> */}
+
       <Switch>
         <PrivateRoute path='/dashboard' component={Dashboard} />
         <Route path='/calcul-mental' component={Mental} />
         <Route path='/flash-cards' component={FlashCards} />
+        <Route path='/technical-info' component={Technical} />
         <Route exact path='/' component={Home} />
         <Route
           render={() => (
@@ -32,7 +36,7 @@ function App() {
           )}
         />
       </Switch>
-    </div>
+    </>
   )
 }
 

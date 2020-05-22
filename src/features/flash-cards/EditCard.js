@@ -17,8 +17,8 @@ import GridItem from 'components/Grid/GridItem'
 
 import { useGrades, useSubjects, useDomains, useThemes } from 'app/hooks'
 import emptyCard from './emptyCard'
-import CardTextInput from './CardTextInput'
-import CardNmuberInput from './CardNumberInput'
+import TextInput from '../../components/TextInput'
+import NumberInput from '../../components/NumberInput'
 import EditVariables from './EditVariables'
 import EditButtons from './EditButtons'
 import { CircularProgress } from '@material-ui/core'
@@ -149,15 +149,15 @@ function EditCard({ card, onNewCard, onSave, saving }) {
         </CardIcon>
       </CardHeader>
       <CardBody>
-        <CardTextInput label='Titre' text={title} onChange={setTitle} />
-        <CardTextInput label='Enoncé' text={enounce} onChange={setEnounce} />
-        <CardTextInput label='Réponse' text={answer} onChange={setAnswer} />
-        <CardTextInput
+        <TextInput label='Titre' text={title} onChange={setTitle} />
+        <TextInput label='Enoncé' text={enounce} onChange={setEnounce} />
+        <TextInput label='Réponse' text={answer} onChange={setAnswer} />
+        <TextInput
           label='Explication'
           text={explanation}
           onChange={setExplanation}
         />
-        <CardTextInput
+        <TextInput
           label='Avertissement'
           text={warning}
           onChange={setWarning}
@@ -172,7 +172,7 @@ function EditCard({ card, onNewCard, onSave, saving }) {
             )}
           </GridItem>
           <GridItem xs={6}>
-            <CardNmuberInput label='Niveau' value={level} onChange={setLevel} />
+            <NumberInput label='Niveau' value={level} onChange={setLevel} />
           </GridItem>
         </GridContainer>
 

@@ -7,6 +7,7 @@ import {
   whiteColor,
   blackColor,
   grayColor,
+  reactColor,
   hexToRgb
 } from "assets/jss/main-jss.js";
 const timelineStyle = theme => ({
@@ -117,6 +118,27 @@ const timelineStyle = theme => ({
       hexToRgb(primaryColor[0]) +
       ", 0.4)"
   },
+  white: {
+    backgroundColor: whiteColor,
+    boxShadow:
+      "0 4px 20px 0px rgba(" +
+      hexToRgb(blackColor) +
+      ", 0.14), 0 7px 10px -5px rgba(" +
+      hexToRgb(primaryColor[0]) +
+      ", 0.4)"
+  },
+  react: {
+    backgroundColor: reactColor,
+    boxShadow:
+      "0 4px 20px 0px rgba(" +
+      hexToRgb(blackColor) +
+      ", 0.14), 0 7px 10px -5px rgba(" +
+      hexToRgb(primaryColor[0]) +
+      ", 0.4)"
+  },
+
+
+
   badgeIcon: {
     width: "24px",
     height: "51px"

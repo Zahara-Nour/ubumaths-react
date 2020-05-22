@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react'
-import db from 'app/db'
+import db from 'features/db/db'
 import styles from 'assets/jss/views/extendedTablesStyle.js'
 import { makeStyles } from '@material-ui/core/styles'
 

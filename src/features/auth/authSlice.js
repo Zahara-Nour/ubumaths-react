@@ -3,16 +3,16 @@ import {
   fetchRequest,
   fetchSuccess,
   fetchFailure,
-  FETCH_USER,
+  FETCH_TYPES,
 } from 'features/db/dbSlice'
 
-import db from '../../app/db'
+import db from '../db/db'
 
 const initialState = {
   connecting: false,
   disconnecting: false,
   connected: false,
-  user: { role: 'guest' },
+  user: { role: [] },
   // user: {
   //   email: 'd.lejolly@voltairedoha.com',
   //   role: 'teacher',
@@ -71,18 +71,29 @@ export const {
 
 const selectUser = (state) => state.auth.user
 const selectIsLoggedIn = (state) => state.auth.connected
+const selectIsAdmin = (state) => state.auth.user.includes['admin']
+const selectIsStudent = (state) => state.auth.user.includes['student']
+const selectIsTeacher = (state) => state.auth.user.includes['teacher']
+const selectIsContributor = (state) => state.auth.user.includes['contributor']
 
-export { selectUser, selectIsLoggedIn }
+export {
+  selectUser,
+  selectIsLoggedIn,
+  selectIsAdmin,
+  selectIsContributor,
+  selectIsStudent,
+  selectIsTeacher,
+}
 
 function fetchUser({ id }) {
   return function (dispatch) {
-    dispatch(fetchRequest({ type: FETCH_USER }))
+    dispatch(fetchRequest({ type: FETCH_TYPES.FETCH_USER }))
     db.collection('Users')
       .doc(id)
       .get()
       .then(function (doc) {
         if (doc.exists) {
-          dispatch(fetchSuccess({ data: doc.data(), type: FETCH_USER }))
+          dispatch(fetchSuccess({ data: doc.data(), type: FETCH_TYPES.FETCH_USER }))
 
           dispatch(updateUser({ user: doc.data() }))
         } else {
@@ -90,7 +101,7 @@ function fetchUser({ id }) {
           dispatch(
             fetchFailure({
               error: 'Aucun document trouvé ',
-              type: FETCH_USER,
+              type: FETCH_TYPES.FETCH_USER,
             }),
           )
           console.log('No such document!')
@@ -104,6 +115,5 @@ function fetchUser({ id }) {
 }
 
 export { fetchUser }
-
 
 export default authSlice.reducer

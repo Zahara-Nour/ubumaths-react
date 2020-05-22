@@ -1,27 +1,27 @@
-import React, { useState, useCallback } from 'react'
+import React, { useState } from 'react'
 import { Switch, Route } from 'react-router-dom'
 import DisplayFlashCards from './DisplayFlashCards'
 import NavBar from 'components/NavBar'
 import { useSelector } from 'react-redux'
 import { selectMaintenanceMode } from 'features/maintenance/maintenanceSlice'
-import SelectScope from './SelectScope'
 import SelectGrade from './SelectGrade'
 import ThemesList from './ThemesList'
-import { Container } from '@material-ui/core'
+import { Container, CircularProgress } from '@material-ui/core'
 import GridContainer from 'components/Grid/GridContainer'
 import GridItem from 'components/Grid/GridItem'
+import Maintenance from 'components/Maintenance'
+import SelectSubject from './SelectSubject'
+import SelectDomain from './SelectDomain'
+import SelectTheme from './SelectTheme'
+import { useSubjects, useDomains, useThemes, useGrades } from 'app/hooks'
 
 function FlashCards({ match }) {
   const maintenance = useSelector(selectMaintenanceMode)
-  if (maintenance) return <h2>Le site est en cours de maintenance</h2>
+  if (maintenance) return <Maintenance />
+
   return (
     <Switch>
-      {/* <Route path={`${match.url}/select`} component={SelectFlashCards}/> */}
-      {/* <Route path={`${match.url}/edit`} component='EditFlashCards' />
-    <Route path={`${match.url}/:id`} component='DisplayFlashCards' /> */}
       <Route exact path={`${match.url}`} render={() => <Home />} />
-      {/* <Route path={`${match.url}/edit`} component={EditFlashCards} />
-      <Route path={`${match.url}/create`} component={CreateFlashCards} /> */}
       <Route
         path={`${match.url}/:subject/:domain/:theme/:level`}
         component={DisplayFlashCards}
@@ -32,28 +32,46 @@ function FlashCards({ match }) {
 }
 
 function Home() {
-  const [subject, setSubject] = useState('')
-  const [domain, setDomain] = useState('')
+  const [grades, , isErrorGrades] = useGrades()
   const [grade, setGrade] = useState('')
-
-  const handleSelectScope = useCallback(({ subject, domain }) => {
-    setDomain(domain)
-    setSubject(subject)
-  },[]) 
+  const [subjects, , isErrorSubjects] = useSubjects()
+  const [subject, setSubject] = useState('')
+  const [domains, , isErrorDomains] = useDomains(subject)
+  const [domain, setDomain] = useState('')
+  const [themes, , isErrorThemes] = useThemes(subject, domain)
+  const [theme, setTheme] = useState('')
 
   return (
     <>
       <NavBar />
       <Container fixed>
-      <GridContainer>
-      <GridItem xs={12} sm={12} md={3} lg={3}>
-      <h2>Flash Cards</h2>
+        <GridContainer>
+          <GridItem xs={12} sm={12} md={3} lg={3}>
+            <h2>Flash Cards</h2>
 
-      <SelectScope onChange={handleSelectScope} />
-      <SelectGrade onChange={setGrade} />
-      <ThemesList subject={subject} domain={domain} grade={grade} />
-      </GridItem>
-    </GridContainer>
+            
+              <SelectSubject
+                subjects={subjects}
+                subject={subject}
+                onChange={setSubject}
+              />
+            
+            
+              <SelectDomain
+                domains={domains}
+                domain={domain}
+                onChange={setDomain}
+              />
+            
+           
+              <SelectTheme themes={themes} theme={theme} onChange={setTheme} />
+           
+            
+              <SelectGrade grades={grades} grade={grade} onChange={setGrade} />
+          
+            <ThemesList subject={subject} domain={domain} grade={grade} />
+          </GridItem>
+        </GridContainer>
       </Container>
     </>
   )

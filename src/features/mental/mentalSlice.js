@@ -1,6 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit'
 import { math } from 'tinycas/build/math/math'
-import db from '../../app/db'
+import db from '../db/db'
 import {
   saveRequest,
   saveSuccess,
@@ -8,11 +8,7 @@ import {
   fetchRequest,
   fetchSuccess,
   fetchFailure,
-  FETCH_CLASSES,
-  FETCH_ASSIGNED_ASSESSMENTS,
-  FETCH_ASSESSMENT,
-  FETCH_ASSESSMENTS,
-  FETCH_STUDENTS,
+  FETCH_TYPES
 } from 'features/db/dbSlice'
 
 function generateQuestions(questions) {
@@ -139,7 +135,7 @@ function saveMarkAsync(userId, assessmentId, mark) {
           .set(data)
           .then(() => console.log('Note enregisrée pour ' + userId))
       })
-      .catch((error) => console.error('Error writing document: ', error))
+      .catch((error) => console.error('Error writing document: ', error.message))
   }
 }
 
@@ -176,7 +172,7 @@ function saveBasket(user, questions, title, type, oneShot, students) {
             console.log('Evaluation ' + title + ' enregisrée pour ' + student),
           )
           .catch((error) => {
-            console.error('Error writing document: ', error)
+            console.error('Error writing document: ', error.message)
             throw error
           })
       })
@@ -193,7 +189,7 @@ function saveBasket(user, questions, title, type, oneShot, students) {
         .then(dispatch(saveSuccess()))
         .catch(function (error) {
           dispatch(saveFailure({ error }))
-          console.error('Error writing document: ', error)
+          console.error('Error writing document: ', error.message)
         })
     }
     saveAssessment()
@@ -219,7 +215,7 @@ function loadBasket(userId, id, type) {
         .collection('Assessments')
   }
   return function (dispatch) {
-    dispatch(fetchRequest({ type: FETCH_ASSESSMENT }))
+    dispatch(fetchRequest({ type: FETCH_TYPES.FETCH_ASSESSMENT }))
 
     return collectionRef
       .doc(id)
@@ -227,7 +223,7 @@ function loadBasket(userId, id, type) {
       .then(function (doc) {
         if (doc.exists) {
    
-          dispatch(fetchSuccess({ data: doc.data(), type: FETCH_ASSESSMENT }))
+          dispatch(fetchSuccess({ data: doc.data(), type: FETCH_TYPES.FETCH_ASSESSMENT }))
           dispatch(setBasket({ questions: doc.data().questions }))
           console.log('Document successfully loaded!')
         } else {
@@ -235,7 +231,7 @@ function loadBasket(userId, id, type) {
           dispatch(
             fetchFailure({
               error: 'Aucun document trouvé ',
-              type: FETCH_ASSESSMENT,
+              type: FETCH_TYPES.FETCH_ASSESSMENT,
             }),
           )
           console.log('No such document!')
@@ -250,7 +246,7 @@ function loadBasket(userId, id, type) {
 
 function loadAssignedAssessmentsAsync({ userId }) {
   return function (dispatch) {
-    dispatch(fetchRequest({ type: FETCH_ASSIGNED_ASSESSMENTS }))
+    dispatch(fetchRequest({ type: FETCH_TYPES.FETCH_ASSIGNED_ASSESSMENTS }))
     db.collection('Users')
       .doc(userId)
       .collection('assessments')
@@ -262,7 +258,7 @@ function loadAssignedAssessmentsAsync({ userId }) {
     
         })
         dispatch(
-          fetchSuccess({ data: datas, type: FETCH_ASSIGNED_ASSESSMENTS }),
+          fetchSuccess({ data: datas, type: FETCH_TYPES.FETCH_ASSIGNED_ASSESSMENTS }),
         )
       })
       .catch(function (error) {
@@ -276,14 +272,14 @@ function loadAssignedAssessmentsAsync({ userId }) {
 
 function fetchClasses(user) {
   return (dispatch) => {
-    dispatch(fetchRequest({ type: FETCH_CLASSES }))
+    dispatch(fetchRequest({ type: FETCH_TYPES.FETCH_CLASSES }))
     db.collection('Users')
       .doc(user.email)
       .get()
       .then((doc) => {
         if (doc.exists) {
           dispatch(
-            fetchSuccess({ data: doc.data().classes, type: FETCH_CLASSES }),
+            fetchSuccess({ data: doc.data().classes, type: FETCH_TYPES.FETCH_CLASSES }),
           )
         } else {
           dispatch(fetchFailure(`${user.email} doesn't exist`))

@@ -17,11 +17,6 @@ function ThemesList({ domain, subject, grade }) {
     grade,
   )
 
-  console.log('subject', subject)
-  console.log('domain', domain)
-  console.log('grade', grade)
-  console.log('themes', themes)
-
   const findLevels = (theme, grade) => {
     const found = cardsLevels.find(
       (card) =>
@@ -40,9 +35,8 @@ function ThemesList({ domain, subject, grade }) {
       : []
   }
 
-  return isLoadingThemes ? (
-    <CircularProgress />
-  ) : themes.length === 0 ? null : (
+  if (themes.length === 0) return null
+  return (
     <List>
       {themes.map((theme, index) => (
         <ListItem key={theme}>

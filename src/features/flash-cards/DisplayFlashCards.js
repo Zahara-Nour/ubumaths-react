@@ -1,4 +1,4 @@
-import React, { useState } from 'React'
+import React, { useState, useEffect } from 'React'
 
 import { useCards } from 'app/hooks'
 import { CircularProgress, Container } from '@material-ui/core'
@@ -9,6 +9,7 @@ import FlashCard from './FlashCard'
 import { Redirect } from 'react-router-dom'
 import NavBar from 'components/NavBar'
 import generateCard from './generateCard'
+import { shuffle } from 'app/utils'
 
 
 
@@ -16,10 +17,12 @@ function DisplayFlashCards({ match }) {
   const theme = match.params.theme
   const subject = match.params.subject
   const domain = match.params.domain
-  const level = match.params.level
-  const [cards, isLoading, isError] = useCards(subject, domain, theme, level)
+  const level = parseInt(match.params.level,10)
+  const [cards, , isError] = useCards({subject, domain, theme, level})
   const [card, setCard] = useState(0)
   const [IsFinished, setIsFinished] = useState(false)
+  const [shuffledCards, setShuffleCards]= useState([])
+  
 
   const handleNext = () => {
     if (card < cards.length - 1) {
@@ -28,6 +31,10 @@ function DisplayFlashCards({ match }) {
       setIsFinished(true)
     }
   }
+
+  useEffect(()=> {
+    setShuffleCards(shuffle([...cards]))
+  }, [cards])
 
   if (isError)
     return (
@@ -48,8 +55,11 @@ function DisplayFlashCards({ match }) {
       {cards.length > 0 && (
         <GridContainer>
           <GridItem xs={12} sm={12} md={8} lg={6}>
-            <FlashCard card={generateCard(cards[card])} onNext={handleNext} />
+            <FlashCard card={generateCard(shuffledCards[card])} onNext={handleNext} />
+            
 
+            <p style={{ color: 'white' }}>.</p>
+            <p style={{ color: 'white' }}>.</p>
             <p style={{ color: 'white' }}>.</p>
           </GridItem>
         </GridContainer>

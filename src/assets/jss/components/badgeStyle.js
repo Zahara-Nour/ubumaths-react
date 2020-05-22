@@ -6,7 +6,9 @@ import {
   infoColor,
   roseColor,
   grayColor,
-  whiteColor
+  whiteColor,
+  firebaseColor,
+  reactColor
 } from "assets/jss/main-jss.js";
 
 const badgeStyle = {
@@ -42,6 +44,12 @@ const badgeStyle = {
   },
   gray: {
     backgroundColor: grayColor[0]
+  },
+  firebase: {
+    backgroundColor: firebaseColor
+  },
+  react: {
+    backgroundColor: reactColor
   }
 };
 

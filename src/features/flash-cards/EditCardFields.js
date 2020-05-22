@@ -1,18 +1,9 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 // @material-ui/core components
 import { makeStyles } from '@material-ui/core/styles'
-import FormLabel from '@material-ui/core/FormLabel'
-import FormControlLabel from '@material-ui/core/FormControlLabel'
-import InputAdornment from '@material-ui/core/InputAdornment'
-import Radio from '@material-ui/core/Radio'
-import Checkbox from '@material-ui/core/Checkbox'
 
 // @material-ui/icons
-import MailOutline from '@material-ui/icons/MailOutline'
-import Check from '@material-ui/icons/Check'
-import Clear from '@material-ui/icons/Clear'
-import Contacts from '@material-ui/icons/Contacts'
-import FiberManualRecord from '@material-ui/icons/FiberManualRecord'
+
 
 // core components
 
@@ -20,7 +11,6 @@ import CustomInput from 'components/CustomInput/CustomInput.js'
 import Button from 'components/CustomButtons/Button.js'
 import Card from 'components/Card/Card.js'
 import CardHeader from 'components/Card/CardHeader.js'
-import CardText from 'components/Card/CardText.js'
 import CardIcon from 'components/Card/CardIcon.js'
 import CardBody from 'components/Card/CardBody.js'
 import EditIcon from '@material-ui/icons/Edit'
@@ -30,9 +20,8 @@ import styles from 'assets/jss/views/regularFormsStyle'
 import SelectGrade from './SelectGrade'
 import GridContainer from 'components/Grid/GridContainer'
 import GridItem from 'components/Grid/GridItem'
-import Snackbar from 'components/Snackbar/Snackbar'
 import SnackbarContent from 'components/Snackbar/SnackbarContent'
-import { saveCard } from 'app/db'
+import { saveCard } from 'features/db/db'
 
 const useStyles = makeStyles(styles)
 
@@ -126,18 +115,6 @@ function EditCardFields({ card, onNewCard }) {
   useEffect(() => {
     if (card) {
       const { variables, ...rest } = card
-
-      // const tempCard = {
-      //   enounce: card.enounce,
-      //   variables: { ...card.variables },
-      //   answer: card.answer,
-      //   explanation: card.explanation,
-      //   warning: card.warning,
-      //   theme: card.theme,
-      //   subject: card.subject,
-      //   subject: card.subject,
-      //   id: card.id,
-      // }
       const tempCard = {
         ...rest,
         variables: { ...card.variables },
@@ -156,7 +133,6 @@ function EditCardFields({ card, onNewCard }) {
     onNewCard(newCard)
   }, [newCard, onNewCard])
 
-  console.log('variables', variables)
 
   return card ? (
     <Card>

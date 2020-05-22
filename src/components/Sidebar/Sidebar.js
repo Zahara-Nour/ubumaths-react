@@ -26,11 +26,14 @@ import avatar from 'assets/img/faces/avatar.jpg'
 import { useSelector } from 'react-redux'
 import { selectUser } from 'features/auth/authSlice'
 import GidouilleIcon from 'assets/Icons/GidouilleIcon'
+import { selectIsLoadingOrSaving } from 'features/db/dbSlice'
+
 
 function Sidebar(props) {
   const [openAvatar, setOpenAvatar] = useState(false)
   const [miniActive, setMiniActive] = useState(true)
   const user = useSelector(selectUser)
+  const IsLoadingOrSaving = useSelector(selectIsLoadingOrSaving)
 
   // verifies if routeName is the one active (in browser input)
   const activeRoute = (routeName) => {
@@ -178,10 +181,11 @@ function Sidebar(props) {
     cx({
       [classes.whiteAfter]: bgColor === 'white',
     })
+
   var brand = (
     <div className={logoClasses}>
       <div className={logoMini}>
-      <GidouilleIcon color='#00acc1' size='2em' />
+      <GidouilleIcon color='#00acc1' size='2em' className={cx({ [classes.gidouille]: IsLoadingOrSaving })} />
       </div>
       <div className={logoNormal}>{logoText}</div>
     </div>
