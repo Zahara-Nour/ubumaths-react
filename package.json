@@ -14,7 +14,9 @@
     "@testing-library/user-event": "^7.2.1",
     "chartist": "^0.11.4",
     "classnames": "^2.2.6",
+    "file-saver": "^2.0.2",
     "firebase": "^7.14.0",
+    "fuzzysort": "^1.1.4",
     "history": "^4.10.1",
     "mathlive": "^0.35.1",
     "moment": "^2.24.0",
@@ -46,7 +48,8 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "format": "prettier --write \"src/**/*\"",
-    "deploy": "firebase deploy"
+    "deploy": "firebase deploy",
+    "savedb": "node ./savedb.js "
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -64,6 +67,7 @@
     ]
   },
   "devDependencies": {
-    "node-sass": "^4.13.1"
+    "firestore-export-import": "^0.5.0",
+    "node-sass": "^4.14.1"
   }
 }
