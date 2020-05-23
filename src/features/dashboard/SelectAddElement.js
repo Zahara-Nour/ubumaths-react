@@ -44,7 +44,7 @@ function SelectAddElement({
 
   const [elements, , isErrorElements] = useCollection({
     path,
-    filters:filter ? [filter] : [],
+    filters: filter ? [filter] : [],
     listen: true,
   })
   const [name, setName] = useState('')
@@ -78,7 +78,7 @@ function SelectAddElement({
   let dependanceName = ''
   let dependanceValue = ''
 
-  if (name && elements.find(elt => elt.name === name)) {
+  if (name && elements.find((elt) => elt.name === name)) {
     if (filter) {
       const name = Object.getOwnPropertyNames(filter)[0]
       // console.log('name', name)
@@ -96,7 +96,7 @@ function SelectAddElement({
     // console.log('value', value)
     dependanceName = name
     dependanceValue = value
-    newElementId = value + '-' 
+    newElementId = value + '-'
   }
   newElementId = newElementId + newName
   // console.log('id', elementId)
@@ -131,7 +131,7 @@ function SelectAddElement({
   const saveNewElement = () => {
     let document = {
       name: newName,
-      id:newElementId,
+      id: newElementId,
     }
     if (filter) {
       document = { ...document, [dependanceName]: dependanceValue }
@@ -178,18 +178,23 @@ function SelectAddElement({
           </Button>
         </GridItem>
       </GridContainer>
-      <NotifAlert
-        open={savedError}
-        message={"L'enregistement' a échoué ! " + savedError}
-        color='danger'
-        onClose={() => setSavedError(false)}
-      />
-      <NotifAlert
-        open={savedSuccess}
-        message={"L'enregistement' a réussi ! "}
-        color='success'
-        onClose={() => setSavedSuccess(false)}
-      />
+      {savedError && (
+        <NotifAlert
+          open={savedError}
+          message={"L'enregistement' a échoué ! " + savedError}
+          color='danger'
+          onClose={() => setSavedError(false)}
+        />
+      )}
+      {savedSuccess && (
+        <NotifAlert
+          open={savedSuccess}
+          message={"L'enregistement' a réussi ! "}
+          color='success'
+          autoclose
+          onClose={() => setSavedSuccess(false)}
+        />
+      )}
       {name && children && React.cloneElement(children, newFilter)}
     </div>
   )
