@@ -1,11 +1,13 @@
 import React from 'react'
 import CustomInput from 'components/CustomInput/CustomInput'
 
-function TextInput({label, text, onChange}) {
+function TextInput({label, text, onChange, success=false, error=false}) {
 
     return (
         <CustomInput
             labelText={label}
+            success={success}
+            error={error}
             formControlProps={{
               fullWidth: true,
             }}

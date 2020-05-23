@@ -10,25 +10,26 @@ import styles from 'assets/jss/customSelectStyle.js'
 
 const useStyles = makeStyles(styles)
 
-function Select({ label, elements, element, onChange }) {
+function Select({ label, elements, name, onChange }) {
   const classeNames = useStyles()
-
   const handleSelect = (evt) => onChange(evt.target.value)
 
-  useEffect(()=> {
-    if (elements && elements.length>0 && !element) {
-      console.log('init select', label)
+  useEffect(() => {
+    if (elements && elements.length > 0) {
       onChange(elements[0].name)
+    } else {
+      onChange('')
     }
-  }, [elements, onChange, element, label])
+  }, [elements, onChange])
 
-  
   if (!elements || elements.length === 0) return null
+
+  // console.log(`select ${label} ${element}`)
 
   return (
     <FormControl fullWidth className={classeNames.selectFormControl}>
       <InputLabel htmlFor='simple-select' className={classeNames.selectLabel}>
-      {label}
+        {label}
       </InputLabel>
       <MuiSelect
         MenuProps={{
@@ -37,10 +38,12 @@ function Select({ label, elements, element, onChange }) {
         classes={{
           select: classeNames.select,
         }}
-        value={element}
+        //  value={ element }
+        value={elements.find((elt) => elt.name === name) ? name : ''}
         onChange={handleSelect}
         inputProps={{
           name: `choose-${label}`,
+          key: `choose-${label}`, // to preserve focus
         }}
       >
         <MenuItem
@@ -55,7 +58,6 @@ function Select({ label, elements, element, onChange }) {
         {elements.map((element) => (
           <MenuItem
             key={element.name}
-            
             classes={{
               root: classeNames.selectMenuItem,
               selected: classeNames.selectMenuItemSelected,

@@ -20,66 +20,76 @@ const db = firebase.firestore()
 const fetchCollection = ({ path, filters }) => {
   path = [...path]
   let documents = []
-  let request = db.collection(path.shift())
+  let collectionRef = db.collection(path.shift())
   while (path.length > 0) {
-    request = request.doc(path.shift()).collection(path.shift())
+    collectionRef = collectionRef.doc(path.shift()).collection(path.shift())
   }
 
   filters.forEach((filter) => {
     const name = Object.getOwnPropertyNames(filter)[0]
     const value = filter[name]
-    request = request.where(name, '==', value)
+    collectionRef = collectionRef.where(name, '==', value)
   })
 
-  request = request
+  return collectionRef
     .get()
     .then((docs) => {
       docs.forEach((doc) => {
         documents.push({ ...doc.data(), id: doc.id })
       })
       documents.sort((a, b) => lexicoSort(a.name, b.name))
+      console.log(`fetch successful in collection ${path.join('/')}`, documents)
       return documents
     })
     .catch((error) =>
-      console.error(`Error while fetching ${path.join('/')} : `, error.message),
+      console.error(
+        `Error while fetching collection ${path.join('/')} `,
+        error,
+      ),
     )
-
-  return request
 }
 
 const listenCollection = ({ path, filters, onChange }) => {
+  // console.log('listenCollection',path.join('/'))
+  // console.log('path', path)
   path = [...path]
-  let request = db.collection(path.shift())
+  
+  let collectionRef = db.collection(path.shift())
   while (path.length > 0) {
-    request = request.doc(path.shift()).collection(path.shift())
+    collectionRef = collectionRef.doc(path.shift()).collection(path.shift())
   }
 
+  // console.log('collection set')
   filters.forEach((filter) => {
     const name = Object.getOwnPropertyNames(filter)[0]
     const value = filter[name]
-    request = request.where(name, '==', value)
+    collectionRef = collectionRef.where(name, '==', value)
   })
-  console.log('listenCollection')
- 
-    const unsubscribe = request.onSnapshot(
-      (docs) => {
-        const documents = []
-        docs.forEach((doc) => {
-          documents.push({ ...doc.data(), id: doc.id })
-        })
-        documents.sort((a, b) => lexicoSort(a.name, b.name))
-        console.log('documents', documents)
-        onChange(documents)
-      },
-      (error) =>
-        console.error(
-          `Error while listening ${path.join('/')} : `,
-          error.message,
-        ),
-    )
+
+  // console.log('filters set')
+
+  const unsubscribe = collectionRef.onSnapshot(
+    (docs) => {
+      const documents = []
+      // console.log('docs',docs)
+      docs.forEach((doc) => {
+        documents.push({ ...doc.data(), id: doc.id })
+      })
+      documents.sort((a, b) => lexicoSort(a.name, b.name))
+      // console.log(
+      //   `Listen successful in collection ${path.join('/')}`,
+      //   documents,
+      // )
+      onChange(documents)
+    },
+    (error) =>
+      console.error(
+        `Error while listening collection ${path.join('/')} : `,
+        error,
+      ),
+  )
   return unsubscribe
 }
-
 
 function fetchAssessments(user, type) {
   let collectionRef
@@ -328,32 +338,92 @@ function saveCard(card) {
       .collection('FlashCards')
       .doc()
       .set(card)
-      .catch((error) => console.error(`Error while saving card`, error.message))
+      .catch((error) => console.error(`Error while saving card`, error))
 }
 
-function saveToCollection({ path, document }) {
-  path = path.split('/')
-  const collection = path[path.length - 1]
-  let request = db.collection(path.shift())
-  while (path.length > 0) {
-    request = request.doc(path.shift()).collection(path.shift())
-  }
-  if (document.id) {
-    const { id, ...rest } = document
-    request = request
-      .doc(id)
-      .update(rest)
-      .then(() => `Document ${id} successfully updated in ${collection}`)
-  } else {
-    request = request
-      .doc()
-      .set(document)
-      .then(() => `Document  successfully added to ${collection}`)
+function createDocument({ path, document }) {
+  const pathArray = path.split('/')
+  let collectionRef = db.collection(pathArray.shift())
+  while (pathArray.length > 0) {
+    collectionRef = collectionRef.doc(pathArray.shift()).collection(pathArray.shift())
   }
 
-  return request.catch((error) =>
-    console.log(`Error while saving document in ${collection}`, error.message),
-  )
+  if (document.id) {
+    const { id, ...rest } = document
+    return collectionRef
+      .doc(id)
+      .set(rest)
+      .then(() =>
+        console.log(`Document ${id} successfully added in collection ${path}`, rest),
+      )
+      .catch((error) =>
+        console.error(
+          `Error while saving document ${id} in collection ${path}`,
+          error,
+        ),
+      )
+  } else {
+    const doc = collectionRef.doc()
+    return doc
+      .set(document)
+      .then(() =>
+        console
+          .log(
+            `Document ${doc.id} successfully added in collection ${path}`,
+            document,
+          )
+          .catch((error) =>
+            console.error(
+              `Error while saving document ${doc.id} in collection ${path}`,
+              error,
+            ),
+          ),
+      )
+  }
+}
+
+// document must have an id field
+function saveDocument({ path, document }) {
+  path = path.split('/')
+  const collection = path[path.length - 1]
+  let collectionRef = db.collection(path.shift())
+  while (path.length > 0) {
+    collectionRef = collectionRef.doc(path.shift()).collection(path.shift())
+  }
+
+  const { id, ...rest } = document
+  return collectionRef
+    .doc(id)
+    .update(rest)
+    .then(() =>
+      console.log(`Document ${id} successfully updated in ${collection}`, rest),
+    )
+    .catch((error) =>
+      console.error(
+        `Error while saving document ${id} in ${collection}`,
+        error,
+      ),
+    )
+}
+
+function fetchDocument({ path, id }) {
+  path = path.split('/')
+  const collection = path[path.length - 1]
+  let collectionRef = db.collection(path.shift())
+  while (path.length > 0) {
+    collectionRef = collectionRef.doc(path.shift()).collection(path.shift())
+  }
+
+  return collectionRef
+    .doc(id)
+    .get()
+    .then(() => `Document ${id} successfully updated in ${collection}`)
+    .catch((error) =>
+      console.log(
+        `Error while saving document in ${collection}`,
+        error.message,
+      ),
+    )
 }
 
 export {
@@ -369,6 +439,8 @@ export {
   fetchCardsLevels,
   fetchCollection,
   listenCollection,
-  saveToCollection,
+  createDocument,
+  saveDocument,
+  fetchDocument,
 }
 export default db

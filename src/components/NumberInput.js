@@ -1,12 +1,11 @@
 import React from 'react'
 import CustomInput from 'components/CustomInput/CustomInput'
 
-function CardNmuberInput({label, value, onChange}) {
+function NumberInput({label, value, onChange}) {
 
     return (
       <CustomInput
       labelText={label}
-      
       formControlProps={{
         fullWidth: true,
       }}
@@ -20,4 +19,4 @@ function CardNmuberInput({label, value, onChange}) {
 
 }
 
-export default CardNmuberInput
+export default NumberInput

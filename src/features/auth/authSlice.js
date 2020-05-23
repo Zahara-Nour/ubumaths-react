@@ -12,7 +12,7 @@ const initialState = {
   connecting: false,
   disconnecting: false,
   connected: false,
-  user: { role: [] },
+  user: { roles: ['guest'] },
   // user: {
   //   email: 'd.lejolly@voltairedoha.com',
   //   role: 'teacher',
@@ -34,7 +34,7 @@ const authSlice = createSlice({
     loginSuccess(state, action) {
       state.connecting = false
       state.connected = true
-      state.user = action.payload.user
+      state.user = {...state.user,...action.payload.user}
     },
     loginFailure(state, action) {
       state.connecting = false
@@ -46,7 +46,7 @@ const authSlice = createSlice({
     logoutSuccess(state) {
       state.disconnecting = false
       state.connected = false
-      state.user = { role: 'guest' }
+      state.user = { roles: ['guest'] }
     },
     logoutFailure(state, action) {
       state.disconnecting = false
@@ -75,6 +75,7 @@ const selectIsAdmin = (state) => state.auth.user.includes['admin']
 const selectIsStudent = (state) => state.auth.user.includes['student']
 const selectIsTeacher = (state) => state.auth.user.includes['teacher']
 const selectIsContributor = (state) => state.auth.user.includes['contributor']
+const selectRoles = (state) => state.auth.user.roles
 
 export {
   selectUser,
@@ -83,6 +84,7 @@ export {
   selectIsContributor,
   selectIsStudent,
   selectIsTeacher,
+  selectRoles
 }
 
 function fetchUser({ id }) {

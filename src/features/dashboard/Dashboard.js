@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import cx from 'classnames'
 import { Switch, Route } from 'react-router-dom'
 
@@ -10,21 +10,22 @@ import AdminNavbar from 'components/AdminNavbar.js'
 import Footer from 'components/Footer/Footer.js'
 import Sidebar from 'components/Sidebar/Sidebar.js'
 
-import routes from 'app/routes.js'
+import getRoleRoutes from 'app/routes.js'
 
 import styles from 'assets/jss/layouts/adminStyle.js'
 import Error404 from 'components/Error404'
+import { useSelector } from 'react-redux'
+import { selectRoles } from 'features/auth/authSlice'
 
 const useStyles = makeStyles(styles)
 
 export default function Dashboard(props) {
+  
   const { ...rest } = props
   // states and functions
   const [mobileOpen, setMobileOpen] = React.useState(false)
   const [miniActive, setMiniActive] = React.useState(false)
 
-  
-  
   // styles
   const classes = useStyles()
   const mainPanelClasses =
@@ -37,40 +38,44 @@ export default function Dashboard(props) {
     })
   // ref for main panel div
   const mainPanel = React.createRef()
-  // effect instead of componentDidMount, componentDidUpdate and componentWillUnmount
-  React.useEffect(() => {
-    window.addEventListener('resize', resizeFunction)
-
-    // Specify how to clean up after this effect:
-    return function cleanup() {
-      window.removeEventListener('resize', resizeFunction)
-    }
-  })
-
-  const handleDrawerToggle = () => {
-    setMobileOpen(!mobileOpen)
-  }
 
   const getActiveRoute = (routes) => {
     let activeRoute = 'DashBoard'
     for (let i = 0; i < routes.length; i++) {
-      if (window.location.href.indexOf(props.match.path + routes[i].path) !== -1) {
+      if (
+        window.location.href.indexOf(props.match.path + routes[i].path) !== -1
+      ) {
         return routes[i].name
       }
     }
     return activeRoute
   }
-  const getRoutes = (routes) => {
-    return routes.map((prop, key) => {
 
-      return (
-        <Route
-          path={props.match.path+prop.path}
-          component={prop.component}
-          key={key}
-        />
-      )
+  const roles = useSelector(selectRoles)
+
+  
+    const routes = []
+    roles.forEach((role) => {
+      getRoleRoutes(role).forEach((route) => {
+        if (!routes.includes(route)) routes.push(route)
+      })
     })
+    
+  const getRoutes = (routes) => {
+
+    return routes.map((prop, key) => (
+      <Route
+        path={props.match.path + prop.path}
+        component={prop.component}
+        key={key}
+      />
+    ))
+  }
+
+ 
+
+  const handleDrawerToggle = () => {
+    setMobileOpen(!mobileOpen)
   }
   const sidebarMinimize = () => {
     setMiniActive(!miniActive)
@@ -80,6 +85,15 @@ export default function Dashboard(props) {
       setMobileOpen(false)
     }
   }
+
+  React.useEffect(() => {
+    window.addEventListener('resize', resizeFunction)
+
+    // Specify how to clean up after this effect:
+    return function cleanup() {
+      window.removeEventListener('resize', resizeFunction)
+    }
+  })
 
   return (
     <div className={classes.wrapper}>
@@ -111,7 +125,7 @@ export default function Dashboard(props) {
                 render={() => <Home />}
               />
               {getRoutes(routes)}
-              <Route render={() => <Error404/>} />
+              <Route render={() => <Error404 />} />
             </Switch>
           </div>
         </div>

@@ -16,9 +16,6 @@ import {
   setGrades,
   selectCardslevels,
   addCardsLevels,
-  setCountries,
-  setCities,
-  setSchools,
   FETCH_TYPES,
   setCollection,
   selectCollection,
@@ -34,14 +31,10 @@ import {
   fetchGrades,
   fetchCardsLevels,
   listenCards,
-  listenCountries,
-  fetchCountries,
-  fetchCities,
-  fetchSchools,
   fetchCollection,
   listenCollection,
 } from '../features/db/db'
-import { faCompressArrowsAlt } from '@fortawesome/free-solid-svg-icons'
+
 import { compareArrays } from './utils'
 
 function useInterval(callback, delay) {
@@ -219,7 +212,7 @@ const useCards = ({ subject, domain, theme, level, listen }) => {
 const useFilters = (filters) => {
   const namesRef = useRef([])
   const valuesRef = useRef([])
-  const filtersRef = useRef([])
+  const filtersRef = useRef(filters)
   const names = filters.map((filter) => Object.getOwnPropertyNames(filter)[0])
   const values = filters.map((filter, index) => filter[names[index]])
 
@@ -239,17 +232,17 @@ const useFilters = (filters) => {
 }
 
 const useCollection = ({ path, filters = [], listen = false }) => {
-  path = useMemo(() => path.split('/'), [path])
-  const collection = useMemo(() => path[path.length - 1], [path])
+  filters = useFilters(filters)
+  const dispatch = useDispatch()
+  const emptyCollection = useMemo(() => [], [])
+  const pathArray = useMemo(() => path.split('/'), [path])
+  const collection = useMemo(() => pathArray[pathArray.length - 1], [pathArray])
   const type = useMemo(() => FETCH_TYPES['FETCH_' + collection.toUpperCase()], [
     collection,
   ])
-
   
-  filters = useFilters(filters)
   const documents = useSelector(selectCollection(collection, filters))
-
-  const dispatch = useDispatch()
+  const documentFoundInState = !!documents
   const [isLoading, setIsLoading] = useState(false)
   const [isError, setIsError] = useState(false)
 
@@ -257,65 +250,80 @@ const useCollection = ({ path, filters = [], listen = false }) => {
     (key, type) => {
       let init = true
       return (data) => {
+        if (data.length === 0) data = emptyCollection
         if (init) {
           init = false
-          dispatch(fetchSuccess({ data, type, key }))
-          setIsLoading(false)
+          if (!documentFoundInState) {
+            dispatch(fetchSuccess({ data, type, key }))
+            dispatch(setCollection({ collection, documents: data, filters }))
+            setIsLoading(false)
+          }
         } else {
           dispatch(update({ data, type }))
+          dispatch(setCollection({ collection, documents: data, filters }))
         }
-        dispatch(setCollection({ collection, documents: data, filters }))
       }
     },
-    [collection, dispatch, filters],
+    [collection, dispatch, filters, emptyCollection, documentFoundInState],
   )
 
+  // console.log('*** collection', collection)
+  //   useWhyDidYouUpdate(collection, { path, filters, handleUpdate, listen, dispatch })
+  //   console.log('documents', documents)
+  //   console.log('***********')
+  // if (documents) console.log('documents successfully found in state', documents)
 
-// console.log('*** collection', collection)
-//   useWhyDidYouUpdate(collection, { path, filters, handleUpdate, listen, dispatch })
-//   console.log('documents', documents)
-//   console.log('***********')
+  // useWhatChanged('useCollection', { filters })
 
   useEffect(() => {
-    let unsubscribe = () => {}
-
     if (
       listen &&
       !(
         filters &&
         filters.find((filter) => !filter[Object.getOwnPropertyNames(filter)[0]])
-      )
+      ) &&
+      path
     ) {
-      console.log('listen')
-
-      setIsError(false)
-      setIsLoading(true)
-      const key = dispatch(fetchDb({ type }))
+      let key
+      if (!documentFoundInState) {
+        setIsError(false)
+        setIsLoading(true)
+        // console.log('listening first fetch', path)
+        // console.log('filters', filters)
+        key = dispatch(fetchDb({ type }))
+      }
       try {
         return listenCollection({
-          path,
+          path: pathArray,
           filters,
           onChange: handleUpdate(key, type),
         })
       } catch (error) {
         setIsError(error.message)
         setIsLoading(false)
-        dispatch(fetchFailure({ error: error.message, key }))
+        dispatch(fetchFailure({ error: error.message, key, type }))
       }
-      unsubscribe = listenCollection({ path, filters, onChange: handleUpdate })
     }
-    return unsubscribe
-  }, [path, filters, handleUpdate, listen, dispatch, type])
+  }, [
+    pathArray,
+    filters,
+    handleUpdate,
+    listen,
+    dispatch,
+    type,
+    path,
+    documentFoundInState,
+  ])
 
   useEffect(() => {
-    // console.log('useEffect collecttion')
     const fetchData = async () => {
       setIsError(false)
       setIsLoading(true)
 
       const key = dispatch(fetchDb({ type }))
       try {
-        const result = await fetchCollection({ path, filters })
+        let result = await fetchCollection({ path: pathArray, filters })
+        if (result.length === 0) result = emptyCollection
         // console.log(`result ${collection}`, result)
         dispatch(fetchSuccess({ data: result, type, key }))
         dispatch(setCollection({ collection, documents: result, filters }))
@@ -334,14 +342,15 @@ const useCollection = ({ path, filters = [], listen = false }) => {
       !(
         filters &&
         filters.find((filter) => !filter[Object.getOwnPropertyNames(filter)[0]])
-      )
+      ) &&
+      path
     ) {
-      console.log(`fetch ${collection}`)
+      // console.log(`fetch ${collection}`)
       fetchData()
     }
-  }, [dispatch, documents, filters, listen, path, collection, type])
+  }, [dispatch, documents, filters, listen, pathArray, collection, type, path, emptyCollection])
 
-  return [documents, isLoading, isError]
+  return [documents || emptyCollection, isLoading, isError]
 }
 
 const useCardsLevels = (subject, domain) => {
@@ -572,38 +581,36 @@ function useScript(src) {
   return [state.loaded, state.error]
 }
 
-function useWhyDidYouUpdate(name,props) {
+function useWhatChanged(name, props) {
   // Get a mutable ref object where we can store props ...
   // ... for comparison next time this hook runs.
   const previousProps = useRef()
 
-  useEffect(() => {
-    if (previousProps.current) {
-      // Get all keys from previous and current props
-      const allKeys = Object.keys({ ...previousProps.current, ...props })
-      // Use this object to keep track of changed props
-      const changesObj = {}
-      // Iterate through keys
-      allKeys.forEach((key) => {
-        // If previous is different from current
-        if (previousProps.current[key] !== props[key]) {
-          // Add to changesObj
-          changesObj[key] = {
-            from: previousProps.current[key],
-            to: props[key],
-          }
+  if (previousProps.current) {
+    // Get all keys from previous and current props
+    const allKeys = Object.keys({ ...previousProps.current, ...props })
+    // Use this object to keep track of changed props
+    const changesObj = {}
+    // Iterate through keys
+    allKeys.forEach((key) => {
+      // If previous is different from current
+      if (previousProps.current[key] !== props[key]) {
+        // Add to changesObj
+        changesObj[key] = {
+          from: previousProps.current[key],
+          to: props[key],
         }
-      })
-
-      // If changesObj not empty then output to console
-      if (Object.keys(changesObj).length) {
-        console.log('[why-did-you-update]', name, changesObj)
       }
-    }
+    })
 
-    // Finally update previousProps with current props for next hook call
-    previousProps.current = props
-  })
+    // If changesObj not empty then output to console
+    if (Object.keys(changesObj).length) {
+      console.log('[why-did-you-update]', name, changesObj)
+    }
+  }
+
+  // Finally update previousProps with current props for next hook call
+  previousProps.current = props
 }
 
 export {
@@ -619,5 +626,5 @@ export {
   useCardsLevels,
   useCollection,
   useFilters,
-  useWhyDidYouUpdate,
+  useWhatChanged,
 }
