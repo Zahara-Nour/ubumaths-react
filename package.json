@@ -54,7 +54,7 @@
     "format": "prettier --write \"src/**/*\"",
     "deploy": "firebase deploy",
     "savedb": "node ./savedb.js ",
-    "version": "npm run build && sentry-cli releases new $npm_package_version",
+    "version": "npm run build && sentry-cli releases new --finalize $npm_package_version",
     "postversion": "git push && git push --tags && npm run deploy"
   },
   "eslintConfig": {
