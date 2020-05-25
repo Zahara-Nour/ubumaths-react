@@ -1,6 +1,6 @@
 {
   "name": "ubumaths",
-  "version": "0.5.15",
+  "version": "0.5.16",
   "private": true,
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^1.2.28",
@@ -54,7 +54,7 @@
     "format": "prettier --write \"src/**/*\"",
     "deploy": "firebase deploy",
     "savedb": "node ./savedb.js ",
-    "version": "npm run build && sentry-cli releases new --finalize $npm_package_version && sentry-cli releases files $npm_package_version upload-sourcemaps --no-rewrite build",
+    "version": "npm run build && sentry-cli releases new --finalize $npm_package_version && sentry-cli releases files $npm_package_version upload-sourcemaps --no-rewrite build/static/js",
     "postversion": "git push && git push --tags  && sentry-cli releases set-commits --commit 'Zahara-Nour/ubumaths' $npm_package_version && npm run deploy && private/logrocket.sh"
   },
   "eslintConfig": {
