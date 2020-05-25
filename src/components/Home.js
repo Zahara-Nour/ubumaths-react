@@ -8,12 +8,14 @@ import { makeStyles } from '@material-ui/core/styles'
 import styles from 'assets/jss/homeStyle.js'
 import Footer from './Footer'
 
+
 const useStyles = makeStyles(styles)
 
 function Home() {
   const classes = useStyles()
+throw new Error('Test error')
 
-  throw new Error('essai sentry')
+  // throw new Error('essai sentry')
   return (
     <div className={classes.wrapper}>
       <NavBar />

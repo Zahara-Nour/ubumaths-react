@@ -11,7 +11,7 @@ import { BrowserRouter as Router } from 'react-router-dom'
 import { createBrowserHistory } from 'history'
 import LogRocket from 'logrocket'
 import * as Sentry from '@sentry/browser'
-import {version} from '../package.json'
+import { version } from '../package.json'
 
 
 if (process.env.NODE_ENV === 'production') {
@@ -21,7 +21,7 @@ if (process.env.NODE_ENV === 'production') {
     release: version,
   })
   LogRocket.init('7mzcdm/ubumaths', {
-    release: version
+    release: version,
   })
   // LogRocket.getSessionURL((sessionURL) => {
   //   Sentry.configureScope((scope) => {
@@ -32,13 +32,14 @@ if (process.env.NODE_ENV === 'production') {
 
 const hist = createBrowserHistory()
 
-
 ReactDOM.render(
   <React.StrictMode>
     <Provider store={store} history={hist}>
       <PersistGate loading={null} persistor={persistore}>
         <Router>
-          <App />
+     
+            <App />
+       
         </Router>
       </PersistGate>
     </Provider>
