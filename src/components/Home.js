@@ -12,6 +12,8 @@ const useStyles = makeStyles(styles)
 
 function Home() {
   const classes = useStyles()
+
+  throw new Error('essai sentry')
   return (
     <div className={classes.wrapper}>
       <NavBar />

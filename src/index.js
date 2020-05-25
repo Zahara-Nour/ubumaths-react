@@ -32,7 +32,7 @@ if (process.env.NODE_ENV === 'production') {
 
 const hist = createBrowserHistory()
 
-throw new Error('essai sentry')
+
 ReactDOM.render(
   <React.StrictMode>
     <Provider store={store} history={hist}>
