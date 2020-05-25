@@ -15,7 +15,7 @@ import * as Sentry from '@sentry/browser'
 if (process.env.NODE_ENV === 'production') {
   Sentry.init({
     dsn:
-      'https://8144858dc27448d7a96444b4365d71b6@o397779.ingest.sentry.io/5252617',
+      'https://86906891d533413d89c6b74f6d528727@o397779.ingest.sentry.io/5252881',
     release: 'ubumaths@' + process.env.npm_package_version,
   })
   LogRocket.init('7mzcdm/ubumaths')
