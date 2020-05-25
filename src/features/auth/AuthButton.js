@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import firebase from 'firebase/app'
-import 'firebase/auth';
+import 'firebase/auth'
 import { useScript } from 'app/hooks'
 import Button from 'components/CustomButtons/Button'
 import { useDispatch, useSelector } from 'react-redux'
@@ -14,8 +14,9 @@ import {
   logoutFailure,
 } from './authSlice'
 import { selectIsLoggedIn } from './authSlice'
-import {RiLoginBoxLine} from 'react-icons/ri'
-import {RiLogoutBoxRLine} from 'react-icons/ri'
+import { RiLoginBoxLine } from 'react-icons/ri'
+import { RiLogoutBoxRLine } from 'react-icons/ri'
+import LogRocket from 'logrocket'
 
 export default function AuthButton() {
   const [auth2, setAuth2] = useState()
@@ -32,8 +33,13 @@ export default function AuthButton() {
       const profile = googleUser.getBasicProfile()
       const authResponse = googleUser.getAuthResponse()
 
-      if (!profile.getEmail().includes('@voltairedoha.com') && profile.getEmail()!=='zahara.alnour@gmail.com') {
-        console.log("Erreur connexion avec un mail n'appartenant pas au domaine voltairedoha.com")
+      if (
+        !profile.getEmail().includes('@voltairedoha.com') &&
+        profile.getEmail() !== 'zahara.alnour@gmail.com'
+      ) {
+        console.log(
+          "Erreur connexion avec un mail n'appartenant pas au domaine voltairedoha.com",
+        )
         return
       }
       var unsubscribe = firebase
@@ -59,14 +65,13 @@ export default function AuthButton() {
                 // The firebase.auth.AuthCredential type that was used.
                 var credential = error.credential
                 // ...
-                console.error("error while authenticating in Firebase", error)
+                console.error('error while authenticating in Firebase', error)
               })
           } else {
             console.log('User already signed-in Firebase.')
           }
         })
 
-      
       const userProfile = {
         googleId: profile.getId(),
         imageUrl: profile.getImageUrl(),
@@ -85,6 +90,10 @@ export default function AuthButton() {
       )
 
       dispatch(fetchUser({ id: profile.getEmail() }))
+
+      LogRocket.identify(userProfile.email, {
+        name: userProfile.name,
+      })
     },
     [dispatch],
   )
@@ -131,7 +140,6 @@ export default function AuthButton() {
 
   return isLoggedIn ? (
     <Button
-   
       color='success'
       justIcon
       round
@@ -142,20 +150,24 @@ export default function AuthButton() {
           (res) => handleLogoutSuccess(res),
           (err) => handleLogoutFailure(err),
         )
-        firebase.auth().signOut().then(function(res) {
-          handleLogoutSuccess(res)
-        }).catch(function(error) {
-          handleLogoutFailure(error)
-        });
+        firebase
+          .auth()
+          .signOut()
+          .then(function (res) {
+            handleLogoutSuccess(res)
+          })
+          .catch(function (error) {
+            handleLogoutFailure(error)
+          })
       }}
     >
-      <RiLogoutBoxRLine/>
+      <RiLogoutBoxRLine />
     </Button>
   ) : (
     <Button
-    disabled={!auth2}
-    justIcon
-    round
+      disabled={!auth2}
+      justIcon
+      round
       color='danger'
       onClick={() => {
         dispatch(loginRequest())
@@ -168,7 +180,7 @@ export default function AuthButton() {
         )
       }}
     >
-      <RiLoginBoxLine/>
+      <RiLoginBoxLine />
     </Button>
   )
 }
