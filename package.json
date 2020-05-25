@@ -1,6 +1,6 @@
 {
   "name": "ubumaths",
-  "version": "0.5.21",
+  "version": "0.5.22",
   "private": true,
   "dependencies": {
     "@bugsnag/js": "^7.1.0",
