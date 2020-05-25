@@ -32,7 +32,7 @@ export default function AuthButton() {
       const profile = googleUser.getBasicProfile()
       const authResponse = googleUser.getAuthResponse()
 
-      if (!profile.getEmail().includes('@voltairedoha.com')) {
+      if (!profile.getEmail().includes('@voltairedoha.com') && profile.getEmail()!=='zahara.alnour@gmail.com') {
         console.log("Erreur connexion avec un mail n'appartenant pas au domaine voltairedoha.com")
         return
       }

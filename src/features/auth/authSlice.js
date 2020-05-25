@@ -71,10 +71,11 @@ export const {
 
 const selectUser = (state) => state.auth.user
 const selectIsLoggedIn = (state) => state.auth.connected
-const selectIsAdmin = (state) => state.auth.user.includes['admin']
-const selectIsStudent = (state) => state.auth.user.includes['student']
-const selectIsTeacher = (state) => state.auth.user.includes['teacher']
-const selectIsContributor = (state) => state.auth.user.includes['contributor']
+const selectIsAdmin = (state) => state.auth.user.roles.includes('admin')
+const selectIsStudent = (state) => state.auth.user.roles.includes('student')
+const selectIsTeacher = (state) => state.auth.user.roles.includes('teacher')
+const selectIsContributor = (state) => state.auth.user.roles.includes('contributor')
+const selectIsReferent = (state) => state.auth.user.roles.includes('referent')
 const selectRoles = (state) => state.auth.user.roles
 
 export {
@@ -84,6 +85,7 @@ export {
   selectIsContributor,
   selectIsStudent,
   selectIsTeacher,
+  selectIsReferent,
   selectRoles
 }
 
