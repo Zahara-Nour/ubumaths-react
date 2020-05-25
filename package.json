@@ -1,6 +1,6 @@
 {
   "name": "ubumaths",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "private": true,
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^1.2.28",
@@ -54,7 +54,7 @@
     "format": "prettier --write \"src/**/*\"",
     "deploy": "firebase deploy",
     "savedb": "node ./savedb.js ",
-    "version":"npm run build && sentry-cli releases new $npm_package_version"
+    "version": "npm run build && sentry-cli releases new $npm_package_version"
   },
   "eslintConfig": {
     "extends": "react-app"
