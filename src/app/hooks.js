@@ -6,6 +6,7 @@ import {
   fetchDb,
   fetchSuccess,
   fetchFailure,
+ 
   selectSubjects,
   setSubjects,
   selectThemes,
@@ -20,6 +21,7 @@ import {
   setCollection,
   selectCollection,
   update,
+  fetchRemove,
 } from 'features/db/dbSlice'
 import {
   fetchAssessments,
@@ -33,6 +35,7 @@ import {
   listenCards,
   fetchCollection,
   listenCollection,
+  
 } from '../features/db/db'
 
 import { compareArrays } from './utils'
@@ -240,8 +243,8 @@ const useCollection = ({ path, filters = [], listen = false }) => {
   const type = useMemo(() => FETCH_TYPES['FETCH_' + collection.toUpperCase()], [
     collection,
   ])
-  
-  const documents = useSelector(selectCollection(collection, filters))
+
+  const documents = useSelector(selectCollection(path, filters))
   const documentFoundInState = !!documents
   const [isLoading, setIsLoading] = useState(false)
   const [isError, setIsError] = useState(false)
@@ -255,25 +258,37 @@ const useCollection = ({ path, filters = [], listen = false }) => {
           init = false
           if (!documentFoundInState) {
             dispatch(fetchSuccess({ data, type, key }))
-            dispatch(setCollection({ collection, documents: data, filters }))
+            dispatch(setCollection({ path, documents: data, filters }))
             setIsLoading(false)
           }
         } else {
           dispatch(update({ data, type }))
-          dispatch(setCollection({ collection, documents: data, filters }))
+          dispatch(setCollection({ path, documents: data, filters }))
         }
       }
     },
-    [collection, dispatch, filters, emptyCollection, documentFoundInState],
+    [path, dispatch, filters, emptyCollection, documentFoundInState],
   )
 
-  // console.log('*** collection', collection)
-  //   useWhyDidYouUpdate(collection, { path, filters, handleUpdate, listen, dispatch })
-  //   console.log('documents', documents)
-  //   console.log('***********')
+  // console.log('*** collection', path)
+
   // if (documents) console.log('documents successfully found in state', documents)
 
-  // useWhatChanged('useCollection', { filters })
+  // const report = useWhatChanged(`useCollection ${path}`, {
+  //   documents,
+  //   collection,
+  //   emptyCollection,
+  //   filters,
+  //   handleUpdate,
+  //   listen,
+  //   dispatch,
+  //   type,
+  //   path,
+  //   documentFoundInState,
+  //   isLoading,
+  //   isListening,
+  // })
+  // console.log('***********')
 
   useEffect(() => {
     if (
@@ -282,30 +297,36 @@ const useCollection = ({ path, filters = [], listen = false }) => {
         filters &&
         filters.find((filter) => !filter[Object.getOwnPropertyNames(filter)[0]])
       ) &&
-      path
+      path 
     ) {
       let key
       if (!documentFoundInState) {
         setIsError(false)
         setIsLoading(true)
-        // console.log('listening first fetch', path)
-        // console.log('filters', filters)
+
         key = dispatch(fetchDb({ type }))
       }
+      let unsubscribe = () => {}
       try {
-        return listenCollection({
-          path: pathArray,
+        unsubscribe = listenCollection({
+          path,
           filters,
           onChange: handleUpdate(key, type),
         })
+        
+        
       } catch (error) {
         setIsError(error.message)
         setIsLoading(false)
         dispatch(fetchFailure({ error: error.message, key, type }))
       }
+      return  () => {
+        //in case component is unmount before fetch is fullfilled : remove in queue
+        dispatch(fetchRemove({ key, type }))
+        unsubscribe()
+      }
     }
   }, [
-    pathArray,
     filters,
     handleUpdate,
     listen,
@@ -313,6 +334,7 @@ const useCollection = ({ path, filters = [], listen = false }) => {
     type,
     path,
     documentFoundInState,
+    
   ])
 
   useEffect(() => {
@@ -322,7 +344,7 @@ const useCollection = ({ path, filters = [], listen = false }) => {
 
       const key = dispatch(fetchDb({ type }))
       try {
-        let result = await fetchCollection({ path: pathArray, filters })
+        let result = await fetchCollection({ path, filters })
         if (result.length === 0) result = emptyCollection
         // console.log(`result ${collection}`, result)
         dispatch(fetchSuccess({ data: result, type, key }))
@@ -333,6 +355,10 @@ const useCollection = ({ path, filters = [], listen = false }) => {
         setIsError(error.message)
         dispatch(fetchFailure({ error: error.message, key }))
         setIsLoading(false)
+      }
+      return  () => {
+        //in case component is unmount before fetch is fullfilled : remove in queue
+        dispatch(fetchRemove({ key, type }))
       }
     }
 
@@ -348,7 +374,16 @@ const useCollection = ({ path, filters = [], listen = false }) => {
       // console.log(`fetch ${collection}`)
       fetchData()
     }
-  }, [dispatch, documents, filters, listen, pathArray, collection, type, path, emptyCollection])
+  }, [
+    dispatch,
+    documents,
+    filters,
+    listen,
+    collection,
+    type,
+    path,
+    emptyCollection,
+  ])
 
   return [documents || emptyCollection, isLoading, isError]
 }
@@ -584,8 +619,10 @@ function useScript(src) {
 function useWhatChanged(name, props) {
   // Get a mutable ref object where we can store props ...
   // ... for comparison next time this hook runs.
-  const previousProps = useRef()
 
+  console.log('//// useWhatChanged   -------')
+  const previousProps = useRef()
+  let report
   if (previousProps.current) {
     // Get all keys from previous and current props
     const allKeys = Object.keys({ ...previousProps.current, ...props })
@@ -604,13 +641,21 @@ function useWhatChanged(name, props) {
     })
 
     // If changesObj not empty then output to console
+
     if (Object.keys(changesObj).length) {
       console.log('[why-did-you-update]', name, changesObj)
+      report = `[why-did-you-update] ${name} ${JSON.stringify(
+        changesObj,
+        null,
+        2,
+      )}`
     }
   }
 
   // Finally update previousProps with current props for next hook call
   previousProps.current = props
+  console.log('------ useWhatChanged   /////')
+  return report
 }
 
 export {
