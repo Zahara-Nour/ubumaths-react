@@ -195,7 +195,7 @@ function SelectAddElement({
           onClose={() => setSavedSuccess(false)}
         />
       )}
-      {name && children && React.cloneElement(children, newFilter)}
+      {name && children && React.cloneElement(children, {...newFilter, id:elementId})}
     </div>
   )
 }
