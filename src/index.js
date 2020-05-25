@@ -16,13 +16,14 @@ if (process.env.NODE_ENV === 'production') {
   Sentry.init({
     dsn:
       'https://8144858dc27448d7a96444b4365d71b6@o397779.ingest.sentry.io/5252617',
+    release: 'ubumaths@' + process.env.npm_package_version,
   })
   LogRocket.init('7mzcdm/ubumaths')
-  LogRocket.getSessionURL(sessionURL => {
-    Sentry.configureScope(scope => {
-      scope.setExtra("sessionURL", sessionURL);
-    });
-  });
+  // LogRocket.getSessionURL((sessionURL) => {
+  //   Sentry.configureScope((scope) => {
+  //     scope.setExtra('sessionURL', sessionURL)
+  //   })
+  // })
 }
 
 const hist = createBrowserHistory()
