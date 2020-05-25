@@ -45,13 +45,14 @@ const flexContainerRow = {
   alignItems: 'center',
 }
 function NavBar(props) {
+  const classes = useStyles()
   const IsLoadingOrSaving = useSelector(selectIsLoadingOrSaving)
   const isLoggedIn = useSelector(selectIsLoggedIn)
   const user = useSelector(selectUser)
   const [open, setOpen] = useState(false)
   const handleDrawerToggle = () => setOpen(!open)
 
-  const classes = useStyles()
+  
 
   const listLeft = (
     <>
