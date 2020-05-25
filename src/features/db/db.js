@@ -18,11 +18,11 @@ firebase.initializeApp(firebaseConfig)
 const db = firebase.firestore()
 
 const fetchCollection = ({ path, filters }) => {
-  path = [...path]
+  const pathArray = path.split('/')
   let documents = []
-  let collectionRef = db.collection(path.shift())
-  while (path.length > 0) {
-    collectionRef = collectionRef.doc(path.shift()).collection(path.shift())
+  let collectionRef = db.collection(pathArray.shift())
+  while (pathArray.length > 0) {
+    collectionRef = collectionRef.doc(pathArray.shift()).collection(pathArray.shift())
   }
 
   filters.forEach((filter) => {
@@ -38,12 +38,12 @@ const fetchCollection = ({ path, filters }) => {
         documents.push({ ...doc.data(), id: doc.id })
       })
       documents.sort((a, b) => lexicoSort(a.name, b.name))
-      console.log(`fetch successful in collection ${path.join('/')}`, documents)
+      console.log(`fetch successful in collection ${path}`, documents)
       return documents
     })
     .catch((error) =>
       console.error(
-        `Error while fetching collection ${path.join('/')} `,
+        `Error while fetching collection ${path} `,
         error,
       ),
     )
@@ -52,11 +52,11 @@ const fetchCollection = ({ path, filters }) => {
 const listenCollection = ({ path, filters, onChange }) => {
   // console.log('listenCollection',path.join('/'))
   // console.log('path', path)
-  path = [...path]
+  const pathArray = path.split('/')
   
-  let collectionRef = db.collection(path.shift())
-  while (path.length > 0) {
-    collectionRef = collectionRef.doc(path.shift()).collection(path.shift())
+  let collectionRef = db.collection(pathArray.shift())
+  while (pathArray.length > 0) {
+    collectionRef = collectionRef.doc(pathArray.shift()).collection(pathArray.shift())
   }
 
   // console.log('collection set')
@@ -84,7 +84,7 @@ const listenCollection = ({ path, filters, onChange }) => {
     },
     (error) =>
       console.error(
-        `Error while listening collection ${path.join('/')} : `,
+        `Error while listening collection ${path} : `,
         error,
       ),
   )

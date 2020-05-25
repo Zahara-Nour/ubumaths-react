@@ -57,9 +57,9 @@ const dbSlice = createSlice({
     },
 
     setCollection(state, action) {
-      const { collection, filters, documents } = action.payload
+      const { path, filters, documents } = action.payload
 
-      if (!state[collection]) state[collection] = {}
+      if (!state[path]) state[path] = {}
       const deepness = filters.length
 
       const modify = (substate, deepLevel) => {
@@ -77,11 +77,12 @@ const dbSlice = createSlice({
       }
 
       if (deepness === 0) {
-        state[collection] = documents
+        state[path] = documents
       } else {
         try {
-          state[collection] = modify(state[collection], 0)
+          state[path] = modify(state[path], 0)
         } catch (error) {
+          console.errror('error in setCollection')
         }
       }
     },
@@ -121,6 +122,16 @@ const dbSlice = createSlice({
       const type = action.payload.type 
       state.fetched[type] = action.payload.data
     },
+
+    fetchRemove(state, action) {
+
+      const key = action.payload.key
+      const type = action.payload.type
+      state.fetching[type] = false
+      state.queue.splice(state.queue.indexOf(key), 1)
+
+    },
+
     fetchRequest(state, action) {
       // console.log('fetchrequest', action.payload)
       const type = action.payload.type
@@ -173,14 +184,16 @@ export const FETCH_TYPES = {
   FETCH_COUNTRIES: 'countries',
   FETCH_CITIES: 'cities',
   FETCH_SCHOOLS: 'schools',
-  FETCH_ROLES: 'schools',
+  FETCH_ROLES: 'roles',
+  FETCH_CLASSROOMS: 'classrooms',
 }
 
 export const SAVE_TYPES = {
   SAVE_COUNTRIES: 'countries',
   SAVE_CITIES: 'cities',
   SAVE_SCHOOLS: 'schools',
-  SAVE_ROLES: 'schools',
+  SAVE_ROLES: 'roles',
+  SAVE_CLASSROOMS: 'classrooms',
 }
 
 export const {
@@ -192,6 +205,7 @@ export const {
   fetchSuccess,
   fetchFailure,
   fetchReset,
+  fetchRemove,
   setDomains,
   setSubjects,
   setThemes,
@@ -201,7 +215,8 @@ export const {
   setSchools,
   setCollection,
   addCardsLevels,
-  update
+  update,
+  
 } = dbSlice.actions
 
 const selectGrades = (state) => state.db.grades
