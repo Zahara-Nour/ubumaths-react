@@ -18,7 +18,7 @@ if (process.env.NODE_ENV === 'production') {
   Sentry.init({
     dsn:
       'https://86906891d533413d89c6b74f6d528727@o397779.ingest.sentry.io/5252881',
-    release: 'ubumaths@' + version,
+    release: version,
   })
   LogRocket.init('7mzcdm/ubumaths')
   // LogRocket.getSessionURL((sessionURL) => {
