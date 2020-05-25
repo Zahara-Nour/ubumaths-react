@@ -11,12 +11,14 @@ import { BrowserRouter as Router } from 'react-router-dom'
 import { createBrowserHistory } from 'history'
 import LogRocket from 'logrocket'
 import * as Sentry from '@sentry/browser'
+import {version} from '../package.json'
+
 
 if (process.env.NODE_ENV === 'production') {
   Sentry.init({
     dsn:
       'https://86906891d533413d89c6b74f6d528727@o397779.ingest.sentry.io/5252881',
-    release: 'ubumaths@' + process.env.npm_package_version,
+    release: 'ubumaths@' + version,
   })
   LogRocket.init('7mzcdm/ubumaths')
   // LogRocket.getSessionURL((sessionURL) => {
