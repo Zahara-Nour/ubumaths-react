@@ -14,15 +14,15 @@ import setupLogRocketReact from 'logrocket-react'
 import * as Sentry from '@sentry/browser'
 import { version } from '../package.json'
 
-// if (process.env.NODE_ENV === 'production') {
-Sentry.init({
-  dsn:
-    'https://86906891d533413d89c6b74f6d528727@o397779.ingest.sentry.io/5252881',
-  release: version,
-})
-LogRocket.init('7mzcdm/ubumaths',{
-  release:version
-})
+// // if (process.env.NODE_ENV === 'production') {
+// Sentry.init({
+//   dsn:
+//     'https://86906891d533413d89c6b74f6d528727@o397779.ingest.sentry.io/5252881',
+//   release: version,
+// })
+// LogRocket.init('7mzcdm/ubumaths',{
+//   release:version
+// })
 // LogRocket.getSessionURL((sessionURL) => {
 //   Sentry.configureScope((scope) => {
 //     scope.setExtra('sessionURL', sessionURL)

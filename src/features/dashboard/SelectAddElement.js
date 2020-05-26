@@ -84,7 +84,7 @@ function SelectAddElement({
       // console.log('name', name)
       const value = filter[name]
       // console.log('value', value)
-      elementId = value + '-'
+      elementId = value + '_'
     }
     elementId = elementId + name
   }
@@ -96,7 +96,7 @@ function SelectAddElement({
     // console.log('value', value)
     dependanceName = name
     dependanceValue = value
-    newElementId = value + '-'
+    newElementId = value + '_'
   }
   newElementId = newElementId + newName
   // console.log('id', elementId)

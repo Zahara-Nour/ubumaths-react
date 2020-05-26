@@ -8,7 +8,7 @@ import EditIcon from '@material-ui/icons/Edit'
 
 function SchoolProfile({ id }) {
    
-  const [country, city, name] = id.split('-')
+  const [country, city, name] = id.split('_')
 
 
   return (

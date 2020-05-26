@@ -13,7 +13,6 @@ const useStyles = makeStyles(styles)
 
 function Home() {
   const classes = useStyles()
-throw new Error('Test error')
 
   // throw new Error('essai sentry')
   return (
