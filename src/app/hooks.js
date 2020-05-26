@@ -212,7 +212,7 @@ const useCards = ({ subject, domain, theme, level, listen }) => {
   return [data, isLoading, isError]
 }
 
-const useFilters = (filters) => {
+const useFilters = (filters=[]) => {
   const namesRef = useRef([])
   const valuesRef = useRef([])
   const filtersRef = useRef(filters)
@@ -235,7 +235,7 @@ const useFilters = (filters) => {
 }
 
 const useCollection = ({ path, filters = [], listen = false }) => {
-  filters = useFilters(filters)
+  // filters = useFilters(filters)
   const dispatch = useDispatch()
   const emptyCollection = useMemo(() => [], [])
   const pathArray = useMemo(() => path.split('/'), [path])

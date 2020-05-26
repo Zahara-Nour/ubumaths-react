@@ -1,7 +1,6 @@
 import React, { useState, useMemo } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
+import { useDispatch } from 'react-redux'
 import {
-  selectIsLoadingOrSaving,
   SAVE_TYPES,
   saveDb,
   saveSuccess,
@@ -16,15 +15,18 @@ import AddIcon from '@material-ui/icons/Add'
 import NotifAlert from 'components/NotifAlert'
 import TextInput from 'components/TextInput'
 import Button from 'components/CustomButtons/Button'
-import { useWhatChanged } from 'app/hooks'
+import { useWhatChanged, useFilters } from 'app/hooks'
+
 
 function SelectAddElement({
   path,
   label,
   newLabel,
   children,
-  filter,
+  filters,
+  filterNameAppended = false,
   filterName,
+  add = true,
   ...rest
 }) {
   // console.log(' *** ', path)
@@ -38,14 +40,13 @@ function SelectAddElement({
   //   ...rest,
   // })
   const dispatch = useDispatch()
-  const IsLoadingOrSaving = useSelector(selectIsLoadingOrSaving)
+  filters=useFilters(filters)
 
-  // console.log('filters', filters)
-
-  const [elements, , isErrorElements] = useCollection({
+  const [isSaving, setIsSaving] = useState(false)
+  const [elements, isLoadingElements, isErrorElements] = useCollection({
     path,
-    filters: filter ? [filter] : [],
-    listen: true,
+    filters,
+    listen:add,
   })
   const [name, setName] = useState('')
   const [newName, setNewName] = useState('')
@@ -77,41 +78,41 @@ function SelectAddElement({
   let newElementId = ''
   let dependanceName = ''
   let dependanceValue = ''
+  let value = ''
 
-  if (name && elements.find((elt) => elt.name === name)) {
-    if (filter) {
-      const name = Object.getOwnPropertyNames(filter)[0]
+  if (name && filters.length && elements.find((elt) => elt.name === name)) {
+   
+    let name
+    filters.forEach((filter) => {
+      name = Object.getOwnPropertyNames(filter)[0]
       // console.log('name', name)
-      const value = filter[name]
+      value = value  ? value + '_' + filter[name] : filter[name] 
       // console.log('value', value)
-      elementId = value + '_'
-    }
-    elementId = elementId + name
-  }
-
-  if (filter) {
-    const name = Object.getOwnPropertyNames(filter)[0]
-    // console.log('name', name)
-    const value = filter[name]
-    // console.log('value', value)
+    })
     dependanceName = name
     dependanceValue = value
-    newElementId = value + '_'
+   
   }
-  newElementId = newElementId + newName
+  elementId = value ? value + '_' + name : name
+  newElementId = value ? value + '_' + newName : newName
+
   // console.log('id', elementId)
   // console.log('newid', newElementId)
 
-  const newFilter = useMemo(
-    () => ({
-      filter: { [filterName]: elementId },
-    }),
-    [filterName, elementId],
+  const newFilters = useMemo(
+    () =>
+      filterNameAppended
+        ? {
+            filters: [{ [filterName]: elementId }],
+          }
+        : filters.concat({ [filterName]: name }),
+    [filterName, elementId, filterNameAppended, filters, name],
   )
   // console.log('newFilters', newFilters)
-  const disabled = IsLoadingOrSaving || newName === '' || !!elementExists
+  const disabled = isLoadingElements || isSaving || newName === '' || !!elementExists
 
   const save = (path, document) => {
+    setIsSaving(true)
     const pathArray = path.split('/')
     const collection = pathArray[pathArray.length - 1]
     const type = SAVE_TYPES['SAVE_' + collection.toUpperCase()]
@@ -119,10 +120,12 @@ function SelectAddElement({
 
     return createDocument({ path, document })
       .then(() => {
+        setIsSaving(false)
         setSavedSuccess(true)
         dispatch(saveSuccess({ data: document, type, key }))
       })
       .catch((error) => {
+        setIsSaving(false)
         setSavedError(true)
         dispatch(saveFailure({ type, key }))
       })
@@ -133,7 +136,7 @@ function SelectAddElement({
       name: newName,
       id: newElementId,
     }
-    if (filter) {
+    if (filterNameAppended && filters.length) {
       document = { ...document, [dependanceName]: dependanceValue }
     }
     save(path, document).then(() => {
@@ -142,11 +145,17 @@ function SelectAddElement({
     })
   }
 
+  console.log('\nselect', label)
+  console.log('filters', filters)
+  console.log('name',name)
+  console.log('elementId',elementId)
+  console.log('newFilters', newFilters)
+
   // console.log('elements', elements)
   return (
     <div>
       <GridContainer>
-        <GridItem xs={5}>
+        <GridItem xs={add ? 5 : 12}>
           <Select
             label={label}
             elements={elements}
@@ -154,29 +163,33 @@ function SelectAddElement({
             onChange={setName}
           />
         </GridItem>
-        <GridItem xs={5}>
-          <TextInput
-            label={
-              elementExists && !IsLoadingOrSaving
-                ? `${elementExists.name} existe déjà !`
-                : newLabel
-            }
-            text={newName}
-            onChange={setNewName}
-            error={!!elementExists && !IsLoadingOrSaving}
-          />
-        </GridItem>
-        <GridItem xs={2}>
-          <Button
-            disabled={disabled}
-            round
-            justIcon
-            color='rose'
-            onClick={saveNewElement}
-          >
-            <AddIcon />
-          </Button>
-        </GridItem>
+        {add && (
+          <GridItem xs={5}>
+            <TextInput
+              label={
+                elementExists && !isLoadingElements && !isSaving
+                  ? `${elementExists.name} existe déjà !`
+                  : newLabel
+              }
+              text={newName}
+              onChange={setNewName}
+              error={!!elementExists && !isLoadingElements && !isSaving}
+            />
+          </GridItem>
+        )}
+        {add && (
+          <GridItem xs={2}>
+            <Button
+              disabled={disabled}
+              round
+              justIcon
+              color='rose'
+              onClick={saveNewElement}
+            >
+              <AddIcon />
+            </Button>
+          </GridItem>
+        )}
       </GridContainer>
       {savedError && (
         <NotifAlert
@@ -195,7 +208,9 @@ function SelectAddElement({
           onClose={() => setSavedSuccess(false)}
         />
       )}
-      {name && children && React.cloneElement(children, {...newFilter, id:elementId})}
+      {name &&
+        children &&
+        React.cloneElement(children, { ...newFilters, id: elementId })}
     </div>
   )
 }

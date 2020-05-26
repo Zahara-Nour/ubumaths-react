@@ -1,11 +1,10 @@
 import React, { useState } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
+import { useDispatch } from 'react-redux'
 import {
   SAVE_TYPES,
   saveDb,
   saveSuccess,
   saveFailure,
-  selectIsLoadingOrSaving,
 } from 'features/db/dbSlice'
 import { createDocument } from 'features/db/db'
 import NotifAlert from 'components/NotifAlert'
@@ -17,10 +16,12 @@ import { useCollection } from 'app/hooks'
 import Button from 'components/CustomButtons/Button'
 import AddIcon from '@material-ui/icons/Add'
 
-function ListAdd({ path, newLabel }) {
+function ListAdd({ path, newLabel, add }) {
   const dispatch = useDispatch()
-  const IsLoadingOrSaving = useSelector(selectIsLoadingOrSaving)
-  const [elements, , isErrorElements] = useCollection({path, listen:true})
+
+  const [elements, isLoadingElements, isErrorElements] = useCollection({path, listen:true})
+  const [isSaving, setIsSaving] = useState(false)
+  console.log('list add elements ', elements)
   const [name, setName] = useState('')
   const [newName, setNewName] = useState('')
 
@@ -40,6 +41,7 @@ function ListAdd({ path, newLabel }) {
   const elementExists = exists(elements, newName)
 
   const save = (path, document) => {
+    setIsSaving(true)
     const pathArray = path.split('/')
     const collection = pathArray[pathArray.length - 1]
     const type = SAVE_TYPES['SAVE_' + collection.toUpperCase()]
@@ -47,10 +49,12 @@ function ListAdd({ path, newLabel }) {
 
     return createDocument({ path, document })
       .then(() => {
+        setIsSaving(false)
         setSavedSuccess(true)
         dispatch(saveSuccess({ data: document, type, key }))
       })
       .catch((error) => {
+        setIsSaving(false)
         setSavedError(true)
         dispatch(saveFailure({ type, key }))
       })
@@ -68,22 +72,22 @@ function ListAdd({ path, newLabel }) {
     })
   }
 
-  const disabled = IsLoadingOrSaving || newName === '' || !!elementExists
+  const disabled = isLoadingElements || isSaving || newName === '' || !!elementExists
 
 
   return (
     <div>
-      <GridContainer>
+      {add && (<GridContainer>
         <GridItem xs={6}>
           <TextInput
             label={
-              elementExists && !IsLoadingOrSaving
+              elementExists && !isLoadingElements && !isSaving
                 ? `${elementExists.name} existe déjà !`
                 : newLabel
             }
             text={newName}
             onChange={setNewName}
-            error={!!elementExists && !IsLoadingOrSaving}
+            error={!!elementExists && !isLoadingElements && !isSaving}
           />
         </GridItem>
         <GridItem xs={6}>
@@ -97,7 +101,7 @@ function ListAdd({ path, newLabel }) {
             <AddIcon />
           </Button>
         </GridItem>
-      </GridContainer>
+      </GridContainer>)}
       <List elements={elements} />
       {savedError && (
         <NotifAlert

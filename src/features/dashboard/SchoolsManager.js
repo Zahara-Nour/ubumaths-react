@@ -55,18 +55,21 @@ function SchoolsManager() {
                   label='Pays'
                   newLabel='Nouveau Pays'
                   filterName='country'
+                  filterNameAppended
                 >
                   <SelectAddElement
                     path='Cities'
                     label='Ville'
                     newLabel='Nouvelle Ville'
                     filterName='city'
+                    filterNameAppended
                   >
                     <SelectAddElement
                       path='Schools'
                       label='Ecole'
                       newLabel='Nouvelle école'
                       filterName='school'
+                      filterNameAppended
                     >
                       <Portal
                         container={portalRef.current}

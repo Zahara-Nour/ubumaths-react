@@ -9,6 +9,7 @@ import EditIcon from '@material-ui/icons/Edit'
 function SchoolProfile({ id }) {
    
   const [country, city, name] = id.split('_')
+  console.log('schoolid', id)
 
 
   return (
@@ -21,7 +22,7 @@ function SchoolProfile({ id }) {
       <CardBody>
         <h3>{name}</h3>
         <h4>{country} - {city}</h4>
-        <ListAdd path={`Schools/${id}/Classrooms`} newLabel='Nouvelle classe'/>
+        <ListAdd path={`Schools/${id}/Classrooms`} newLabel='Nouvelle classe' add/>
       </CardBody>
     </Card>
   )
