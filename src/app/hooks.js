@@ -6,17 +6,6 @@ import {
   fetchDb,
   fetchSuccess,
   fetchFailure,
- 
-  selectSubjects,
-  setSubjects,
-  selectThemes,
-  selectDomains,
-  setThemes,
-  setDomains,
-  selectGrades,
-  setGrades,
-  selectCardslevels,
-  addCardsLevels,
   FETCH_TYPES,
   setCollection,
   selectCollection,
@@ -26,16 +15,8 @@ import {
 import {
   fetchAssessments,
   fetchStudents,
-  fetchCards,
-  fetchSubjects,
-  fetchDomains,
-  fetchThemes,
-  fetchGrades,
-  fetchCardsLevels,
-  listenCards,
   fetchCollection,
   listenCollection,
-  
 } from '../features/db/db'
 
 import { compareArrays } from './utils'
@@ -130,89 +111,7 @@ const useStudents = () => {
   return [data, isLoading, isError]
 }
 
-const useGrades = () => {
-  const grades = useSelector(selectGrades)
-  const dispatch = useDispatch()
-  const [data, setData] = useState([])
-
-  const [isLoading, setIsLoading] = useState(false)
-  const [isError, setIsError] = useState(false)
-
-  useEffect(() => {
-    const fetchData = async () => {
-      setIsError(false)
-      setIsLoading(true)
-
-      const key = dispatch(fetchDb({ type: FETCH_TYPES.FETCH_GRADES }))
-      try {
-        const result = await fetchGrades()
-        if (result.length !== 0) {
-          setData(result)
-          dispatch(
-            fetchSuccess({ data: result, type: FETCH_TYPES.FETCH_GRADES, key }),
-          )
-          dispatch(setGrades({ grades: result }))
-        } else {
-          throw new Error('Grades list is empty')
-        }
-      } catch (error) {
-        setIsError(error.message)
-        dispatch(fetchFailure({ error: error.message, key }))
-      }
-      setIsLoading(false)
-    }
-    if (grades.length === 0) {
-      fetchData()
-    } else {
-      setData(grades)
-    }
-  }, [dispatch, grades])
-
-  return [data, isLoading, isError]
-}
-
-const useCards = ({ subject, domain, theme, level, listen }) => {
-  const dispatch = useDispatch()
-  const [data, setData] = useState([])
-
-  const [isLoading, setIsLoading] = useState(false)
-  const [isError, setIsError] = useState(false)
-  const [fetched, setFetched] = useState(false)
-
-  useEffect(() => {
-    const fetchData = async () => {
-      setIsError(false)
-      setIsLoading(true)
-
-      const key = dispatch(fetchDb({ type: FETCH_TYPES.FETCH_CARDS }))
-      try {
-        let result = await fetchCards(subject, domain, theme, level)
-        setData(result)
-        dispatch(
-          fetchSuccess({ data: result, type: FETCH_TYPES.FETCH_CARDS, key }),
-        )
-        setFetched(true)
-      } catch (error) {
-        setIsError(error.message)
-        dispatch(fetchFailure({ error: error.message, key }))
-      }
-      setIsLoading(false)
-    }
-    fetchData()
-  }, [dispatch, theme, domain, subject, level])
-
-  useEffect(() => {
-    let unsubscribe = () => {}
-    if (fetched && listen) {
-      unsubscribe = listenCards(subject, domain, theme, level, setData)
-    }
-    return unsubscribe
-  }, [subject, domain, theme, level, fetched, listen])
-
-  return [data, isLoading, isError]
-}
-
-const useFilters = (filters=[]) => {
+const useFilters = (filters = []) => {
   const namesRef = useRef([])
   const valuesRef = useRef([])
   const filtersRef = useRef(filters)
@@ -234,8 +133,16 @@ const useFilters = (filters=[]) => {
   }
 }
 
-const useCollection = ({ path, filters = [], listen = false }) => {
-  // filters = useFilters(filters)
+const useCollection = ({
+  path,
+  filters = [],
+  listen = false,
+  extract,
+  sort,
+}) => {
+  const emptyFilters = useMemo(()=>[],[])
+  if (!filters) filters = emptyFilters
+  filters = useFilters(filters)
   const dispatch = useDispatch()
   const emptyCollection = useMemo(() => [], [])
   const pathArray = useMemo(() => path.split('/'), [path])
@@ -257,6 +164,7 @@ const useCollection = ({ path, filters = [], listen = false }) => {
         if (init) {
           init = false
           if (!documentFoundInState) {
+            console.log(`--fetch success for ${path} : `,data)
             dispatch(fetchSuccess({ data, type, key }))
             dispatch(setCollection({ path, documents: data, filters }))
             setIsLoading(false)
@@ -270,7 +178,8 @@ const useCollection = ({ path, filters = [], listen = false }) => {
     [path, dispatch, filters, emptyCollection, documentFoundInState],
   )
 
-  // console.log('*** collection', path)
+  // console.log('\n*** useCollection', path)
+  // console.log('filters', filters)
 
   // if (documents) console.log('documents successfully found in state', documents)
 
@@ -286,7 +195,7 @@ const useCollection = ({ path, filters = [], listen = false }) => {
   //   path,
   //   documentFoundInState,
   //   isLoading,
-  //   isListening,
+
   // })
   // console.log('***********')
 
@@ -297,13 +206,14 @@ const useCollection = ({ path, filters = [], listen = false }) => {
         filters &&
         filters.find((filter) => !filter[Object.getOwnPropertyNames(filter)[0]])
       ) &&
-      path 
+      path
     ) {
+      console.log(`--listening ${path}`, filters)
       let key
       if (!documentFoundInState) {
         setIsError(false)
         setIsLoading(true)
-
+        console.log(`--fetching ${path}`)
         key = dispatch(fetchDb({ type }))
       }
       let unsubscribe = () => {}
@@ -313,15 +223,14 @@ const useCollection = ({ path, filters = [], listen = false }) => {
           filters,
           onChange: handleUpdate(key, type),
         })
-        
-        
       } catch (error) {
         setIsError(error.message)
         setIsLoading(false)
         dispatch(fetchFailure({ error: error.message, key, type }))
       }
-      return  () => {
+      return () => {
         //in case component is unmount before fetch is fullfilled : remove in queue
+        console.log(`--unlistening ${path}`)
         dispatch(fetchRemove({ key, type }))
         unsubscribe()
       }
@@ -334,7 +243,6 @@ const useCollection = ({ path, filters = [], listen = false }) => {
     type,
     path,
     documentFoundInState,
-    
   ])
 
   useEffect(() => {
@@ -347,16 +255,17 @@ const useCollection = ({ path, filters = [], listen = false }) => {
         let result = await fetchCollection({ path, filters })
         if (result.length === 0) result = emptyCollection
         // console.log(`result ${collection}`, result)
+
         dispatch(fetchSuccess({ data: result, type, key }))
-        dispatch(setCollection({ collection, documents: result, filters }))
+        dispatch(setCollection({ path, documents: result, filters }))
         setIsLoading(false)
       } catch (error) {
-        console.error(`error fetching ${collection}`, error.message)
+        console.error(`error fetching ${path}`, error.message)
         setIsError(error.message)
         dispatch(fetchFailure({ error: error.message, key }))
         setIsLoading(false)
       }
-      return  () => {
+      return () => {
         //in case component is unmount before fetch is fullfilled : remove in queue
         dispatch(fetchRemove({ key, type }))
       }
@@ -383,173 +292,19 @@ const useCollection = ({ path, filters = [], listen = false }) => {
     type,
     path,
     emptyCollection,
+    extract,
   ])
 
-  return [documents || emptyCollection, isLoading, isError]
-}
-
-const useCardsLevels = (subject, domain) => {
-  const cardLevels = useSelector(selectCardslevels)
-
-  const dispatch = useDispatch()
-  const [data, setData] = useState([])
-  const [isLoading, setIsLoading] = useState(false)
-  const [isError, setIsError] = useState(false)
-
-  useEffect(() => {
-    const fetchData = async () => {
-      setIsError(false)
-      setIsLoading(true)
-
-      const key = dispatch(fetchDb({ type: FETCH_TYPES.FETCH_CARDS_LEVELS }))
-      try {
-        const result = await fetchCardsLevels(subject, domain)
-        dispatch(
-          fetchSuccess({
-            data: result,
-            type: FETCH_TYPES.FETCH_CARDS_LEVELS,
-            key,
-          }),
-        )
-        if (result.length > 0) {
-          setData(result)
-          dispatch(addCardsLevels({ cardsLevels: result }))
-        }
-      } catch (error) {
-        setIsError(error.message)
-        dispatch(fetchFailure({ error: error.message, key }))
-      }
-      setIsLoading(false)
+  const treatedDocuments = useMemo(() => {
+    let returnedDocument = documents || []
+    if (sort) returnedDocument = returnedDocument.slice().sort(sort)
+    if (extract) {
+      returnedDocument = returnedDocument.map((doc) => doc[extract])
     }
+    return returnedDocument
+  }, [documents, sort, extract])
 
-    if (
-      domain &&
-      subject &&
-      !cardLevels.find(
-        (card) => card.subject === subject && card.domain === domain,
-      )
-    ) {
-      fetchData()
-    } else {
-      setData(cardLevels)
-    }
-  }, [dispatch, domain, subject, cardLevels])
-
-  return [data, isLoading, isError]
-}
-
-const useThemes = (subject, domain, grade) => {
-  const themes = useSelector(selectThemes(subject, domain))
-  const dispatch = useDispatch()
-  const [data, setData] = useState([])
-
-  const [isLoading, setIsLoading] = useState(false)
-  const [isError, setIsError] = useState(false)
-
-  useEffect(() => {
-    const fetchData = async () => {
-      setIsError(false)
-      setIsLoading(true)
-      const key = dispatch(fetchDb({ type: FETCH_TYPES.FETCH_THEMES }))
-      try {
-        let result = await fetchThemes(subject, domain)
-        if (result.length > 0 && grade) {
-          result = result.filter((theme) => theme.grade === grade)
-        }
-        setData(result)
-        dispatch(
-          fetchSuccess({ data: result, type: FETCH_TYPES.FETCH_THEMES, key }),
-        )
-        dispatch(setThemes({ themes: result, subject, domain }))
-      } catch (error) {
-        setIsError(error.message)
-        dispatch(fetchFailure({ error: error.message, key }))
-      }
-      setIsLoading(false)
-    }
-    if (!themes && subject && domain) {
-      fetchData()
-    } else if (themes) {
-      setData(themes)
-    }
-  }, [dispatch, themes, domain, subject, grade])
-
-  return [data, isLoading, isError]
-}
-
-const useDomains = (subject) => {
-  const domains = useSelector(selectDomains(subject))
-  const dispatch = useDispatch()
-  const [data, setData] = useState([])
-
-  const [isLoading, setIsLoading] = useState(false)
-  const [isError, setIsError] = useState(false)
-
-  useEffect(() => {
-    const fetchData = async () => {
-      setIsError(false)
-      setIsLoading(true)
-
-      const key = dispatch(fetchDb({ type: FETCH_TYPES.FETCH_DOMAINS }))
-      try {
-        const result = await fetchDomains(subject)
-        setData(result)
-        dispatch(
-          fetchSuccess({ data: result, type: FETCH_TYPES.FETCH_DOMAINS, key }),
-        )
-        dispatch(setDomains({ domains: result, subject }))
-      } catch (error) {
-        setIsError(error.message)
-        dispatch(fetchFailure({ error: error.message, key }))
-      }
-      setIsLoading(false)
-    }
-    if (!domains && subject) {
-      fetchData()
-    } else if (domains) {
-      setData(domains)
-    }
-  }, [dispatch, domains, subject])
-
-  return [data, isLoading, isError]
-}
-
-const useSubjects = () => {
-  const subjects = useSelector(selectSubjects)
-  const dispatch = useDispatch()
-  const [data, setData] = useState([])
-
-  const [isLoading, setIsLoading] = useState(false)
-  const [isError, setIsError] = useState(false)
-
-  useEffect(() => {
-    const fetchData = async () => {
-      setIsError(false)
-      setIsLoading(true)
-
-      const key = dispatch(fetchDb({ type: FETCH_TYPES.FETCH_SUBJECTS }))
-      try {
-        const result = await fetchSubjects()
-        setData(result)
-        dispatch(
-          fetchSuccess({ data: result, type: FETCH_TYPES.FETCH_SUBJECTS, key }),
-        )
-        dispatch(setSubjects({ subjects: result }))
-      } catch (error) {
-        setIsError(error.message)
-        dispatch(fetchFailure({ error: error.message, key }))
-      }
-      setIsLoading(false)
-    }
-
-    if (subjects.length === 0) {
-      fetchData()
-    } else {
-      setData(subjects)
-    }
-  }, [dispatch, subjects])
-
-  return [data, isLoading, isError]
+  return [treatedDocuments, isLoading, isError]
 }
 
 let cachedScripts = []
@@ -620,7 +375,7 @@ function useWhatChanged(name, props) {
   // Get a mutable ref object where we can store props ...
   // ... for comparison next time this hook runs.
 
-  console.log('//// useWhatChanged   -------')
+  // console.log('//// useWhatChanged   -------')
   const previousProps = useRef()
   let report
   if (previousProps.current) {
@@ -654,22 +409,41 @@ function useWhatChanged(name, props) {
 
   // Finally update previousProps with current props for next hook call
   previousProps.current = props
-  console.log('------ useWhatChanged   /////')
+  // console.log('------ useWhatChanged   /////')
   return report
 }
 
+function useDebounce(value, delay) {
+  // State and setters for debounced value
+  const [debouncedValue, setDebouncedValue] = useState(value);
+
+  useEffect(
+    () => {
+      // Update debounced value after delay
+      const handler = setTimeout(() => {
+        setDebouncedValue(value);
+      }, delay);
+
+      // Cancel the timeout if value changes (also on delay change or unmount)
+      // This is how we prevent debounced value from updating if value is changed ...
+      // .. within the delay period. Timeout gets cleared and restarted.
+      return () => {
+        clearTimeout(handler);
+      };
+    },
+    [value, delay] // Only re-call effect if value or delay changes
+  );
+
+  return debouncedValue;
+}
+
 export {
-  useSubjects,
-  useThemes,
-  useDomains,
   useInterval,
   useAssessments,
   useStudents,
   useScript,
-  useCards,
-  useGrades,
-  useCardsLevels,
   useCollection,
   useFilters,
   useWhatChanged,
+  useDebounce
 }

@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { useCollection } from 'app/hooks'
-import List from './List'
+import List from '../../components/List'
 import Button from 'components/CustomButtons/Button'
 import { Container } from '@material-ui/core'
 import GridContainer from 'components/Grid/GridContainer'
@@ -20,7 +20,7 @@ import {
   saveFailure,
 } from 'features/db/dbSlice'
 import AddIcon from '@material-ui/icons/Add'
-import { saveToCollection, createDocument } from 'features/db/db'
+import {  createDocument } from 'features/db/db'
 import SnackbarContent from 'components/Snackbar/SnackbarContent'
 
 function Roles() {
@@ -28,7 +28,6 @@ function Roles() {
   const collection = 'Roles'
   const IsLoadingOrSaving = useSelector(selectIsLoadingOrSaving)
   const [roles, ,] = useCollection({ path: 'Roles', listen: true })
-  const [role, setRole] = useState(0)
   const [newRole, setNewRole] = useState('')
 
   const [savedError, setSavedError] = useState(false)

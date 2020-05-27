@@ -1,49 +1,49 @@
-import React, { useState } from 'react'
+import React from 'react'
 // @material-ui/core components
-import { makeStyles } from '@material-ui/core/styles'
-import Switch from '@material-ui/core/Switch'
-import FormControlLabel from '@material-ui/core/FormControlLabel'
+// import { makeStyles } from '@material-ui/core/styles'
+// import Switch from '@material-ui/core/Switch'
+// import FormControlLabel from '@material-ui/core/FormControlLabel'
 // core components
-import styles from 'assets/jss/customCheckboxRadioSwitch.js'
-import { useDispatch, useSelector } from 'react-redux'
-import { selectIsLoadingOrSaving } from 'features/db/dbSlice'
-import { useCollection } from 'app/hooks'
+// import styles from 'assets/jss/customCheckboxRadioSwitch.js'
+// import { useDispatch, useSelector } from 'react-redux'
+// import { selectIsLoadingOrSaving } from 'features/db/dbSlice'
+// import { useCollection } from 'app/hooks'
 
-const useStyles = makeStyles(styles)
+// const useStyles = makeStyles(styles)
 
  function Users() {
-  const classes = useStyles()
-  const [checked, setChecked] = useState(false)
+  // const classes = useStyles()
+  // const [checked, setChecked] = useState(false)
  
-  const dispatch = useDispatch()
-  const IsLoadingOrSaving = useSelector(selectIsLoadingOrSaving)
-  const [countries, , isErrorCountries] = useCollection({
-    path: 'Countries',
-    listen: true,
-  })
-  const [country, setCountry] = useState('')
+  // const dispatch = useDispatch()
+  // const IsLoadingOrSaving = useSelector(selectIsLoadingOrSaving)
+  // const [countries, , isErrorCountries] = useCollection({
+  //   path: 'Countries',
+  //   listen: true,
+  // })
+  // const [country, setCountry] = useState('')
   
 
-  const [cities, , isErrorCities] = useCollection({
-    path: 'Cities',
-    filters: [{ country }],
-    listen: true,
-  })
-  const [city, setCity] = useState('')
+  // const [cities, , isErrorCities] = useCollection({
+  //   path: 'Cities',
+  //   filters: [{ country }],
+  //   listen: true,
+  // })
+  // const [city, setCity] = useState('')
  
 
-  const [schools, , isErrorSchools] = useCollection({
-    path: 'Schools',
-    filters: [{ country }, { city }],
-    listen: true,
-  })
-  const [school, setSchool] = useState('')
+  // const [schools, , isErrorSchools] = useCollection({
+  //   path: 'Schools',
+  //   filters: [{ country }, { city }],
+  //   listen: true,
+  // })
+  // const [school, setSchool] = useState('')
 
 
 
   return (
     <div>
-      <div>
+      {/* <div>
         <FormControlLabel
           control={
             <Switch
@@ -63,7 +63,7 @@ const useStyles = makeStyles(styles)
           }}
           label='Chercher par nom ou email'
         />
-      </div>
+      </div> */}
     </div>
   )
 }

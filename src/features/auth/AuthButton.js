@@ -22,7 +22,7 @@ export default function AuthButton() {
   const [auth2, setAuth2] = useState()
   const dispatch = useDispatch()
   const isLoggedIn = useSelector(selectIsLoggedIn)
-  const [loaded, error] = useScript('https://apis.google.com/js/api.js')
+  const [loaded, ] = useScript('https://apis.google.com/js/api.js')
   const ClientId =
     '702572178697-3pdjj0caro5u0ttpft17ppc0fnlmol1p.apps.googleusercontent.com'
 
@@ -58,12 +58,12 @@ export default function AuthButton() {
               .signInWithCredential(credential)
               .catch(function (error) {
                 // Handle Errors here.
-                var errorCode = error.code
-                var errorMessage = error.message
-                // The email of the user's account used.
-                var email = error.email
-                // The firebase.auth.AuthCredential type that was used.
-                var credential = error.credential
+                // var errorCode = error.code
+                // var errorMessage = error.message
+                // // The email of the user's account used.
+                // var email = error.email
+                // // The firebase.auth.AuthCredential type that was used.
+                // var credential = error.credential
                 // ...
                 console.error('error while authenticating in Firebase', error)
               })

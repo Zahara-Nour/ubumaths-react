@@ -11,7 +11,7 @@ import { useSelector } from 'react-redux'
 import Home from 'components/Home'
 import NavBar from 'components/NavBar'
 import FlashCards from 'features/flash-cards/FlashCards'
-import DbCache from './DbCache'
+// import DbCache from './DbCache'
 import Error404 from 'components/Error404'
 import Technical from 'components/Technical'
 

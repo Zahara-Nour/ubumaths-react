@@ -1,20 +1,20 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Helmet } from 'react-helmet'
 import { Switch, Route } from 'react-router-dom'
 import DisplayFlashCards from './DisplayFlashCards'
 import NavBar from 'components/NavBar'
 import { useSelector } from 'react-redux'
 import { selectMaintenanceMode } from 'features/maintenance/maintenanceSlice'
-import SelectGrade from './SelectGrade'
+
 import ThemesList from './ThemesList'
-import { Container, CircularProgress } from '@material-ui/core'
+import { Container } from '@material-ui/core'
 import GridContainer from 'components/Grid/GridContainer'
 import GridItem from 'components/Grid/GridItem'
 import Maintenance from 'components/Maintenance'
-import SelectSubject from './SelectSubject'
-import SelectDomain from './SelectDomain'
-import SelectTheme from './SelectTheme'
-import { useSubjects, useDomains, useThemes, useGrades } from 'app/hooks'
+
+import {  useCollection } from 'app/hooks'
+import Filter from 'components/Filter'
+import Select from 'components/Select'
 
 function FlashCards({ match }) {
   const maintenance = useSelector(selectMaintenanceMode)
@@ -28,7 +28,7 @@ function FlashCards({ match }) {
           name='description'
           content='Créer et utiliser des jeux de Flash Cards pour réviser une matière, une notion.'
         />
-        <meta name='keywords' content='Flash, Cards, math, latex'/>
+        <meta name='keywords' content='Flash, Cards, math, latex' />
       </Helmet>
       <Switch>
         <Route exact path={`${match.url}`} render={() => <Home />} />
@@ -43,44 +43,54 @@ function FlashCards({ match }) {
 }
 
 function Home() {
-  const [grades, , isErrorGrades] = useGrades()
+  const [grades, ,] = useCollection({path:'Grades'})
   const [grade, setGrade] = useState('')
-  const [subjects, , isErrorSubjects] = useSubjects()
-  const [subject, setSubject] = useState('')
-  const [domains, , isErrorDomains] = useDomains(subject)
-  const [domain, setDomain] = useState('')
-  const [themes, , isErrorThemes] = useThemes(subject, domain)
-  const [theme, setTheme] = useState('')
+  console.log('grades', grades)
+
+  useEffect(()=> {
+    if (grades && grades.length) {
+      console.log('setGrade', grades[0])
+      setGrade(grades[0].name)
+    }
+  },[grades])
 
   return (
     <>
       <NavBar />
       <Container fixed>
         <GridContainer>
-          <GridItem xs={12} sm={12} md={3} lg={3}>
-            <h2>Flash Cards</h2>
-
-            <SelectSubject
-              subjects={subjects}
-              subject={subject}
-              onChange={setSubject}
+          <GridItem xs={12} sm={12} md={6} lg={6}>
+            <h3>Flash Cards</h3>
+            <Select
+              label='Niveau'
+              elements={grades}
+              selected={grade}
+              onChange={setGrade}
             />
-
-            <SelectDomain
-              domains={domains}
-              domain={domain}
-              onChange={setDomain}
-            />
-
-            <SelectTheme themes={themes} theme={theme} onChange={setTheme} />
-
-            <SelectGrade grades={grades} grade={grade} onChange={setGrade} />
-
-            <ThemesList subject={subject} domain={domain} grade={grade} />
+            <Filter
+              type='select'
+              path='Subjects'
+              label='Matière'
+              newLabel='Nouvelle matière'
+              filterName='subject'
+           
+            >
+              <Filter
+               type='select'
+                path='Domains'
+                label='Domaine'
+                newLabel='Nouveau domaine'
+                filterName='domain'
+                filterNameAppended
+              >
+                <ThemesList grade={grade} />
+              </Filter>
+            </Filter>
           </GridItem>
         </GridContainer>
       </Container>
     </>
   )
 }
+
 export default FlashCards

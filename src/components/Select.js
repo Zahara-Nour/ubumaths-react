@@ -1,44 +1,45 @@
 import React, { useEffect } from 'react'
 import {
-  Select,
+  Select as MuiSelect,
   FormControl,
   InputLabel,
   MenuItem,
   makeStyles,
 } from '@material-ui/core'
-
 import styles from 'assets/jss/customSelectStyle.js'
 
 const useStyles = makeStyles(styles)
 
-function SelectTheme({ themes, theme, onChange }) {
+function Select({ label, elements, selected, onChange }) {
   const classeNames = useStyles()
+  const handleSelect = (evt) => onChange(evt.target.value)
 
-  const handleTheme = (evt) => onChange(evt.target.value)
+  // console.log(`select ${label} ${selected}`, elements)
 
-  useEffect(() => {
-    if (themes && themes.length > 0 && (!theme || !themes.includes(theme))) onChange(themes[0].label)
-  }, [themes, onChange, theme])
-
-  if (!themes || themes.length === 0) return null
-
+  if (!elements || elements.length === 0 || !selected) return null
+  // console.log(`Going to render ${label}`)
   return (
     <FormControl fullWidth className={classeNames.selectFormControl}>
       <InputLabel htmlFor='simple-select' className={classeNames.selectLabel}>
-        Thème
+        {label}
       </InputLabel>
-      <Select
+      <MuiSelect
         MenuProps={{
           className: classeNames.selectMenu,
         }}
         classes={{
           select: classeNames.select,
         }}
-        value={theme}
-        onChange={handleTheme}
+        //  value={ element }
+        value={
+          selected && elements.find((elt) => elt.name === selected)
+            ? selected
+            : ''
+        }
+        onChange={handleSelect}
         inputProps={{
-          name: 'choose-theme',
-          id: 'choose-theme',
+          name: `choose-${label}`,
+          key: `choose-${label}`, // to preserve focus
         }}
       >
         <MenuItem
@@ -48,23 +49,23 @@ function SelectTheme({ themes, theme, onChange }) {
             root: classeNames.selectMenuItem,
           }}
         >
-          Thème
+          {label}
         </MenuItem>
-        {themes.map((theme) => (
+        {elements.map((element) => (
           <MenuItem
-            key={theme.id}
+            key={element.name}
             classes={{
               root: classeNames.selectMenuItem,
               selected: classeNames.selectMenuItemSelected,
             }}
-            value={theme.label}
+            value={element.name}
           >
-            {theme.label}
+            {element.name}
           </MenuItem>
         ))}
-      </Select>
+      </MuiSelect>
     </FormControl>
   )
 }
 
-export default SelectTheme
+export default Select

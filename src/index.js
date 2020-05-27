@@ -11,8 +11,8 @@ import { BrowserRouter as Router } from 'react-router-dom'
 import { createBrowserHistory } from 'history'
 import LogRocket from 'logrocket'
 import setupLogRocketReact from 'logrocket-react'
-import * as Sentry from '@sentry/browser'
-import { version } from '../package.json'
+// import * as Sentry from '@sentry/browser'
+// import { version } from '../package.json'
 
 // // if (process.env.NODE_ENV === 'production') {
 // Sentry.init({

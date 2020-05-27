@@ -1,5 +1,8 @@
-import React from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import CustomInput from 'components/CustomInput/CustomInput'
+// const throttleFunc = require('lodash.throttle')
+import { throttle as throttleFunc } from 'lodash'
+
 
 function TextInput({
   label,
@@ -8,7 +11,29 @@ function TextInput({
   success = false,
   error = false,
   multiline = false,
+  throttle,
+  defaultText
 }) {
+
+  const changeValue = useRef(
+    throttleFunc((value) => {
+      // console.log('throotle', value)
+      onChange(value)
+    }, throttle,{leading:true})
+  )
+
+  const [innerText, setInnerText] = useState(text || '')
+
+  const innerOnChange = (evt) => {
+    const value = evt.target.value
+    if (throttle) {
+      setInnerText(value)
+      changeValue.current(value)
+    } else onChange(value)
+  }
+
+  useEffect(()=> setInnerText(defaultText),[defaultText])
+
   return (
     <CustomInput
       labelText={label}
@@ -19,8 +44,8 @@ function TextInput({
       }}
       inputProps={{
         type: 'text',
-        value: text || '', // to ensure input being considered as a controlled component,
-        onChange: (evt) => onChange(evt.target.value),
+        value: (throttle ? innerText : text) || '', // to ensure input being considered as a controlled component,
+        onChange: innerOnChange,
         multiline,
       }}
     />

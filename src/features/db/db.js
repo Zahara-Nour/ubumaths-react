@@ -18,11 +18,15 @@ firebase.initializeApp(firebaseConfig)
 const db = firebase.firestore()
 
 const fetchCollection = ({ path, filters }) => {
+  // console.log('dbfetch path', path)
+  // console.log('dbfetch filters', filters)
   const pathArray = path.split('/')
   let documents = []
   let collectionRef = db.collection(pathArray.shift())
   while (pathArray.length > 0) {
-    collectionRef = collectionRef.doc(pathArray.shift()).collection(pathArray.shift())
+    collectionRef = collectionRef
+      .doc(pathArray.shift())
+      .collection(pathArray.shift())
   }
 
   filters.forEach((filter) => {
@@ -38,14 +42,11 @@ const fetchCollection = ({ path, filters }) => {
         documents.push({ ...doc.data(), id: doc.id })
       })
       documents.sort((a, b) => lexicoSort(a.name, b.name))
-      console.log(`fetch successful in collection ${path}`, documents)
+      console.log(`fetch successful in collection ${path}`, documents, filters)
       return documents
     })
     .catch((error) =>
-      console.error(
-        `Error while fetching collection ${path} `,
-        error,
-      ),
+      console.error(`Error while fetching collection ${path} `, error),
     )
 }
 
@@ -53,10 +54,12 @@ const listenCollection = ({ path, filters, onChange }) => {
   // console.log('listenCollection',path.join('/'))
   // console.log('path', path)
   const pathArray = path.split('/')
-  
+
   let collectionRef = db.collection(pathArray.shift())
   while (pathArray.length > 0) {
-    collectionRef = collectionRef.doc(pathArray.shift()).collection(pathArray.shift())
+    collectionRef = collectionRef
+      .doc(pathArray.shift())
+      .collection(pathArray.shift())
   }
 
   // console.log('collection set')
@@ -83,10 +86,7 @@ const listenCollection = ({ path, filters, onChange }) => {
       onChange(documents)
     },
     (error) =>
-      console.error(
-        `Error while listening collection ${path} : `,
-        error,
-      ),
+      console.error(`Error while listening collection ${path} : `, error),
   )
   return unsubscribe
 }
@@ -142,187 +142,6 @@ function fetchStudents(user) {
     })
 }
 
-function fetchCards(subject, domain, theme, level) {
-  const cards = []
-  const filters = []
-
-  if (subject) filters.push(['subject', subject])
-  if (domain) filters.push(['domain', domain])
-  if (theme) filters.push(['theme', theme])
-  if (level) filters.push(['level', level])
-
-  let request = db.collection('FlashCards')
-  for (let i = 0; i < filters.length; i++) {
-    if (filters[i][1]) {
-      request = request.where(filters[i][0], '==', filters[i][1])
-    } else {
-      break
-    }
-  }
-
-  request = request
-    .get()
-    .then((docs) => {
-      docs.forEach((doc) => {
-        cards.push({ ...doc.data(), id: doc.id })
-      })
-      cards.sort((a, b) => {
-        if (a.title < b.title) return -1
-        if (a.title > b.title) return 1
-        return 0
-      })
-      return cards
-    })
-    .catch((error) =>
-      console.error('Error while fetching cards : ', error.message),
-    )
-
-  return request
-}
-
-function listenCards(subject, domain, theme, level, onChange) {
-  let cards = []
-  const filters = [
-    ['subject', subject],
-    ['domain', domain],
-    ['theme', theme],
-    ['level', level],
-  ]
-  let request = db.collection('FlashCards')
-  for (let i = 0; i < filters.length; i++) {
-    if (filters[i][1]) {
-      request = request.where(filters[i][0], '==', filters[i][1])
-    } else {
-      break
-    }
-  }
-
-  request = request.onSnapshot(
-    (docs) => {
-      cards = []
-      docs.forEach((doc) => {
-        cards.push({ ...doc.data(), id: doc.id })
-      })
-      cards.sort((a, b) => {
-        if (a.title < b.title) return -1
-        if (a.title > b.title) return 1
-        return 0
-      })
-      onChange(cards)
-    },
-    (error) => console.error('Error while listening cards : ', error.message),
-  )
-
-  return request
-}
-
-function fetchCardsLevels(subject, domain) {
-  const levelCards = []
-
-  return db
-    .collection('FlashCards')
-    .where('subject', '==', subject)
-    .where('domain', '==', domain)
-    .get()
-    .then((docs) => {
-      docs.forEach((doc) => {
-        const data = doc.data()
-        const { level, theme, grade } = data
-        const levelCard = levelCards.find(
-          (card) =>
-            card.theme === theme &&
-            card.subject === subject &&
-            card.domain === domain,
-        )
-        if (levelCard) {
-          levelCard.levels[grade] = levelCard.levels[grade].includes(level)
-            ? levelCard.levels[grade]
-            : levelCard.levels[grade].concat(level).sort((a, b) => a - b)
-        } else {
-          levelCards.push({
-            subject,
-            domain,
-            theme,
-            levels: { [grade]: [level] },
-          })
-        }
-      })
-      return levelCards
-    })
-    .catch((error) =>
-      console.error('Error while fetching cardsLevels : ', error.message),
-    )
-}
-
-function fetchGrades() {
-  return db
-    .collection('Globals')
-    .doc('structure')
-    .get()
-    .then((doc) => {
-      if (doc.exists) {
-        return doc.data().grades
-      } else {
-        console.error("document doesn't exist")
-        return []
-      }
-    })
-    .catch((error) =>
-      console.error('Error while fetching grades : ', error.message),
-    )
-}
-
-function fetchSubjects() {
-  const subjects = []
-  return db
-    .collection('Globals')
-    .doc('curriculum')
-    .collection('Subjects')
-    .get()
-    .then((docs) => {
-      docs.forEach((doc) => subjects.push(doc.data().label))
-      return subjects
-    })
-    .catch((error) =>
-      console.error('Error while fetching subjects : ', error.message),
-    )
-}
-
-function fetchDomains(subject) {
-  const domains = []
-  return db
-    .collection('Globals')
-    .doc('curriculum')
-    .collection('Domains')
-    .where('subject', '==', subject)
-    .get()
-    .then((docs) => {
-      docs.forEach((doc) => domains.push(doc.data().label))
-      return domains
-    })
-    .catch((error) =>
-      console.error('Error while fetching domains : ', error.message),
-    )
-}
-
-function fetchThemes(subject, domain) {
-  const themes = []
-  return db
-    .collection('Globals')
-    .doc('curriculum')
-    .collection('Themes')
-    .where('subject', '==', subject)
-    .where('domain', '==', domain)
-    .get()
-    .then((docs) => {
-      docs.forEach((doc) => themes.push({ ...doc.data(), id: doc.id }))
-      return themes
-    })
-    .catch((error) =>
-      console.error('Error while fetching themes : ', error.message),
-    )
-}
-
 function saveCard(card) {
   if (card.id) {
     const { id, ...rest } = card
@@ -345,7 +164,9 @@ function createDocument({ path, document }) {
   const pathArray = path.split('/')
   let collectionRef = db.collection(pathArray.shift())
   while (pathArray.length > 0) {
-    collectionRef = collectionRef.doc(pathArray.shift()).collection(pathArray.shift())
+    collectionRef = collectionRef
+      .doc(pathArray.shift())
+      .collection(pathArray.shift())
   }
 
   if (document.id) {
@@ -354,7 +175,10 @@ function createDocument({ path, document }) {
       .doc(id)
       .set(rest)
       .then(() =>
-        console.log(`Document ${id} successfully added in collection ${path}`, rest),
+        console.log(
+          `Document ${id} successfully added in collection ${path}`,
+          rest,
+        ),
       )
       .catch((error) =>
         console.error(
@@ -400,7 +224,7 @@ function saveDocument({ path, document }) {
     )
     .catch((error) =>
       console.error(
-        `Error while saving document ${id} in ${collection}`,
+        `Error while updating document ${id} in ${collection}`,
         error,
       ),
     )
@@ -427,16 +251,9 @@ function fetchDocument({ path, id }) {
 }
 
 export {
-  listenCards,
   saveCard,
   fetchAssessments,
   fetchStudents,
-  fetchCards,
-  fetchSubjects,
-  fetchDomains,
-  fetchThemes,
-  fetchGrades,
-  fetchCardsLevels,
   fetchCollection,
   listenCollection,
   createDocument,

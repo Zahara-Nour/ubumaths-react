@@ -1,9 +1,9 @@
 import React from 'react'
-import { useSubjects, useGrades } from './hooks'
+// import { useSubjects, useGrades } from './hooks'
 
 function DbCache() {
-    useSubjects()
-    useGrades()
+    // useSubjects()
+    // useGrades()
 
     return null
 }

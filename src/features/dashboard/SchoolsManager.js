@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from 'react'
+import React, { useRef, useState } from 'react'
 
 import GridContainer from 'components/Grid/GridContainer'
 import GridItem from 'components/Grid/GridItem'
@@ -8,22 +8,22 @@ import CardIcon from 'components/Card/CardIcon'
 import CardBody from 'components/Card/CardBody'
 import SchoolIcon from '@material-ui/icons/School'
 import { Container } from '@material-ui/core'
-import SelectAddElement from './SelectAddElement'
-import Portal from './Portal'
+import FilterSelect from '../../components/Filter'
+import Portal from '../../components/Portal'
 import SchoolProfile from './SchoolProfile'
 import { useSelector } from 'react-redux'
 import {
   selectIsAdmin,
   selectIsReferent,
   selectUser,
-  selectRoles,
+
 } from 'features/auth/authSlice'
 
 function SchoolsManager() {
   const portalRef = useRef(null)
 
   // bug : portal does'n appear without a rerender
-  const [portalRendered, setPortalRendered] = useState(false)
+  const [, setPortalRendered] = useState(false)
 
   const isAdmin = useSelector(selectIsAdmin)
   const isReferent = useSelector(selectIsReferent)
@@ -50,21 +50,21 @@ function SchoolsManager() {
               <CardBody>
                 <h3>Etablissements scolaires</h3>
 
-                <SelectAddElement
+                <FilterSelect
                   path='Countries'
                   label='Pays'
                   newLabel='Nouveau Pays'
                   filterName='country'
                   filterNameAppended
                 >
-                  <SelectAddElement
+                  <FilterSelect
                     path='Cities'
                     label='Ville'
                     newLabel='Nouvelle Ville'
                     filterName='city'
                     filterNameAppended
                   >
-                    <SelectAddElement
+                    <FilterSelect
                       path='Schools'
                       label='Ecole'
                       newLabel='Nouvelle école'
@@ -79,9 +79,9 @@ function SchoolsManager() {
                       >
                         <SchoolProfile />
                       </Portal>
-                    </SelectAddElement>
-                  </SelectAddElement>
-                </SelectAddElement>
+                    </FilterSelect>
+                  </FilterSelect>
+                </FilterSelect>
               </CardBody>
             </Card>
           </GridItem>

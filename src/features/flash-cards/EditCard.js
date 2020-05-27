@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 // @material-ui/core components
 import { makeStyles } from '@material-ui/core/styles'
+import { math } from 'tinycas/build/math/math'
 
 // core components
 
@@ -11,41 +12,53 @@ import CardBody from 'components/Card/CardBody.js'
 import EditIcon from '@material-ui/icons/Edit'
 
 import styles from 'assets/jss/views/regularFormsStyle'
-import SelectGrade from './SelectGrade'
+
 import GridContainer from 'components/Grid/GridContainer'
 import GridItem from 'components/Grid/GridItem'
 
-import { useGrades, useSubjects, useDomains, useThemes } from 'app/hooks'
+import { useCollection } from 'app/hooks'
 import emptyCard from './emptyCard'
 import TextInput from '../../components/TextInput'
 import NumberInput from '../../components/NumberInput'
 import EditVariables from './EditVariables'
 import EditButtons from './EditButtons'
 import { CircularProgress } from '@material-ui/core'
-import SelectSubject from './SelectSubject'
-import SelectDomain from './SelectDomain'
-import SelectTheme from './SelectTheme'
+import Select from 'components/Select'
+import Filter from 'components/Filter'
+import { compareArrays } from 'app/utils'
 
 const useStyles = makeStyles(styles)
 
-function EditCard({ card, onNewCard, onSave, saving }) {
+function EditCard({
+  card = emptyCard,
+  onNewCard,
+  onGeneratedCard,
+  onSave,
+  saving,
+}) {
   const classes = useStyles()
-  const [subjects, isLoadingSubjects, isErrorSubjects] = useSubjects()
-  const [subject, setSubject] = useState(card.subject)
-  const [domains, isLoadingDomains, isErrorDomains] = useDomains(subject)
-  const [domain, setDomain] = useState(card.domain)
-  const [themes, isLoadingThemes, isErrorThemes] = useThemes(subject, domain)
-  const [theme, setTheme] = useState(card.theme)
   const [title, setTitle] = useState('')
+  const [defaultTitle, setDefaultTitle] = useState('')
   const [enounce, setEnounce] = useState('')
+  const [defaultEnounce, setDefaultEnounce] = useState('')
   const [answer, setAnswer] = useState('')
+  const [defaultAnswer, setDefaultAnswer] = useState('')
   const [explanation, setExplanation] = useState('')
+  const [defaultExplanation, setDefaultExplanation] = useState('')
   const [warning, setWarning] = useState('')
-  const [grades, isLoadingGrades, isErrorGrades] = useGrades()
+  const [defaultWarning, setDefaultWarning] = useState('')
+  const [grades, isLoadingGrades] = useCollection({
+    path: 'Grades',
+  })
   const [grade, setGrade] = useState('')
   const [level, setLevel] = useState(1)
   const [variables, setVariables] = useState({})
-  const [newCard, setNewCard] = useState({ ...emptyCard})
+  const [generatedVariables, setGeneratedVariables] = useState({})
+  const [newCard, setNewCard] = useState({ ...emptyCard })
+  const [generatedCard, setGeneratedCard] = useState({ ...emptyCard })
+
+  const [defaultFilters, setDefaultFilters] = useState([])
+  const defaultFiltersRef = useRef([])
 
   const getIdVariables = () =>
     Object.getOwnPropertyNames(variables)
@@ -59,15 +72,25 @@ function EditCard({ card, onNewCard, onSave, saving }) {
     throw new Error('too much variables')
   }
 
-  const editVariable = (name) => (value) =>
+  const editVariable = (name) => (value) => {
     setVariables({ ...variables, [name]: value })
+    setGeneratedVariables({
+      ...variables,
+      [name]: value ? math(value).generate().latex : '',
+    })
+  }
 
-  const addVariable = () =>
-    setVariables((variables) => ({ ...variables, [`&${getNextId()}`]: '' }))
+  const addVariable = () => {
+    const nextId = getNextId()
+    setVariables((variables) => ({ ...variables, [`&${nextId}`]: '' }))
+    setGeneratedVariables((variables) => ({ ...variables, [`&${nextId}`]: '' }))
+  }
 
   const deleteVariable = (name) => () => {
     const { [name]: tmp, ...rest } = variables
     setVariables({ ...rest })
+    const { [name]: tmp2, ...rest2 } = generatedVariables
+    setGeneratedVariables({ ...rest2 })
   }
 
   const createCard = () => {
@@ -80,35 +103,50 @@ function EditCard({ card, onNewCard, onSave, saving }) {
   }
 
   const duplicateCard = () => {
-    const title = newCard.title + ' (copie)'
+    const name = newCard.name + ' (copie)'
     const { id, ...rest } = newCard
     onSave({
       ...rest,
-      title,
+      name,
     })
   }
 
   useEffect(() => {
     if (card) {
-      setNewCard(c => ({...c, id:card.id}))
-      setTitle(card.title || '')
+      setNewCard((c) => ({ ...c, id: card.id }))
+      setTitle(card.name || '')
+      setDefaultTitle(card.name || '')
       setEnounce(card.enounce || '')
+      setDefaultEnounce(card.enounce || '')
       setAnswer(card.answer || '')
+      setDefaultAnswer(card.answer || '')
       setExplanation(card.explanation || '')
+      setDefaultExplanation(card.explanation || '')
       setWarning(card.warning || '')
+      setDefaultWarning(card.warning || '')
       setVariables({ ...card.variables })
+      const generated = {}
+
+      Object.getOwnPropertyNames(card.variables).forEach((name) => {
+        generated[name] = math(card.variables[name]).generate().latex
+      })
+      // console.log('generated variables', generated)
+      setGeneratedVariables(generated)
       setGrade(card.grade || '')
       setLevel(card.level || '')
-      setSubject(card.subject || '')
-      setDomain(card.domain || '')
-      setTheme(card.theme || '')
+
+      setDefaultFilters([
+        { subject: card.subject },
+        { domain: card.domain },
+        { theme: card.theme },
+      ])
     }
   }, [card])
 
   useEffect(() => {
     setNewCard((card) => ({
       ...card,
-      title,
+      name: title,
       enounce,
       answer,
       explanation,
@@ -116,10 +154,23 @@ function EditCard({ card, onNewCard, onSave, saving }) {
       grade,
       level,
       variables,
-      subject,
-      domain,
-      theme,
     }))
+  }, [title, enounce, answer, explanation, warning, grade, level, variables])
+
+  useEffect(() => {
+    setGeneratedCard((card) => {
+      return {
+        ...card,
+        name: title,
+        enounce,
+        answer,
+        explanation,
+        warning,
+        grade,
+        level,
+        variables: generatedVariables,
+      }
+    })
   }, [
     title,
     enounce,
@@ -128,16 +179,26 @@ function EditCard({ card, onNewCard, onSave, saving }) {
     warning,
     grade,
     level,
-    variables,
-    subject,
-    domain,
-    theme,
+    generatedVariables,
   ])
 
   useEffect(() => {
-  
     onNewCard(newCard)
   }, [newCard, onNewCard])
+
+  useEffect(() => {
+    onGeneratedCard(generatedCard)
+  }, [generatedCard, onGeneratedCard])
+
+  function GetFilters({ id }) {
+    const [subject, domain, theme] = id.split('_')
+    if (!compareArrays([subject, domain, theme], defaultFiltersRef.current)) {
+      setNewCard((card) => ({ ...card, subject, domain, theme }))
+      setGeneratedCard((card) => ({ ...card, subject, domain, theme }))
+    }
+    defaultFiltersRef.current = [subject, domain, theme]
+    return null
+  }
 
   if (!card) return null
 
@@ -149,18 +210,39 @@ function EditCard({ card, onNewCard, onSave, saving }) {
         </CardIcon>
       </CardHeader>
       <CardBody>
-        <TextInput label='Titre' text={title} onChange={setTitle} />
-        <TextInput label='Enoncé' text={enounce} onChange={setEnounce} />
-        <TextInput label='Réponse' text={answer} onChange={setAnswer} />
+        <TextInput
+          label='Titre'
+          defaultText={defaultTitle}
+          onChange={setTitle}
+          throttle={500}
+        />
+        <TextInput
+          label='Enoncé'
+          defaultText={defaultEnounce}
+          onChange={setEnounce}
+          multiline
+          throttle={500}
+        />
+        <TextInput
+          label='Réponse'
+          defaultText={defaultAnswer}
+          onChange={setAnswer}
+          multiline
+          throttle={500}
+        />
         <TextInput
           label='Explication'
-          text={explanation}
+          defaultText={defaultExplanation}
           onChange={setExplanation}
+          multiline
+          throttle={500}
         />
         <TextInput
           label='Avertissement'
-          text={warning}
+          defaultText={defaultWarning}
           onChange={setWarning}
+          multiline
+          throttle={500}
         />
 
         <GridContainer alignItems='center'>
@@ -168,7 +250,7 @@ function EditCard({ card, onNewCard, onSave, saving }) {
             {isLoadingGrades ? (
               <CircularProgress />
             ) : (
-              <SelectGrade grades={grades} grade={grade} onChange={setGrade} />
+              <Select elements={grades} selected={grade} onChange={setGrade} />
             )}
           </GridItem>
           <GridItem xs={6}>
@@ -176,33 +258,56 @@ function EditCard({ card, onNewCard, onSave, saving }) {
           </GridItem>
         </GridContainer>
 
-        {isLoadingSubjects ? (
-          <CircularProgress />
-        ) : (
-          <SelectSubject
-            subjects={subjects}
-            subject={subject}
-            onChange={setSubject}
-          />
-        )}
-        {subjects.length > 0 && isLoadingDomains ? (
-          <CircularProgress />
-        ) : (
-          <SelectDomain
-            domains={domains}
-            domain={domain}
-            onChange={setDomain}
-          />
-        )}
-        {domains.length > 0 && isLoadingThemes ? (
-          <CircularProgress />
-        ) : (
-          <SelectTheme themes={themes} theme={theme} onChange={setTheme} />
-        )}
+        <Filter
+          type='select'
+          path='Subjects'
+          label='Matière'
+          filterName='subject'
+          defaultFilters={defaultFilters}
+        >
+          <Filter
+            type='select'
+            path='Domains'
+            label='Domaine'
+            filterName='domain'
+            filterNameAppended
+          >
+            <Filter
+              type='select'
+              path='Themes'
+              label='Thème'
+              filterName='theme'
+              filterNameAppended
+            >
+              <GetFilters />
+            </Filter>
+          </Filter>
+        </Filter>
+
+        {/* <Select
+          label={'Matière'}
+          elements={subjects}
+          selected={subject}
+          onChange={setSubject}
+        />
+
+        <Select
+          label={'Domaine'}
+          elements={domains}
+          selected={domain}
+          onChange={setDomain}
+        />
+
+        <Select
+          label={'Theme'}
+          elements={themes}
+          selected={theme}
+          onChange={setTheme}
+        /> */}
 
         <br />
         <EditVariables
-        variables={variables}
+          variables={variables}
           onAdd={addVariable}
           onDelete={deleteVariable}
           onChange={editVariable}

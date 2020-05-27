@@ -14,11 +14,11 @@ export default function NumberSelect({ name, value, onClick }) {
     onClick(value - 1)
   }
 
-  const flexContainerColumn = {
-    display: 'flex',
-    flexDirection: 'column'
+  // const flexContainerColumn = {
+  //   display: 'flex',
+  //   flexDirection: 'column'
 
-  }
+  // }
 
   const flexContainerRow = {
     display: 'flex',

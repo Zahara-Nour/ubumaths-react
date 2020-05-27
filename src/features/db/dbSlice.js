@@ -19,42 +19,6 @@ const dbSlice = createSlice({
   name: 'db',
   initialState: initialState,
   reducers: {
-    addCardsLevels(state, action) {
-      state.cardsLevels = state.cardsLevels.concat(action.payload.cardsLevels)
-    },
-
-    setCountries(state, action) {
-      state.countries = action.payload.countries
-    },
-
-    setCities(state, action) {
-      state.domcitiesains[action.payload.country] = action.payload.cities
-    },
-
-    setSchools(state, action) {
-      state.schools[action.payload.country] = {
-        ...state.schools[action.payload.country],
-        [action.payload.city]: action.payload.schools,
-      }
-    },
-
-    setGrades(state, action) {
-      state.grades = action.payload.grades
-    },
-    setSubjects(state, action) {
-      state.subjects = action.payload.subjects
-    },
-
-    setDomains(state, action) {
-      state.domains[action.payload.subject] = action.payload.domains
-    },
-
-    setThemes(state, action) {
-      state.themes[action.payload.subject] = {
-        ...state.themes[action.payload.subject],
-        [action.payload.domain]: action.payload.themes,
-      }
-    },
 
     setCollection(state, action) {
       const { path, filters, documents } = action.payload
@@ -95,6 +59,7 @@ const dbSlice = createSlice({
       state.saveError[type] = ''
       state.queue.push(key)
     },
+
     saveFailure(state, action) {
       const key = action.payload.key
       const type = action.payload.type
@@ -103,6 +68,7 @@ const dbSlice = createSlice({
       state.saveError[type] = action.payload.error
       state.queue.splice(state.queue.indexOf(key), 1)
     },
+
     saveSuccess(state, action) {
       const key = action.payload.key
       const type = action.payload.type
@@ -111,6 +77,7 @@ const dbSlice = createSlice({
       state.saveError[type] = action.payload.error
       state.queue.splice(state.queue.indexOf(key), 1)
     },
+
     saveReset(state) {
       state.saving = false
       state.saved = false
@@ -175,8 +142,7 @@ export const FETCH_TYPES = {
   FETCH_STUDENTS: 'students',
   FETCH_USER: 'user',
   FETCH_ASSIGNED_ASSESSMENTS: 'assigned-assessments',
-  FETCH_CARDS: 'cards',
-  FETCH_CARDS_LEVELS: 'cards-levels',
+  FETCH_FLASHCARDS: 'flash-cards',
   FETCH_THEMES: 'themes',
   FETCH_DOMAINS: 'domains',
   FETCH_SUBJECTS: 'subjects',
@@ -189,11 +155,15 @@ export const FETCH_TYPES = {
 }
 
 export const SAVE_TYPES = {
+  SAVE_SUBJECTS: 'subjects',
+  SAVE_DOMAINS: 'domains',
+  SAVE_THEMES: 'themes',
   SAVE_COUNTRIES: 'countries',
   SAVE_CITIES: 'cities',
   SAVE_SCHOOLS: 'schools',
   SAVE_ROLES: 'roles',
   SAVE_CLASSROOMS: 'classrooms',
+  SAVE_FLASHCARDS: 'flash-cards',
 }
 
 export const {
@@ -206,31 +176,19 @@ export const {
   fetchFailure,
   fetchReset,
   fetchRemove,
-  setDomains,
-  setSubjects,
-  setThemes,
-  setGrades,
-  setCities,
-  setCountries,
-  setSchools,
   setCollection,
-  addCardsLevels,
   update,
   
 } = dbSlice.actions
 
-const selectGrades = (state) => state.db.grades
-const selectSubjects = (state) => state.db.subjects
-const selectDomains = (subject) => (state) => state.db.domains[subject]
-const selectThemes = (subject, domain) => (state) =>
-  state.db.themes[subject] && state.db.themes[subject][domain]
+
+
 const selectFetching = (type) => (state) => state.db.fetching[type]
 const selectFetched = (type) => (state) => state.db.fetched[type]
 const selectFetchError = (type) => (state) => state.db.fetchError[type]
 const selectSaving = (type) => (state) => state.db.saving[type]
 const selectSaved = (type) => (state) => state.db.saved[type]
 const selectSaveError = (type) => (state) => state.db.saveError[type]
-const selectCardslevels = (state) => state.db.cardsLevels
 const selectIsLoadingOrSaving = (state) => state.db.queue.length > 0
 const selectCollection = (collection, filters) => (state) => {
   let result = state.db[collection]
@@ -263,11 +221,6 @@ export {
   selectFetched,
   selectFetching,
   selectFetchError,
-  selectDomains,
-  selectThemes,
-  selectSubjects,
-  selectGrades,
-  selectCardslevels,
   selectIsLoadingOrSaving,
   selectCollection,
 }

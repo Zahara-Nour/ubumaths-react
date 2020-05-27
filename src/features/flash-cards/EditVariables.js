@@ -29,8 +29,9 @@ function EditVariables({ variables, onAdd, onChange, onDelete }) {
           <GridItem xs={6}>
             <TextInput
               label={name}
-              text={variables[name]}
-              onChange={(evt) => onChange(name)(evt.target.value)}
+              defaultText={variables[name]}
+              onChange={(value) => onChange(name)(value)}
+              throttle={500}
             />
           </GridItem>
           <GridItem xs={3}>
