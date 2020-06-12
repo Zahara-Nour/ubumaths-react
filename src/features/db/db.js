@@ -1,7 +1,8 @@
 import firebase from 'firebase/app'
 import 'firebase/firestore'
+import 'firebase/storage'
 import { saveAs } from 'file-saver'
-import { lexicoSort } from 'app/utils'
+import { lexicoSort, getLogger } from 'app/utils'
 
 const firebaseConfig = {
   apiKey: 'AIzaSyAMnIlAk2yqGItw5EfTCLqj2SdJF6Q5620',
@@ -16,10 +17,12 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig)
 
 const db = firebase.firestore()
+const storage = firebase.storage().ref()
 
 const fetchCollection = ({ path, filters }) => {
-  // console.log('dbfetch path', path)
-  // console.log('dbfetch filters', filters)
+  const { error, info, trace } = getLogger('fetchCollection')
+  trace(`  fetching ${path} with filters :`, filters)
+
   const pathArray = path.split('/')
   let documents = []
   let collectionRef = db.collection(pathArray.shift())
@@ -41,13 +44,10 @@ const fetchCollection = ({ path, filters }) => {
       docs.forEach((doc) => {
         documents.push({ ...doc.data(), id: doc.id })
       })
-      documents.sort((a, b) => lexicoSort(a.name, b.name))
-      console.log(`fetch successful in collection ${path}`, documents, filters)
+      info(`  fetched ${path} :`, documents)
       return documents
     })
-    .catch((error) =>
-      console.error(`Error while fetching collection ${path} `, error),
-    )
+    .catch((err) => error(`Error while fetching collection ${path} :`, err))
 }
 
 const listenCollection = ({ path, filters, onChange }) => {
@@ -161,6 +161,7 @@ function saveCard(card) {
 }
 
 function createDocument({ path, document }) {
+  console.log('creating doc :', document)
   const pathArray = path.split('/')
   let collectionRef = db.collection(pathArray.shift())
   while (pathArray.length > 0) {
@@ -191,17 +192,16 @@ function createDocument({ path, document }) {
     return doc
       .set(document)
       .then(() =>
-        console
-          .log(
-            `Document ${doc.id} successfully added in collection ${path}`,
-            document,
-          )
-          .catch((error) =>
-            console.error(
-              `Error while saving document ${doc.id} in collection ${path}`,
-              error,
-            ),
-          ),
+        console.log(
+          `Document ${doc.id} successfully added in collection ${path}`,
+          document,
+        ),
+      )
+      .catch((error) =>
+        console.error(
+          `Error while saving document ${doc.id} in collection ${path}`,
+          error,
+        ),
       )
   }
 }
@@ -260,4 +260,5 @@ export {
   saveDocument,
   fetchDocument,
 }
+export {storage}
 export default db

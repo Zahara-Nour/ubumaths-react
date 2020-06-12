@@ -11,7 +11,7 @@ import CardBody from 'components/Card/CardBody.js'
 
 
 import { Container } from '@material-ui/core'
-import Footer from './Footer/Footer'
+import Footer from './Footer'
 import { makeStyles } from '@material-ui/core/styles'
 import styles from 'assets/jss/homeStyle.js'
 

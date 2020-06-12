@@ -5,26 +5,44 @@ import { Link } from 'react-router-dom'
 import List from 'components/List'
 import GridContainer from 'components/Grid/GridContainer'
 import GridItem from 'components/Grid/GridItem'
+import { useSelector } from 'react-redux'
+import { selectUser } from 'features/auth/authSlice'
+import { useHistory } from 'react-router-dom'
+import { getLogger } from 'app/utils'
 
-function ThemesList({ id, grade }) {
+function ThemesList({ id, grade, user }) {
+  const {trace} = getLogger('ThemesList')
   const [subject, domain] = id.split('_')
+  const uid = useSelector(selectUser).email
+  const history = useHistory()
+  trace('id : ', id)
+  
 
-  const [grades, , ] = useCollection({
+  const [grades, ,] = useCollection({
     path: 'Grades',
     extract: 'name',
   })
-  const [cards, , ] = useCollection({
+  const [cards, ,] = useCollection({
     path: 'FlashCards',
-    filters: [{ subject }, { domain }],
+    filters: user ? [{subject}, {uid}] : [{ subject }, { domain }],
   })
-  const [themes, , ] = useCollection({
+  const [themes, ,] = useCollection({
     path: 'Themes',
-    filters: [{ domain: `${subject}_${domain}` }],
+    filters: user
+      ? [{ subject }, { uid }]
+      : [{ domain: `${subject}_${domain}` }],
   })
 
+  trace('cards', cards)
+  trace('themes', themes)
+  trace('user', user)
+
+  if (themes.length === 0) return null
 
 
   const levelsByThemes = []
+
+  if (!user) {
   cards.forEach((card) => {
     const { level, theme, grade } = card
     const levelsTheme = levelsByThemes.find(
@@ -41,27 +59,26 @@ function ThemesList({ id, grade }) {
       })
     }
   })
+}
 
   const findLevels = (theme, grade) => {
     const levelsTheme = levelsByThemes.find((l) => l.theme === theme.name)
-    console.log(`levelsTheme for ${theme}`,levelsTheme)
-    const levels = grades.reduce(
-      (prev, current) => {
-        console.log('current', current)
-        console.log('grade', grade)
-        console.log(grades.indexOf(current) <= grades.indexOf(grade))
-        return grades.indexOf(current) <= grades.indexOf(grade)
-          ? prev.concat(levelsTheme.levels[current])
-          : prev
-      },
-      [],
-    )
+   
+    const levels = grades.reduce((prev, current) => {
+    
+      return grades.indexOf(current) <= grades.indexOf(grade)
+        ? prev.concat(levelsTheme.levels[current])
+        : prev
+    }, [])
     return levels
   }
 
+  
+  
+
   const buttons = (theme, grade) => {
     const levels = findLevels(theme, grade)
-    console.log('levels', levels)
+
     return (
       <GridContainer spacing={1}>
         {levels.map((level) => (
@@ -80,10 +97,17 @@ function ThemesList({ id, grade }) {
     )
   }
 
-  if (themes.length === 0) return null
+  const handleSelect = (theme) => {
+    let url = `/flash-cards/user/${subject}/${theme}`
+  url =url.replace(/%/g,'%25')
+  if (decodeURI(encodeURI(url)) !== url ) console.log ('*** URI malformed', url)
+  history.push(encodeURI(url))
+}
 
-  return (
-    <List elements={themes} >
+  return user ? (
+    <List elements={themes} onSelect={handleSelect} />
+  ) : (
+    <List elements={themes}>
       <div render={(theme) => buttons(theme, grade)} />
     </List>
   )

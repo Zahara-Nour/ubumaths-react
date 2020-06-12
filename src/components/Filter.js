@@ -1,12 +1,12 @@
-import React, { useState, useMemo, useEffect, useCallback } from 'react'
-import { useDispatch } from 'react-redux'
+import React, { useState, useMemo, useEffect } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
 import {
   SAVE_TYPES,
   saveDb,
   saveSuccess,
   saveFailure,
 } from 'features/db/dbSlice'
-import { useCollection } from 'app/hooks'
+import { useCollection, useWhyRendered } from 'app/hooks'
 import { createDocument } from 'features/db/db'
 import GridContainer from 'components/Grid/GridContainer'
 import GridItem from 'components/Grid/GridItem'
@@ -17,59 +17,63 @@ import TextInput from 'components/TextInput'
 import Button from 'components/CustomButtons/Button'
 import { useFilters } from 'app/hooks'
 import List from './List'
+import { selectUser } from 'features/auth/authSlice'
+import { getLogger } from 'app/utils'
 
-function Filter({
-  path,
-  label,
-  newLabel,
-  children,
-  filters,
-  defaultFilters,
-  filterNameAppended = false,
-  filterName,
-  type,
-  add = false,
-  sort,
-  render,
-  listen = false,
-  ...rest
-}) {
+function Filter(props) {
+  const {
+    path,
+    label,
+    newLabel,
+    children,
+    filters: filtersProp,
+    defaultFilters: defaultFiltersProp,
+    filterNameAppended = false,
+    filterName,
+    type,
+    add = false,
+    sort,
+    render,
+    listen = false,
+    user,
+  } = props
+
+  const { trace, debug } = getLogger(`Filter ${path}`)
+
   const dispatch = useDispatch()
+  const uid = useSelector(selectUser).email
   const [throwDefaults, setThrowDefaults] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
+  const emptyArray = useMemo(() => [], [])
 
+  trace(`>>>>> ${path}`)
   // most important : filters to trigger fetching collection and to set default names
-  // console.log(`\nparam defaultFilters for ${path}`, defaultFilters)
-  filters = useFilters(filters)
-  // console.log(`filters for ${path}`, filters)
-  defaultFilters = useFilters(defaultFilters)
-  // console.log('default filters', defaultFilters)
-
-  const defaults = useMemo(() => defaultFilters && !!defaultFilters.length, [
-    defaultFilters,
-  ])
 
   let dependanceName = ''
   let dependanceValue = ''
 
-  filters.forEach((filter) => {
-    dependanceName = Object.getOwnPropertyNames(filter)[0]
-    dependanceValue = dependanceValue
-      ? dependanceValue + '_' + filter[dependanceName]
-      : filter[dependanceName]
-  })
-  const dependance = useMemo(() => [{ [dependanceName]: dependanceValue }], [
-    dependanceName,
-    dependanceValue,
-  ])
+  if (filtersProp) {
+    filtersProp.forEach((filter) => {
+      dependanceName = Object.getOwnPropertyNames(filter)[0]
+      dependanceValue = dependanceValue
+        ? dependanceValue + '_' + filter[dependanceName]
+        : filter[dependanceName]
+    })
+  }
 
-  const [isSaving, setIsSaving] = useState(false)
-  const [elements, isLoadingElements] = useCollection({
-    path,
-    filters: filterNameAppended ? dependance : filters,
-    listen: add || listen,
-    sort,
-  })
-  // console.log(`${path} elements`, elements)
+  const newF = filtersProp
+    ? user
+      ? [{uid}].concat(filtersProp)
+      : filtersProp
+    : emptyArray
+
+  const filters = useFilters(newF)
+  // const filters = useFilters(filtersProp|| emptyArray)
+
+  let defaultFilters = useFilters(defaultFiltersProp || emptyArray)
+  const defaults = useMemo(() => defaultFilters && !!defaultFilters.length, [
+    defaultFilters,
+  ])
   const defaultName = useMemo(() => {
     if (defaults) {
       const filter = defaultFilters[0]
@@ -78,43 +82,57 @@ function Filter({
     } else return ''
   }, [defaults, defaultFilters])
 
-  // console.log(`dFilters for ${path} : `, dFilters)
+  const dependance = useMemo(() => [{ [dependanceName]: dependanceValue }], [
+    dependanceName,
+    dependanceValue,
+  ])
 
-  // console.log(
-  //   `getDefaultFilterValue for ${path}`,
-  //   dFilters && dFilters.length ? getDefaultFilterValue() : '',
-  // )
+  const [elements, isLoadingElements] = useCollection({
+    path,
+    filters: filterNameAppended ? dependance : filters,
+    listen: add || listen,
+    sort,
+  })
+
   const [name, setName] = useState('')
   const [newName, setNewName] = useState('')
   const [savedError, setSavedError] = useState(false)
   const [savedSuccess, setSavedSuccess] = useState(false)
-
-  // useWhatChanged(`${path} state changed`, {
-  //   elements,
-  //   name,
-  //   newName,
-  // })
+  const state = {
+    uid,
+    throwDefaults,
+    name,
+    elements,
+    isSaving,
+    savedError,
+    savedSuccess,
+  }
 
   useEffect(() => {
-    if (elements && elements.length && (!defaults)) {
-      // console.log(`going to set name of ${path} with `, elements[0].name)
+    if (elements && elements.length && !defaults) {
+      trace('[useEffect] set name to :', elements[0].name)
       setName(elements[0].name)
     }
   }, [elements, defaults])
 
   useEffect(() => {
-    // console.log('useEffect defaultFilers')
     if (defaults) {
-      // console.log(`going to set name of ${path} with default`, defaultName)
+      trace('[useEffect] set name to default:', defaultName)
       setName(defaultName)
       setThrowDefaults(false)
     }
   }, [defaults, defaultName])
 
-  const newFilters = useMemo(
-    () => ({ filters: filters.concat({ [filterName]: name }) }),
-    [filterName, filters, name],
-  )
+  const newFilters = useMemo(() => {
+    const newOnes = filters.concat({ [filterName]: name })
+    trace('newOnes', [...newOnes])
+    if (user) {
+    
+      newOnes.shift()
+      trace('newOnes', [...newOnes])
+    }
+    return newOnes
+  }, [filterName, filters, name, user])
 
   const checked =
     elements &&
@@ -122,20 +140,37 @@ function Filter({
     name &&
     elements.find((elt) => elt.name === name)
 
+  useWhyRendered('Filter', props, state)
+  trace('  filtersProp', filtersProp)
+  trace('  filters', filters)
+  trace('  defaultFiltersProp', defaultFiltersProp)
+  trace('  defaultFilters', defaultFilters)
+  trace('  defaults', defaults)
+  trace('  user', true)
+  debug('  elements :', elements)
+  debug('  name :', name)
+  trace('  newFilters', newFilters)
+  trace('  throwDefaults', throwDefaults)
+
   if (!checked) {
-    // console.log(`\n!!! check failed  for ${path}!!!`)
-    // console.log('elements', elements)
-    // console.log('name', name)
+    const reason = !elements
+      ? '!elements '
+      : !elements.length
+      ? 'elements empty'
+      : !name
+      ? 'name undefined'
+      : 'name not in elements'
+
+    trace('  check failed :', reason)
+    trace(`<<<<< ${path} \n\n`)
     return null
   }
 
-  if (throwDefaults) defaultFilters = []
+  if (throwDefaults) defaultFilters = emptyArray
+
+  const element = elements.find((elt) => elt.name === name)
 
   //remove accents, spaces ...
-  const element = elements.find((elt) => elt.name === name)
-  // console.log('name', name)
-  // console.log('elemneet', element)
-
   const cleanString = (str) =>
     str
       .normalize('NFD')
@@ -154,6 +189,16 @@ function Filter({
 
   const disabled =
     isLoadingElements || isSaving || newName === '' || !!elementExists
+
+  trace('  checking ok -> going to render')
+  trace('  element', element)
+  trace('  elementId', elementId)
+  trace('  disbled', disabled)
+  trace('  isloading', isLoadingElements)
+  trace('  isSaving', isSaving)
+  trace('  newName', newName)
+  trace('  elemntsExists', !!elementExists)
+  trace(`<<<<< ${path}\n\n`)
 
   const save = (path, document) => {
     setIsSaving(true)
@@ -176,12 +221,17 @@ function Filter({
   }
 
   const saveNewElement = () => {
-    let document = {
+    const document = {
       name: newName,
-      id: newElementId,
     }
     if (filterNameAppended && filters.length) {
-      document = { ...document, [dependanceName]: dependanceValue }
+      document[dependanceName] = dependanceValue
+    } else if (filters.length) {
+      filters.forEach((filter) => {
+        const name = Object.getOwnPropertyNames(filter)[0]
+        const value = filter[name]
+        document[name] = value
+      })
     }
     save(path, document).then(() => {
       setName(newName)
@@ -190,19 +240,9 @@ function Filter({
   }
 
   const errorInput = !!elementExists && !isLoadingElements && !isSaving
-  const inputLabel =
-    elementExists && !isLoadingElements && !isSaving
-      ? `${elementExists.name} existe déjà !`
-      : newLabel
-
-  // console.log('\nselect', label)
-  // console.log('filters', filters)
-  // console.log('name', name)
-  // console.log('elementId', elementId)
-  // console.log('newFilters', newFilters)
-  // console.log(elements.find((elt) => elt.name === name))
-
-  // console.log('elements', elements)
+  const inputLabel = !!elementExists
+    ? `${elementExists.name} existe déjà !`
+    : newLabel
 
   const addElement = (
     <GridContainer>
@@ -210,7 +250,10 @@ function Filter({
         <TextInput
           label={inputLabel}
           text={newName}
-          onChange={setNewName}
+          onChange={(name) => {
+            console.log('onChange name', name)
+            setNewName(name)
+          }}
           error={errorInput}
         />
       </GridItem>
@@ -221,6 +264,7 @@ function Filter({
           round
           justIcon
           color='rose'
+          size='sm'
           onClick={saveNewElement}
         >
           <AddIcon />
@@ -301,7 +345,7 @@ function Filter({
       {name &&
         children &&
         React.cloneElement(children, {
-          ...newFilters,
+          filters: newFilters,
           id: elementId,
           element,
           defaultFilters: defaults ? defaultFilters.slice(1) : [],

@@ -25,11 +25,15 @@ function TextInput({
   const [innerText, setInnerText] = useState(text || '')
 
   const innerOnChange = (evt) => {
+
     const value = evt.target.value
     if (throttle) {
       setInnerText(value)
       changeValue.current(value)
-    } else onChange(value)
+    } else {
+      
+      onChange(value)
+    }
   }
 
   useEffect(()=> setInnerText(defaultText),[defaultText])

@@ -1,6 +1,6 @@
 // @material-ui/icons
 import PeopleAltRoundedIcon from '@material-ui/icons/PeopleAltRounded'
-import FlashCardsManager from 'features/dashboard/FlashCardsManager'
+import FlashCardsManager from 'features/dashboard/flash-cards/FlashCardsManager'
 import DatabaseManager from 'features/dashboard/DatabaseManager'
 import StorageIcon from '@material-ui/icons/Storage'
 import { BsCardText } from 'react-icons/bs'

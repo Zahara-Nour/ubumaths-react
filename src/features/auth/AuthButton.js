@@ -16,7 +16,7 @@ import {
 import { selectIsLoggedIn } from './authSlice'
 import { RiLoginBoxLine } from 'react-icons/ri'
 import { RiLogoutBoxRLine } from 'react-icons/ri'
-import LogRocket from 'logrocket'
+// import LogRocket from 'logrocket'
 
 export default function AuthButton() {
   const [auth2, setAuth2] = useState()
@@ -91,9 +91,9 @@ export default function AuthButton() {
 
       dispatch(fetchUser({ id: profile.getEmail() }))
 
-      LogRocket.identify(userProfile.email, {
-        name: userProfile.name,
-      })
+      // LogRocket.identify(userProfile.email, {
+      //   name: userProfile.name,
+      // })
     },
     [dispatch],
   )

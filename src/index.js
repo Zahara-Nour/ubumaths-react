@@ -9,8 +9,11 @@ import { Provider } from 'react-redux'
 import * as serviceWorker from './app/serviceWorker'
 import { BrowserRouter as Router } from 'react-router-dom'
 import { createBrowserHistory } from 'history'
-import LogRocket from 'logrocket'
-import setupLogRocketReact from 'logrocket-react'
+// import LogRocket from 'logrocket'
+// import setupLogRocketReact from 'logrocket-react'
+import {setDefaultLevel} from 'loglevel'
+
+
 // import * as Sentry from '@sentry/browser'
 // import { version } from '../package.json'
 
@@ -29,7 +32,10 @@ import setupLogRocketReact from 'logrocket-react'
 //   })
 // })
 // }
-setupLogRocketReact(LogRocket)
+
+//setupLogRocketReact(LogRocket)
+
+setDefaultLevel('debug')
 
 const hist = createBrowserHistory()
 

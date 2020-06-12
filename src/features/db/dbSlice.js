@@ -19,36 +19,20 @@ const dbSlice = createSlice({
   name: 'db',
   initialState: initialState,
   reducers: {
-
     setCollection(state, action) {
       const { path, filters, documents } = action.payload
 
       if (!state[path]) state[path] = {}
-      const deepness = filters.length
+      let nested = state[path]
 
-      const modify = (substate, deepLevel) => {
-        if (deepLevel === deepness) return documents
-        const filter = filters[deepLevel]
+      filters.forEach((filter) => {
         const name = Object.getOwnPropertyNames(filter)[0]
         const value = filter[name]
-        return {
-          ...substate,
-          [value]: modify(
-            substate[value] ? substate[value] : {},
-            deepLevel + 1,
-          ),
-        }
-      }
+        if (!nested[value]) nested[value] = {}
+        nested = nested[value]
+      })
 
-      if (deepness === 0) {
-        state[path] = documents
-      } else {
-        try {
-          state[path] = modify(state[path], 0)
-        } catch (error) {
-          console.errror('error in setCollection')
-        }
-      }
+      nested.collection = documents
     },
 
     saveRequest(state, action) {
@@ -86,17 +70,15 @@ const dbSlice = createSlice({
 
     update(state, action) {
       // console.log('fetchrequest', action.payload)
-      const type = action.payload.type 
+      const type = action.payload.type
       state.fetched[type] = action.payload.data
     },
 
     fetchRemove(state, action) {
-
       const key = action.payload.key
       const type = action.payload.type
       state.fetching[type] = false
       state.queue.splice(state.queue.indexOf(key), 1)
-
     },
 
     fetchRequest(state, action) {
@@ -178,10 +160,7 @@ export const {
   fetchRemove,
   setCollection,
   update,
-  
 } = dbSlice.actions
-
-
 
 const selectFetching = (type) => (state) => state.db.fetching[type]
 const selectFetched = (type) => (state) => state.db.fetched[type]
@@ -191,15 +170,16 @@ const selectSaved = (type) => (state) => state.db.saved[type]
 const selectSaveError = (type) => (state) => state.db.saveError[type]
 const selectIsLoadingOrSaving = (state) => state.db.queue.length > 0
 const selectCollection = (collection, filters) => (state) => {
-  let result = state.db[collection]
-  if (!result) return null
+  let nested = state.db[collection]
+ 
   filters.forEach((filter) => {
     const name = Object.getOwnPropertyNames(filter)[0]
     const value = filter[name]
-    if (!result) return null
-    result = result[value]
+    if (!nested) return null
+    nested = nested[value]
   })
-  return result
+  if (!nested) return null
+  return nested.collection
 }
 
 let count = 0

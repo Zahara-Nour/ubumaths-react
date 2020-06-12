@@ -1,4 +1,4 @@
-import React  from 'react'
+import React from 'react'
 import cx from 'classnames'
 import { Switch, Route } from 'react-router-dom'
 
@@ -7,7 +7,7 @@ import { makeStyles } from '@material-ui/core/styles'
 
 // core components
 import AdminNavbar from 'components/AdminNavbar.js'
-import Footer from 'components/Footer/Footer.js'
+import Footer from 'components/Footer.js'
 import Sidebar from 'components/Sidebar/Sidebar.js'
 
 import getRoleRoutes from 'app/routes.js'
@@ -20,7 +20,6 @@ import { selectRoles } from 'features/auth/authSlice'
 const useStyles = makeStyles(styles)
 
 export default function Dashboard(props) {
-  
   const { ...rest } = props
   // states and functions
   const [mobileOpen, setMobileOpen] = React.useState(false)
@@ -53,16 +52,14 @@ export default function Dashboard(props) {
 
   const roles = useSelector(selectRoles)
 
-  
-    const routes = []
-    roles.forEach((role) => {
-      getRoleRoutes(role).forEach((route) => {
-        if (!routes.includes(route)) routes.push(route)
-      })
+  const routes = []
+  roles.forEach((role) => {
+    getRoleRoutes(role).forEach((route) => {
+      if (!routes.includes(route)) routes.push(route)
     })
-    
-  const getRoutes = (routes) => {
+  })
 
+  const getRoutes = (routes) => {
     return routes.map((prop, key) => (
       <Route
         path={props.match.path + prop.path}
@@ -71,8 +68,6 @@ export default function Dashboard(props) {
       />
     ))
   }
-
- 
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen)
@@ -109,7 +104,7 @@ export default function Dashboard(props) {
       />
       <div className={mainPanelClasses} ref={mainPanel}>
         <AdminNavbar
-          sidebarMinimize={sidebarMinimize.bind(this)}
+          sidebarMinimize={sidebarMinimize}
           miniActive={miniActive}
           brandText={getActiveRoute(routes)}
           handleDrawerToggle={handleDrawerToggle}

@@ -28,3 +28,5 @@ report*
 firebase.json
 
 /private
+
+cors.json

@@ -31,11 +31,13 @@ import {
   selectMaintenanceMode,
   trigerMaintenanceMode,
 } from 'features/maintenance/maintenanceSlice'
+import { selectIsAdmin } from 'features/auth/authSlice'
 
 const useStyles = makeStyles(styles)
 
 export default function HeaderLinks(props) {
   const maintenanceMode = useSelector(selectMaintenanceMode)
+  const isAdmin = useSelector(selectIsAdmin)
   const dispatch = useDispatch()
   const [openNotification, setOpenNotification] = React.useState(null)
   const handleClickNotification = (event) => {
@@ -80,7 +82,7 @@ export default function HeaderLinks(props) {
   })
   return (
     <div className={wrapper}>
-      <CustomInput
+      {/* <CustomInput
         rtlActive={rtlActive}
         formControlProps={{
           className: classes.top + ' ' + classes.search,
@@ -92,8 +94,8 @@ export default function HeaderLinks(props) {
             className: classes.searchInput,
           },
         }}
-      />
-      <Button
+      /> */}
+      {/* <Button
         color='white'
         aria-label='edit'
         justIcon
@@ -101,8 +103,8 @@ export default function HeaderLinks(props) {
         className={searchButton}
       >
         <Search className={classes.headerLinksSvg + ' ' + classes.searchIcon} />
-      </Button>
-      <Button
+      </Button> */}
+      {/* <Button
         color='transparent'
         simple
         aria-label='Dashboard'
@@ -124,7 +126,7 @@ export default function HeaderLinks(props) {
             {rtlActive ? 'لوحة القيادة' : 'Dashboard'}
           </span>
         </Hidden>
-      </Button>
+      </Button> */}
       <div className={managerClasses}>
         <Button
           color='transparent'
@@ -297,23 +299,11 @@ export default function HeaderLinks(props) {
           )}
         </Popper>
       </div>
-      {maintenanceMode ? (
+      {isAdmin && (
         <Button
           justIcon
           round
-          color='danger'
-          size='sm'
-          onClick={() => {
-            dispatch(trigerMaintenanceMode())
-          }}
-        >
-          <BuildIcon />
-        </Button>
-      ) : (
-        <Button
-          justIcon
-          round
-          color='success'
+          color={maintenanceMode ? 'danger' : 'success'}
           size='sm'
           onClick={() => {
             dispatch(trigerMaintenanceMode())

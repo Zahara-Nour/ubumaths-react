@@ -7,12 +7,12 @@ import { makeStyles } from '@material-ui/core/styles'
 
 // core components
 
-import CustomInput from 'components/CustomInput/CustomInput.js'
-import Button from 'components/CustomButtons/Button.js'
-import Card from 'components/Card/Card.js'
-import CardHeader from 'components/Card/CardHeader.js'
-import CardIcon from 'components/Card/CardIcon.js'
-import CardBody from 'components/Card/CardBody.js'
+import CustomInput from 'components/CustomInput/CustomInput'
+import Button from 'components/CustomButtons/Button'
+import Card from 'components/Card/Card'
+import CardHeader from 'components/Card/CardHeader'
+import CardIcon from 'components/Card/CardIcon'
+import CardBody from 'components/Card/CardBody'
 import EditIcon from '@material-ui/icons/Edit'
 import DeleteIcon from '@material-ui/icons/Delete'
 

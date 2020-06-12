@@ -2,7 +2,7 @@ import React from 'react'
 import GridContainer from 'components/Grid/GridContainer'
 import GridItem from 'components/Grid/GridItem'
 import Button from 'components/CustomButtons/Button'
-import TextInput from '../../components/TextInput'
+import TextInput from 'components/TextInput'
 
 import DeleteIcon from '@material-ui/icons/Delete'
 

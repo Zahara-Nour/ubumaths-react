@@ -3,7 +3,7 @@ import React, { useState, useRef } from 'react'
 import PropTypes from 'prop-types'
 // javascript plugin used to create scrollbars on windows
 import PerfectScrollbar from 'perfect-scrollbar'
-import { NavLink } from 'react-router-dom'
+import { NavLink, Link } from 'react-router-dom'
 import cx from 'classnames'
 
 // @material-ui/core components
@@ -18,7 +18,7 @@ import Icon from '@material-ui/core/Icon'
 import logo from 'assets/img/gidouille.svg'
 
 // core components
-import AdminNavbarLinks from 'components/Navbars/AdminNavbarLinks.js'
+import AdminNavbarLinks from 'components/AdminNavbarLinks.js'
 
 import sidebarStyle from 'assets/jss/components/sidebarStyle.js'
 
@@ -27,7 +27,6 @@ import { useSelector } from 'react-redux'
 import { selectUser } from 'features/auth/authSlice'
 import GidouilleIcon from 'assets/Icons/GidouilleIcon'
 import { selectIsLoadingOrSaving } from 'features/db/dbSlice'
-
 
 function Sidebar(props) {
   const [openAvatar, setOpenAvatar] = useState(false)
@@ -183,12 +182,18 @@ function Sidebar(props) {
     })
 
   var brand = (
-    <div className={logoClasses}>
-      <div className={logoMini}>
-      <GidouilleIcon color='#00acc1' size='2em' className={cx({ [classes.gidouille]: IsLoadingOrSaving })} />
+    <Link to='/' className={classes.homeLink}>
+      <div className={logoClasses}>
+        <div className={logoMini}>
+          <GidouilleIcon
+            color='#00acc1'
+            size='2em'
+            className={cx({ [classes.gidouille]: IsLoadingOrSaving })}
+          />
+        </div>
+        <div className={logoNormal}>{logoText}</div>
       </div>
-      <div className={logoNormal}>{logoText}</div>
-    </div>
+    </Link>
   )
   const drawerPaper =
     classes.drawerPaper +

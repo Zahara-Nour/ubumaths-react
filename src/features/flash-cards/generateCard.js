@@ -6,6 +6,7 @@ export default function generateCard(card) {
     // firestore returns objects with read-only properties
    
     if (!card) return emptyCard
+    // console.log('generate card', card)
   
     let tempCard = {
       ...card,
