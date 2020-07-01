@@ -36,6 +36,7 @@ function Filter(props) {
     render,
     listen = false,
     user,
+    newElement,
   } = props
 
   const { trace, debug } = getLogger(`Filter ${path}`)
@@ -63,7 +64,7 @@ function Filter(props) {
 
   const newF = filtersProp
     ? user
-      ? [{uid}].concat(filtersProp)
+      ? [{ uid }].concat(filtersProp)
       : filtersProp
     : emptyArray
 
@@ -87,11 +88,12 @@ function Filter(props) {
     dependanceValue,
   ])
 
-  const [elements, isLoadingElements] = useCollection({
+  let [elements, isLoadingElements] = useCollection({
     path,
     filters: filterNameAppended ? dependance : filters,
     listen: add || listen,
     sort,
+    newElement,
   })
 
   const [name, setName] = useState('')
@@ -109,27 +111,28 @@ function Filter(props) {
   }
 
   useEffect(() => {
-    if (elements && elements.length && !defaults) {
-      trace('[useEffect] set name to :', elements[0].name)
-      setName(elements[0].name)
+    if (!defaults) {
+      if (elements && elements.length) {
+        trace('[**] set name to :', elements[0].name)
+        setName(elements[0].name)
+      } else {
+        setName('')
+      }
     }
-  }, [elements, defaults])
+  }, [elements, defaults, trace])
 
   useEffect(() => {
     if (defaults) {
-      trace('[useEffect] set name to default:', defaultName)
+      trace('[**] set name to default:', defaultName)
       setName(defaultName)
       setThrowDefaults(false)
     }
-  }, [defaults, defaultName])
+  }, [defaults, defaultName, trace])
 
   const newFilters = useMemo(() => {
     const newOnes = filters.concat({ [filterName]: name })
-    trace('newOnes', [...newOnes])
     if (user) {
-    
       newOnes.shift()
-      trace('newOnes', [...newOnes])
     }
     return newOnes
   }, [filterName, filters, name, user])
@@ -146,11 +149,11 @@ function Filter(props) {
   trace('  defaultFiltersProp', defaultFiltersProp)
   trace('  defaultFilters', defaultFilters)
   trace('  defaults', defaults)
-  trace('  user', true)
+  // trace('  user', true)
   debug('  elements :', elements)
   debug('  name :', name)
   trace('  newFilters', newFilters)
-  trace('  throwDefaults', throwDefaults)
+  // trace('  throwDefaults', throwDefaults)
 
   if (!checked) {
     const reason = !elements
@@ -193,11 +196,11 @@ function Filter(props) {
   trace('  checking ok -> going to render')
   trace('  element', element)
   trace('  elementId', elementId)
-  trace('  disbled', disabled)
-  trace('  isloading', isLoadingElements)
-  trace('  isSaving', isSaving)
+  // trace('  disabled', disabled)
+  // trace('  isloading', isLoadingElements)
+  // trace('  isSaving', isSaving)
   trace('  newName', newName)
-  trace('  elemntsExists', !!elementExists)
+  // trace('  elemntsExists', !!elementExists)
   trace(`<<<<< ${path}\n\n`)
 
   const save = (path, document) => {

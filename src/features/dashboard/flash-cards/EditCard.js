@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react'
+import React, { useState, useEffect, useRef, useMemo } from 'react'
+import { useFilters } from 'app/hooks'
 // @material-ui/core components
 import { makeStyles } from '@material-ui/core/styles'
 import { math } from 'tinycas/build/math/math'
@@ -25,13 +26,14 @@ import EditButtons from './EditButtons'
 import { CircularProgress, FormControlLabel } from '@material-ui/core'
 import Select from 'components/Select'
 import Filter from 'components/Filter'
-import { compareArrays } from 'app/utils'
+import { compareArrays, getLogger } from 'app/utils'
 import { useSelector } from 'react-redux'
 import { selectIsAdmin, selectUser } from 'features/auth/authSlice'
 import SwitchUI from '@material-ui/core/Switch'
-import { DropzoneArea } from 'material-ui-dropzone'
+import { DropzoneAreaBase } from 'material-ui-dropzone'
 import { storage } from 'features/db/db'
-import ImageUpload from 'components/CustomUpload/ImageUpload'
+import { Grid as GridSpinner } from 'react-spinners-css'
+import Centered from 'components/Centered'
 
 const useStyles = makeStyles(styles)
 
@@ -41,7 +43,9 @@ function EditCard({
   onGeneratedCard,
   onSave,
   saving,
+  filters: filtersProp,
 }) {
+  const { trace, error } = getLogger('EditCard', 'trace')
   const classes = useStyles()
   const isAdmin = useSelector(selectIsAdmin)
   const uid = useSelector(selectUser).email
@@ -64,28 +68,17 @@ function EditCard({
   const [generatedVariables, setGeneratedVariables] = useState({})
   const [newCard, setNewCard] = useState({ ...emptyCard })
   const [generatedCard, setGeneratedCard] = useState({ ...emptyCard })
-  const [advanced, setAdvanced] = useState(isAdmin ? true : false)
+
   const [defaultImgName, setDefaultImgName] = useState('')
   const [imgName, setImgName] = useState('')
-  const [imgFile, setImgFile] = useState()
+  const [files, setFiles] = useState()
   const [imgUploaded, setImgUploaded] = useState(false)
+  const [isLoadingImage, setIsLoadingImage] = useState(false)
 
   const [defaultFilters, setDefaultFilters] = useState([])
   const defaultFiltersRef = useRef([])
-
-  const onDrop = useCallback((acceptedFiles) => {
-    const file = acceptedFiles[0]
-    console.log('file', file.name)
-    const reader = new FileReader()
-
-    reader.onabort = () => console.log('file reading was aborted')
-    reader.onerror = () => console.log('file reading has failed')
-    reader.onload = () => {
-      // Do whatever you want with the file contents
-      // setImgData(reader.result)
-    }
-    reader.readAsArrayBuffer(file)
-  }, [])
+  const filters = useFilters(filtersProp)
+  const [advanced, setAdvanced] = useState(false)
 
   const getIdVariables = () =>
     Object.getOwnPropertyNames(variables)
@@ -150,8 +143,14 @@ function EditCard({
   }
 
   useEffect(() => {
+    if (grades && grades.length) {
+      setGrade(card.grade || grades[0].name)
+    }
+  }, [grades, card.grade])
+
+  useEffect(() => {
     if (card) {
-      setNewCard((c) => ({ ...c, id: card.id }))
+      setNewCard((c) => (card.id ? { ...c, id: card.id } : c))
       setTitle(card.name || '')
       setDefaultTitle(card.name || '')
       setEnounce(card.enounce || '')
@@ -163,6 +162,9 @@ function EditCard({
       setWarning(card.warning || '')
       setDefaultWarning(card.warning || '')
       setVariables({ ...card.variables })
+      setDefaultImgName('')
+      setImgUploaded(false)
+
       const generated = {}
 
       Object.getOwnPropertyNames(card.variables).forEach((name) => {
@@ -170,11 +172,12 @@ function EditCard({
       })
       // console.log('generated variables', generated)
       setGeneratedVariables(generated)
-      setGrade(card.grade || '')
-      setLevel(card.level || '')
+      setLevel(card.level || 1)
 
       setDefaultFilters(
-        isAdmin
+        filters.length
+          ? filters
+          : isAdmin
           ? [
               { subject: card.subject },
               { domain: card.domain },
@@ -182,8 +185,62 @@ function EditCard({
             ]
           : [{ subject: card.subject }, { theme: card.theme }],
       )
+
+      if (card.image) {
+        trace('fetching image :', card.image)
+        setIsLoadingImage(true)
+        storage
+          .child(card.image)
+          .getDownloadURL()
+          .then((url) => {
+            const xhr = new XMLHttpRequest()
+            xhr.responseType = 'blob'
+            xhr.onload = () => {
+              const blob = xhr.response
+              const name = card.image.split('/').pop()
+              const file = new File([blob], name, { type: blob.type })
+              const reader = new FileReader()
+
+              reader.onabort = () => console.log('file reading was aborted')
+              reader.onerror = () => console.log('file reading has failed')
+              reader.onload = () => {
+                // Do whatever you want with the file contents
+                const binaryStr = reader.result
+
+                setFiles([{ file, data: binaryStr }])
+                setDefaultImgName(name)
+                localStorage.setItem(file.name, file)
+              }
+              reader.readAsDataURL(file)
+
+              setFiles([])
+              setIsLoadingImage(false)
+              setImgUploaded(true)
+            }
+            xhr.open('GET', url)
+            xhr.send()
+          })
+          .catch((err) => {
+            error('error while fetching image :', err.message)
+            setFiles([])
+            setIsLoadingImage(false)
+          })
+      } else {
+        trace('reset files')
+        setFiles([])
+      }
+      setAdvanced(
+        isAdmin ||
+          card.explanation ||
+          card.warning ||
+          card.image ||
+          !(
+            Object.keys(card.variables).length === 0 &&
+            card.variables.constructor === Object
+          ),
+      )
     }
-  }, [card, isAdmin])
+  }, [card, isAdmin, filters])
 
   useEffect(() => {
     setNewCard((card) => ({
@@ -196,7 +253,10 @@ function EditCard({
       grade,
       level,
       variables,
-      image: 'flashcards-img/' + (imgName || defaultImgName),
+      image:
+        imgName || defaultImgName
+          ? 'flashcards-img/' + (imgName || defaultImgName)
+          : '',
     }))
   }, [
     title,
@@ -222,7 +282,9 @@ function EditCard({
         warning,
         level,
         variables: generatedVariables,
-        image: imgUploaded ? 'flashcards-img/' + (imgName || defaultImgName) : ''
+        image: imgUploaded && (imgName || defaultImgName)
+          ? 'flashcards-img/' + (imgName || defaultImgName)
+          : '',
       }
     })
   }, [
@@ -235,7 +297,7 @@ function EditCard({
     generatedVariables,
     imgName,
     defaultImgName,
-    imgUploaded
+    imgUploaded,
   ])
 
   useEffect(() => {
@@ -246,7 +308,7 @@ function EditCard({
     onGeneratedCard(generatedCard)
   }, [generatedCard, onGeneratedCard])
 
-  const filters = isAdmin ? (
+  const filtersComponents = isAdmin ? (
     <Filter
       type='select'
       path='Subjects'
@@ -308,177 +370,188 @@ function EditCard({
   if (!card) return null
 
   return (
-    <Card>
-      <CardHeader color='rose' icon>
-        <CardIcon color='rose'>
-          <EditIcon />
-        </CardIcon>
-      </CardHeader>
-      <CardBody>
-        {!isAdmin && (
-          <FormControlLabel
-            control={
-              <SwitchUI
-                checked={advanced}
-                onChange={(event) => setAdvanced(event.target.checked)}
-                classes={{
-                  switchBase: classes.switchBase,
-                  checked: classes.switchChecked,
-                  thumb: classes.switchIcon,
-                  track: classes.switchBar,
-                }}
-              />
-            }
-            classes={{
-              label: classes.label,
-            }}
-            label='Paramètres avancés'
-          />
-        )}
-        <TextInput
-          label='Titre'
-          defaultText={defaultTitle}
-          onChange={setTitle}
-          throttle={500}
-        />
-        <TextInput
-          label='Enoncé'
-          defaultText={defaultEnounce}
-          onChange={setEnounce}
-          multiline
-          throttle={500}
-        />
-        <TextInput
-          label='Réponse'
-          defaultText={defaultAnswer}
-          onChange={setAnswer}
-          multiline
-          throttle={500}
-        />
-        {advanced && (
+    <div>
+      <Card>
+        <CardHeader color='rose' icon>
+          <CardIcon color='rose'>
+            <EditIcon />
+          </CardIcon>
+        </CardHeader>
+        <CardBody>
+          {!isAdmin && (
+            <FormControlLabel
+              control={
+                <SwitchUI
+                  checked={advanced}
+                  onChange={(event) => setAdvanced(event.target.checked)}
+                  classes={{
+                    switchBase: classes.switchBase,
+                    checked: classes.switchChecked,
+                    thumb: classes.switchIcon,
+                    track: classes.switchBar,
+                  }}
+                />
+              }
+              classes={{
+                label: classes.label,
+              }}
+              label='Paramètres avancés'
+            />
+          )}
           <TextInput
-            label='Explication'
-            defaultText={defaultExplanation}
-            onChange={setExplanation}
+            label='Titre'
+            defaultText={defaultTitle}
+            onChange={setTitle}
+            throttle={500}
+          />
+          <TextInput
+            label='Enoncé'
+            defaultText={defaultEnounce}
+            onChange={setEnounce}
             multiline
             throttle={500}
           />
-        )}
-        {advanced && (
           <TextInput
-            label='Avertissement'
-            defaultText={defaultWarning}
-            onChange={setWarning}
+            label='Réponse'
+            defaultText={defaultAnswer}
+            onChange={setAnswer}
             multiline
             throttle={500}
           />
-        )}
+          {advanced && (
+            <TextInput
+              label='Explication'
+              defaultText={defaultExplanation}
+              onChange={setExplanation}
+              multiline
+              throttle={500}
+            />
+          )}
+          {advanced && (
+            <TextInput
+              label='Avertissement'
+              defaultText={defaultWarning}
+              onChange={setWarning}
+              multiline
+              throttle={500}
+            />
+          )}
 
-        {advanced && (
-          <TextInput
-            label='image'
-            defaultText={defaultImgName}
-            onChange={setImgName}
-            throttle={500}
-          />
-        )}
+          {isAdmin && (
+            <GridContainer alignItems='center'>
+              <GridItem xs={6}>
+                {isLoadingGrades ? (
+                  <CircularProgress />
+                ) : (
+                  <Select
+                    elements={grades}
+                    selected={grade}
+                    onChange={setGrade}
+                  />
+                )}
+              </GridItem>
+              <GridItem xs={6}>
+                <NumberInput label='Niveau' value={level} onChange={setLevel} />
+              </GridItem>
+            </GridContainer>
+          )}
 
-        {advanced && (
-          <DropzoneArea
-            filesLimit={1}
-            acceptedFiles={['image/*']}
-            dropzoneText={'Drag and drop an image here or click'}
-            onChange={(files) => {
-              if (files && files.length) {
-                setDefaultImgName(files[0].name)
-                setImgName(files[0].name)
-                setImgFile(files[0])
-                setImgUploaded(false)
+          {filtersComponents}
+
+          <EditButtons
+            onNew={createCard}
+            onDuplicate={duplicateCard}
+            onSave={() => {
+              const file = files[0].file
+              const data = files[0].data
+              if (imgName && files.length && !imgUploaded) {
+                const imgRef = storage.child(newCard.image)
+                imgRef
+                  .put(file)
+                  .then(function (snapshot) {
+                    console.log('Uploaded a blob or file!')
+                    setImgUploaded(true)
+                    onSave()
+                    localStorage.setItem('flashcards-img/'+file.name, data)
+                  })
+                  .catch((error) =>
+                    console.log('error while saving image :', error.message),
+                  )
+              } else {
+                onSave()
               }
             }}
-            onDelete={(file) => {
-              setImgName('')
-              setDefaultImgName('')
-              setImgUploaded(false)
-            }}
+            saving={saving}
           />
-        )}
+        </CardBody>
+      </Card>
 
-        {isAdmin && (
-          <GridContainer alignItems='center'>
-            <GridItem xs={6}>
-              {isLoadingGrades ? (
-                <CircularProgress />
-              ) : (
-                <Select
-                  elements={grades}
-                  selected={grade}
-                  onChange={setGrade}
+      {advanced && (
+        <Card>
+          <CardHeader color='rose' icon>
+            <CardIcon color='rose'>
+              <EditIcon />
+            </CardIcon>
+          </CardHeader>
+          <CardBody>
+            {isLoadingImage ? (
+              <Centered>
+                {' '}
+                <GridSpinner />
+              </Centered>
+            ) : (
+              <div>
+                <TextInput
+                  label='image'
+                  defaultText={defaultImgName}
+                  onChange={setImgName}
+                  throttle={500}
                 />
-              )}
-            </GridItem>
-            <GridItem xs={6}>
-              <NumberInput label='Niveau' value={level} onChange={setLevel} />
-            </GridItem>
-          </GridContainer>
-        )}
-        {filters}
-
-        {/* <Select
-          label={'Matière'}
-          elements={subjects}
-          selected={subject}
-          onChange={setSubject}
-        />
-
-        <Select
-          label={'Domaine'}
-          elements={domains}
-          selected={domain}
-          onChange={setDomain}
-        />
-
-        <Select
-          label={'Theme'}
-          elements={themes}
-          selected={theme}
-          onChange={setTheme}
-        /> */}
-
-        <br />
-        {advanced && (
-          <EditVariables
-            variables={variables}
-            onAdd={addVariable}
-            onDelete={deleteVariable}
-            onChange={editVariable}
-          />
-        )}
-
-        <EditButtons
-          onNew={createCard}
-          onDuplicate={duplicateCard}
-          onSave={() => {
-            if (imgName && imgFile && !imgUploaded) {
-              const imgRef = storage.child(newCard.image)
-              imgRef
-                .put(imgFile)
-                .then(function (snapshot) {
-                  console.log('Uploaded a blob or file!')
-                  setImgUploaded(true)
-                  onSave()
-                })
-                .catch((error) =>
-                  console.log('error while saving image :', error.message),
-                )
-            } else {
-              onSave()
-            }
-          }}
-          saving={saving}
-        />
-      </CardBody>
-    </Card>
+                <DropzoneAreaBase
+                  filesLimit={1}
+                  acceptedFiles={['image/*']}
+                  fileObjects={files}
+                  dropzoneText={'Image'}
+                  onAdd={(files) => {
+                    trace('files added', files)
+                    setDefaultImgName(files[0].file.name)
+                    setImgName(files[0].file.name)
+                    setFiles(files)
+                    setImgUploaded(false)
+                  }}
+                  onDelete={(file) => {
+                    setImgName('')
+                    setDefaultImgName('')
+                    setImgUploaded(false)
+                    setFiles([])
+                  }}
+                  onChange={(files) => {
+                    trace('files changed', files)
+                  }}
+                />
+              </div>
+            )}
+          </CardBody>
+        </Card>
+      )}
+      {advanced && (
+        <Card>
+          <CardHeader color='rose' icon>
+            <CardIcon color='rose'>
+              <EditIcon />
+            </CardIcon>
+          </CardHeader>
+          <CardBody>
+            <EditVariables
+              variables={variables}
+              onAdd={addVariable}
+              onDelete={deleteVariable}
+              onChange={editVariable}
+            />
+          </CardBody>
+        </Card>
+      )}
+    </div>
   )
 }
 

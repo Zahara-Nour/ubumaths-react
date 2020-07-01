@@ -37,7 +37,7 @@ function ThemesList({ id, grade, user }) {
   trace('themes', themes)
   trace('user', user)
 
-  if (themes.length === 0) return null
+  if (! themes || themes.length === 0) return null
 
 
   const levelsByThemes = []

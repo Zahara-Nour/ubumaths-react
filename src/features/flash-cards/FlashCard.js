@@ -17,7 +17,7 @@ import Info from 'components/Typography/Info'
 import Warning from 'components/Typography/Warning'
 import { ErrorBoundary } from 'react-error-boundary'
 import { storage } from 'features/db/db'
-import { getLogger } from 'app/utils'
+import { getLogger, dataURItoBlob } from 'app/utils'
 import { Grid as GridSpinner } from 'react-spinners-css'
 import GridContainer from 'components/Grid/GridContainer'
 import GridItem from 'components/Grid/GridItem'
@@ -71,14 +71,23 @@ function FlashCard({ card, onNext }) {
   useEffect(() => {
     if (card.image) {
       trace('fetching image :', card.image)
-      storage
-        .child(card.image)
-        .getDownloadURL()
-        .then((url) => {
-          setImgUrl(url)
-          trace('setting new image url :', url)
-        })
-        .catch((err) => error('error while fetching image :', err.message))
+      const data = localStorage.getItem(card.image)
+      if (data) {
+        trace('image found in store : ', data)
+        const blob = dataURItoBlob(data)
+        const url = URL.createObjectURL(blob)
+        setImgUrl(url)
+        trace('setting new image url :', url)
+      } else {
+        storage
+          .child(card.image)
+          .getDownloadURL()
+          .then((url) => {
+            setImgUrl(url)
+            trace('setting new image url :', url)
+          })
+          .catch((err) => error('error while fetching image :', err.message))
+      }
     } else {
       setImgUrl('')
     }
@@ -119,15 +128,12 @@ function FlashCard({ card, onNext }) {
   }, [classes.front, classes.back, classes.cardRotate])
 
   useEffect(() => {
-    console.log('add style for rotating')
     addStylesForRotatingCards()
   }, [addStylesForRotatingCards, activeRotate])
 
   useEffect(() => {
     Mathlive.renderMathInDocument()
   })
-
-  
 
   if (!card) return null
 
@@ -141,19 +147,19 @@ function FlashCard({ card, onNext }) {
         : (gridItemRatio / 12) * cardWidth
 
     setImageWidth(width)
-    console.log('width :', width)
-    console.log('card width :', cardWidth)
-    console.log('image width :', image.width)
   }
 
- 
   return (
     <div>
-      
-        {!!imgUrl && !imageWidth && (
-          <img alt='flash card' style={{position:'fixed', opacity:0}} src={imgUrl} onLoad={onLoadFake} />
-        )}
-    
+      {!!imgUrl && !imageWidth && (
+        <img
+          alt='flash card'
+          style={{ position: 'fixed', opacity: 0 }}
+          src={imgUrl}
+          onLoad={onLoadFake}
+        />
+      )}
+
       <div
         className={
           classes.rotatingCardContainer +

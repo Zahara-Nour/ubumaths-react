@@ -10,6 +10,7 @@ import CardHeader from 'components/Card/CardHeader'
 import CardIcon from 'components/Card/CardIcon'
 import CardBody from 'components/Card/CardBody'
 import { useHistory } from 'react-router-dom'
+import { selectIsLoggedIn } from 'features/auth/authSlice'
 
 import { createDocument, saveDocument } from 'features/db/db'
 
@@ -31,8 +32,6 @@ import { useDispatch, useSelector } from 'react-redux'
 import NotifAlert from 'components/NotifAlert'
 import { selectRoles, selectIsAdmin } from 'features/auth/authSlice'
 import { getLogger } from 'app/utils'
-
-
 
 const useStyles = makeStyles(styles)
 
@@ -78,9 +77,13 @@ function EditCards({ filters: defaultFilters, match }) {
         setPortalRendered(true)
       }}
     >
-      <EditAndDisplay  onSaveError={setSavedError} onSaveSucccess={setSavedSuccess}/>
+      <EditAndDisplay
+        onSaveError={setSavedError}
+        onSaveSucccess={setSavedSuccess}
+      />
     </Portal>
   )
+
 
   let filters
   if (roles.includes('admin')) {
@@ -116,6 +119,7 @@ function EditCards({ filters: defaultFilters, match }) {
               render={renderItemList}
               sort={sortCards}
               listen
+              newElement={emptyCard}
             >
               {portal}
             </Filter>
@@ -158,54 +162,53 @@ function EditCards({ filters: defaultFilters, match }) {
   // console.log('newCard', newCard)
   return (
     <div>
-    <GridContainer>
-      <GridItem xs={12} sm={12} md={4} lg={4}>
-        <Card>
-          <CardHeader color='rose' icon>
-            <CardIcon color='rose'>
-              <AiOutlineSelect />
-            </CardIcon>
-          </CardHeader>
-          <CardBody>{filters}</CardBody>
-        </Card>
-      </GridItem>
-      <GridItem xs={12} sm={12} md={8} lg={8}>
-        <div ref={portalRef} />
-      </GridItem>
-    </GridContainer>
-    {savedError && (
-      <NotifAlert
-        open={!!savedError}
-        message={"L'enregistement' a échoué ! " + savedError}
-        color='danger'
-        onClose={() => setSavedError(false)}
-      />
-    )}
-    {savedSuccess && (
-      <NotifAlert
-        open={savedSuccess}
-        message={"L'enregistement' a réussi ! "}
-        color='success'
-        autoclose
-        onClose={() => setSavedSuccess(false)}
-      />
-    )}
+      <GridContainer>
+        <GridItem xs={12} sm={12} md={4} lg={4}>
+          <Card>
+            <CardHeader color='rose' icon>
+              <CardIcon color='rose'>
+                <AiOutlineSelect />
+              </CardIcon>
+            </CardHeader>
+            <CardBody>{filters}</CardBody>
+          </Card>
+        </GridItem>
+        <GridItem xs={12} sm={12} md={8} lg={8}>
+          <div ref={portalRef} />
+        </GridItem>
+      </GridContainer>
+      {savedError && (
+        <NotifAlert
+          open={!!savedError}
+          message={"L'enregistement' a échoué ! " + savedError}
+          color='danger'
+          onClose={() => setSavedError(false)}
+        />
+      )}
+      {savedSuccess && (
+        <NotifAlert
+          open={savedSuccess}
+          message={"L'enregistement' a réussi ! "}
+          color='success'
+          autoclose
+          onClose={() => setSavedSuccess(false)}
+        />
+      )}
     </div>
   )
 }
 
 function EditAndDisplay({ element: card, onSaveError, onSaveSucccess }) {
-  const {error, warn} = getLogger('EditAndDisplay')
+  const { error, warn } = getLogger('EditAndDisplay')
   const dispatch = useDispatch()
   const isAdmin = useSelector(selectIsAdmin)
-  const [newCard, setNewCard] = useState({ ...emptyCard })
-  const [generatedCard, setGeneratedCard] = useState({ ...emptyCard })
-  
+  const [newCard, setNewCard] = useState(emptyCard)
+  const [generatedCard, setGeneratedCard] = useState(emptyCard)
+
   const [isSaving, setIsSaving] = useState(false)
   const history = useHistory()
-  
 
-  const save = (path='FlashCards', document = newCard) => {
+  const save = (path = 'FlashCards', document = newCard) => {
     setIsSaving(true)
     const pathArray = path.split('/')
     const collection = pathArray[pathArray.length - 1]
@@ -227,12 +230,12 @@ function EditAndDisplay({ element: card, onSaveError, onSaveSucccess }) {
           (isAdmin && document.domain !== card.domain) ||
           document.theme !== card.theme
         ) {
-          let url = isAdmin ?
-          `/dashboard/flash-cards/edit/${document.subject}/${document.domain}/${document.theme}/${document.name}`
-          :`/dashboard/flash-cards/edit/${document.subject}/${document.theme}/${document.name}`
+          let url = isAdmin
+            ? `/dashboard/flash-cards/edit/${document.subject}/${document.domain}/${document.theme}/${document.name}`
+            : `/dashboard/flash-cards/edit/${document.subject}/${document.theme}/${document.name}`
 
           url = url.replace(/%/g, '%25')
-       
+
           if (decodeURI(encodeURI(url)) !== url) warn('URI malformed', url)
           history.push(encodeURI(url))
         }
@@ -261,7 +264,6 @@ function EditAndDisplay({ element: card, onSaveError, onSaveSucccess }) {
           <FlashCard card={generateCard(generatedCard)} />
         </GridItem>
       </GridContainer>
-      
     </>
   )
 }

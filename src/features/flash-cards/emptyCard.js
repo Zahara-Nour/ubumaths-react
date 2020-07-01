@@ -4,7 +4,7 @@ const emptyCard = {
     answer: '',
     explanation: '',
     warning: '',
-    name:'',
+    name:'Nouvelle carte',
   }
 
   export default emptyCard

@@ -43,7 +43,7 @@ function DisplayUserCards({ subject, theme }) {
   if (IsFinished) return <Redirect to='/flash-cards/' />
 
 
-
+  if (!cards || cards.length ===0)  return null
   return (
     <div>
       <NavBar />

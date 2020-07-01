@@ -111,7 +111,7 @@ const useStudents = () => {
   return [data, isLoading, isError]
 }
 
-const useFilters = (filters) => {
+const useFilters = (filters = []) => {
   const { trace, debug } = getLogger('useFilters')
 
   const namesRef = useRef([])
@@ -142,9 +142,13 @@ const useCollection = (props) => {
     extract,
     sort,
     shuffling = false,
+    newElement,
   } = props
 
-  const { error, info, trace, debug } = getLogger(`useCollection ${path}`)
+  const { error, info, trace, debug } = getLogger(
+    `useCollection ${path}`,
+    
+  )
   const emptyFilters = useMemo(() => [], [])
   trace(`>>>>>>>>>> `)
   trace('call useFilter with :', filtersProp || emptyFilters, '\n')
@@ -166,14 +170,12 @@ const useCollection = (props) => {
   useWhyRendered(`useCollection ${path}`, props, state)
 
   const handleUpdate = useCallback(
-    (type) => {
-      return (data) => {
-        if (data.length === 0) data = emptyCollection
+    (type) => (data) => {
+      if (data.length === 0) data = emptyCollection
 
-        info(`[**] received ${path} :`, data, 'filters', filters)
-        dispatch(update({ data, type }))
-        dispatch(setCollection({ path, documents: data, filters }))
-      }
+      info(`[**] received ${path} :`, data, 'filters', filters)
+      dispatch(update({ data, type }))
+      dispatch(setCollection({ path, documents: data, filters }))
     },
     [path, dispatch, filters, emptyCollection, info],
   )
@@ -260,14 +262,27 @@ const useCollection = (props) => {
   ])
 
   const treatedDocuments = useMemo(() => {
-    let returnedDocument = documents || []
-    if (sort) returnedDocument = returnedDocument.slice().sort(sort)
-    if (shuffling) returnedDocument = shuffle([...returnedDocument])
+    debug('documents :', documents)
+    if (!documents) return null
+    debug('newElement :', newElement)
+    let returned =
+      !documents.length && newElement
+        ? [
+            {
+              ...newElement,
+              ...filters.reduce((acc, current) => ({ ...acc, ...current }), {}),
+            },
+          ]
+        : documents
+    debug('returned :', returned)
+    if (sort) returned = returned.slice().sort(sort)
+    if (shuffling) returned = shuffle([...returned])
     if (extract) {
-      returnedDocument = returnedDocument.map((doc) => doc[extract])
+      returned = returned.map((doc) => doc[extract])
     }
-    return returnedDocument
-  }, [documents, sort, extract, shuffling])
+    return returned
+  }, [documents, sort, extract, shuffling, newElement, filters])
+
   debug('returns documents :', treatedDocuments, 'filters', filters)
   trace(`<<<<<<<<<<<< `)
   return [treatedDocuments, isLoading, isError]

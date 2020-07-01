@@ -15,6 +15,7 @@ function TextInput({
   defaultText
 }) {
 
+
   const changeValue = useRef(
     throttleFunc((value) => {
       // console.log('throotle', value)
