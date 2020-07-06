@@ -32,7 +32,7 @@ import { selectIsAdmin, selectUser } from 'features/auth/authSlice'
 import SwitchUI from '@material-ui/core/Switch'
 import { DropzoneAreaBase } from 'material-ui-dropzone'
 import { storage } from 'features/db/db'
-import { Grid as GridSpinner } from 'react-spinners-css'
+import GridSpinner from 'components/GridSpinner'
 import Centered from 'components/Centered'
 
 const useStyles = makeStyles(styles)
