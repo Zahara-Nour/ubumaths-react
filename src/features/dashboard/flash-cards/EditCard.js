@@ -143,10 +143,11 @@ function EditCard({
   }
 
   useEffect(() => {
+
     if (grades && grades.length) {
       setGrade(card.grade || grades[0].name)
     }
-  }, [grades, card.grade])
+  }, [grades, card])
 
   useEffect(() => {
     if (card) {
@@ -161,15 +162,18 @@ function EditCard({
       setDefaultExplanation(card.explanation || '')
       setWarning(card.warning || '')
       setDefaultWarning(card.warning || '')
-      setVariables({ ...card.variables })
+      setVariables(card.variables ? { ...card.variables } : {})
       setDefaultImgName('')
       setImgUploaded(false)
 
       const generated = {}
+      trace('card : ', card)
 
-      Object.getOwnPropertyNames(card.variables).forEach((name) => {
-        generated[name] = math(card.variables[name]).generate().latex
-      })
+      if (card.variables) {
+        Object.getOwnPropertyNames(card.variables).forEach((name) => {
+          generated[name] = math(card.variables[name]).generate().latex
+        })
+      }
       // console.log('generated variables', generated)
       setGeneratedVariables(generated)
       setLevel(card.level || 1)
@@ -282,9 +286,10 @@ function EditCard({
         warning,
         level,
         variables: generatedVariables,
-        image: imgUploaded && (imgName || defaultImgName)
-          ? 'flashcards-img/' + (imgName || defaultImgName)
-          : '',
+        image:
+          imgUploaded && (imgName || defaultImgName)
+            ? 'flashcards-img/' + (imgName || defaultImgName)
+            : '',
       }
     })
   }, [
@@ -348,16 +353,16 @@ function EditCard({
     </Filter>
   )
 
-  function GetFilters({ id }) {
+  function GetFilters({ filtersString }) {
     if (isAdmin) {
-      const [subject, domain, theme] = id.split('_')
+      const [subject, domain, theme] = filtersString.split('_')
       if (!compareArrays([subject, domain, theme], defaultFiltersRef.current)) {
         setNewCard((card) => ({ ...card, subject, domain, theme }))
         setGeneratedCard((card) => ({ ...card, subject, domain, theme }))
       }
       defaultFiltersRef.current = [subject, domain, theme]
     } else {
-      const [subject, theme] = id.split('_')
+      const [subject, theme] = filtersString.split('_')
       if (!compareArrays([subject, theme], defaultFiltersRef.current)) {
         setNewCard((card) => ({ ...card, subject, theme }))
         setGeneratedCard((card) => ({ ...card, subject, theme }))
@@ -462,9 +467,9 @@ function EditCard({
             onNew={createCard}
             onDuplicate={duplicateCard}
             onSave={() => {
-              const file = files[0].file
-              const data = files[0].data
               if (imgName && files.length && !imgUploaded) {
+                const file = files[0].file
+                const data = files[0].data
                 const imgRef = storage.child(newCard.image)
                 imgRef
                   .put(file)
@@ -472,7 +477,7 @@ function EditCard({
                     console.log('Uploaded a blob or file!')
                     setImgUploaded(true)
                     onSave()
-                    localStorage.setItem('flashcards-img/'+file.name, data)
+                    localStorage.setItem('flashcards-img/' + file.name, data)
                   })
                   .catch((error) =>
                     console.log('error while saving image :', error.message),

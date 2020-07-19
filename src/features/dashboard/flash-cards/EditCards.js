@@ -94,6 +94,8 @@ function EditCards({ filters: defaultFilters, match }) {
         label='Matière'
         filterName='subject'
         defaultFilters={defaultFilters}
+        newElement = {{name:'Nouvelle matière'}}
+        newLabel='Nouvelle matière'
         add
       >
         <Filter
@@ -101,7 +103,8 @@ function EditCards({ filters: defaultFilters, match }) {
           path='Domains'
           label='Domaine'
           filterName='domain'
-          filterNameAppended
+          newElement = {{name:'Nouveau domaine'}}
+          newLabel='Nouveau domaine'
           add
         >
           <Filter
@@ -109,7 +112,8 @@ function EditCards({ filters: defaultFilters, match }) {
             path='Themes'
             label='Thème'
             filterName='theme'
-            filterNameAppended
+            newElement = {{name:'Nouveau thème'}}
+            newLabel='Nouveau thème'
             add
           >
             <Filter
@@ -120,6 +124,7 @@ function EditCards({ filters: defaultFilters, match }) {
               sort={sortCards}
               listen
               newElement={emptyCard}
+              add
             >
               {portal}
             </Filter>

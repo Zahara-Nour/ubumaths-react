@@ -19,6 +19,9 @@ firebase.initializeApp(firebaseConfig)
 const db = firebase.firestore()
 const storage = firebase.storage().ref()
 
+
+
+
 const fetchCollection = ({ path, filters }) => {
   const { error, info, trace } = getLogger('fetchCollection')
   trace(`  fetching ${path} with filters :`, filters)

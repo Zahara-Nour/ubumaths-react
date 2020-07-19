@@ -136,4 +136,6 @@ function dataURItoBlob(dataURI) {
   return blob
 }
 
-export { shuffle, lexicoSort, compareArrays, dataURItoBlob }
+const emptyArray = []
+
+export { shuffle, lexicoSort, compareArrays, dataURItoBlob, emptyArray }

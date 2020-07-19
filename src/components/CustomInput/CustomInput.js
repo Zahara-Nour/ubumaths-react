@@ -16,7 +16,7 @@ const useStyles = makeStyles(styles);
 
 
 
-export default function CustomInput(props) {
+export default  React.forwardRef((props, ref) =>  {
   const classes = useStyles();
   const {
     formControlProps,
@@ -77,7 +77,7 @@ export default function CustomInput(props) {
           {labelText}
         </InputLabel>
       ) : null}
-      <Input
+      <Input inputRef={ref}
         classes={{
           input: inputClasses,
           root: marginTop,
@@ -95,18 +95,5 @@ export default function CustomInput(props) {
       ) : null}
     </FormControl>
   );
-}
+})
 
-CustomInput.propTypes = {
-  labelText: PropTypes.node,
-  labelProps: PropTypes.object,
-  id: PropTypes.string,
-  inputProps: PropTypes.object,
-  formControlProps: PropTypes.object,
-  inputRootCustomClasses: PropTypes.string,
-  error: PropTypes.bool,
-  success: PropTypes.bool,
-  warning: PropTypes.bool,
-  white: PropTypes.bool,
-  helperText: PropTypes.node
-};

@@ -28,14 +28,14 @@ function Home() {
             </GridItem>
             <GridItem xs={12} sm={12} md={9} lg={9}>
               <h1> Bienvenue sur le site de M. Le Jolly !</h1>
-              <img
+              {/* <img
                 alt='toto'
                 src='https://drive.google.com/file/d/124iv4KovsqlgAjsFNNV_OWpJzypY2jqK/view'
               />
               <img
                 alt='toto'
                 src='https://drive.google.com/uc?export=view&id=124iv4KovsqlgAjsFNNV_OWpJzypY2jqK'
-              />
+              /> */}
             </GridItem>
           </GridContainer>
         </Container>

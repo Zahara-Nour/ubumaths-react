@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react'
+import React, { useState, useMemo, useEffect, useRef } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import {
   SAVE_TYPES,
@@ -15,163 +15,137 @@ import AddIcon from '@material-ui/icons/Add'
 import NotifAlert from 'components/NotifAlert'
 import TextInput from 'components/TextInput'
 import Button from 'components/CustomButtons/Button'
-import { useFilters } from 'app/hooks'
 import List from './List'
 import { selectUser } from 'features/auth/authSlice'
-import { getLogger } from 'app/utils'
+import { getLogger, emptyArray } from 'app/utils'
 
-function Filter(props) {
-  const {
-    path,
-    label,
-    newLabel,
-    children,
-    filters: filtersProp,
-    defaultFilters: defaultFiltersProp,
-    filterNameAppended = false,
-    filterName,
-    type,
-    add = false,
-    sort,
-    render,
-    listen = false,
-    user,
-    newElement,
-  } = props
-
+function Filter({
+  path, // path to database
+  label, //  filter label
+  newLabel, // lbel for new filter creationk
+  children, // children to diplsay after filter has been set
+  filters = emptyArray, //
+  defaultFilters,
+  filterName, // field name in documents collection
+  type = 'select', // 'list' or 'select'
+  add, //  set the  ability to create a new fiter name
+  sort, // function to sort documents list
+  render, //
+  listen, // add a listener on the collection
+  user, //
+  newElement,
+}: props) {
   const { trace, debug } = getLogger(`Filter ${path}`)
 
   const dispatch = useDispatch()
   const uid = useSelector(selectUser).email
   const [throwDefaults, setThrowDefaults] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
-  const emptyArray = useMemo(() => [], [])
 
   trace(`>>>>> ${path}`)
-  // most important : filters to trigger fetching collection and to set default names
 
-  let dependanceName = ''
-  let dependanceValue = ''
-
-  if (filtersProp) {
-    filtersProp.forEach((filter) => {
-      dependanceName = Object.getOwnPropertyNames(filter)[0]
-      dependanceValue = dependanceValue
-        ? dependanceValue + '_' + filter[dependanceName]
-        : filter[dependanceName]
-    })
-  }
-
-  const newF = filtersProp
-    ? user
-      ? [{ uid }].concat(filtersProp)
-      : filtersProp
-    : emptyArray
-
-  const filters = useFilters(newF)
-  // const filters = useFilters(filtersProp|| emptyArray)
-
-  let defaultFilters = useFilters(defaultFiltersProp || emptyArray)
-  const defaults = useMemo(() => defaultFilters && !!defaultFilters.length, [
-    defaultFilters,
-  ])
-  const defaultName = useMemo(() => {
-    if (defaults) {
-      const filter = defaultFilters[0]
-      const name = Object.getOwnPropertyNames(filter)[0]
-      return filter[name]
-    } else return ''
-  }, [defaults, defaultFilters])
-
-  const dependance = useMemo(() => [{ [dependanceName]: dependanceValue }], [
-    dependanceName,
-    dependanceValue,
-  ])
-
-  let [elements, isLoadingElements] = useCollection({
+  // Grab elements to display
+  // filters is added uid if user is logged in
+  const [elements, isLoadingElements] = useCollection({
     path,
-    filters: filterNameAppended ? dependance : filters,
+    filters: user ? [{ uid }].concat(filters) : filters,
     listen: add || listen,
     sort,
-    newElement,
   })
 
-  const [name, setName] = useState('')
-  const [newName, setNewName] = useState('')
-  const [savedError, setSavedError] = useState(false)
-  const [savedSuccess, setSavedSuccess] = useState(false)
-  const state = {
-    uid,
-    throwDefaults,
-    name,
-    elements,
-    isSaving,
-    savedError,
-    savedSuccess,
+  // Check and set defaults
+  const defaults = defaultFilters && defaultFilters.length && !throwDefaults
+
+  let defaultName = ''
+  if (defaults) {
+    const filter = defaultFilters[0]
+    const name = Object.getOwnPropertyNames(filter)[0]
+    defaultName = filter[name]
   }
 
-  useEffect(() => {
-    if (!defaults) {
-      if (elements && elements.length) {
-        trace('[**] set name to :', elements[0].name)
-        setName(elements[0].name)
-      } else {
-        setName('')
-      }
-    }
-  }, [elements, defaults, trace])
+  const [name, setName] = useState('')
+  const [newName, setNewName] = useState()
+  const [savedError, setSavedError] = useState(false)
+  const [savedSuccess, setSavedSuccess] = useState(false)
+  const [displayNew, setDisplayNew] = useState(false)
+  const newRef = useRef()
+  // const state = {
+  //   uid,
+  //   throwDefaults,
+  //   name,
+  //   elements,
+  //   isSaving,
+  //   savedError,
+  //   savedSuccess,
+  // }
 
+  useEffect(() => {
+    if (displayNew && newRef.current) newRef.current.focus()
+  }, [displayNew])
+
+  useEffect(() => {
+    setDisplayNew(elements && elements.length === 0)
+  }, [elements])
+
+  useEffect(() => {
+    if ((!elements || !elements.length) && newElement) {
+      setNewName(newElement.name)
+    } else {
+      setNewName()
+    }
+  }, [newElement, elements, type])
+
+  // set element name to display
   useEffect(() => {
     if (defaults) {
       trace('[**] set name to default:', defaultName)
       setName(defaultName)
       setThrowDefaults(false)
+    } else if (elements && elements.length) {
+      trace('[**] set name to :', elements[0].name)
+      setName(elements[0].name)
+    } else {
+      setName('')
     }
-  }, [defaults, defaultName, trace])
+  }, [elements, defaults, defaultName, trace])
 
-  const newFilters = useMemo(() => {
-    const newOnes = filters.concat({ [filterName]: name })
-    if (user) {
-      newOnes.shift()
-    }
-    return newOnes
-  }, [filterName, filters, name, user])
+  const newFilters = filters.concat({ [filterName]: name })
+  const filtersString = newFilters.reduce((acc, filter) => {
+    const name = Object.getOwnPropertyNames(filter)[0]
+    const value = filter[name]
+    return acc ? acc + '_' + value : value
+  }, '')
 
-  const checked =
+  // Check if the component must be displayed
+  const checkedForDisplay =
     elements &&
-    elements.length &&
-    name &&
-    elements.find((elt) => elt.name === name)
+    (elements.find((elt) => elt.name === name) || newName || newName === '')
 
-  useWhyRendered('Filter', props, state)
-  trace('  filtersProp', filtersProp)
-  trace('  filters', filters)
-  trace('  defaultFiltersProp', defaultFiltersProp)
-  trace('  defaultFilters', defaultFilters)
-  trace('  defaults', defaults)
-  // trace('  user', true)
-  debug('  elements :', elements)
-  debug('  name :', name)
-  trace('  newFilters', newFilters)
+  // useWhyRendered('Filter', props, state)
+  // trace('  filters', filters)
+  // trace('  defaultFilters', defaultFilters)
+  // trace('  defaults', defaults)
+  // // trace('  user', true)
+  // debug('  elements :', elements)
+  // debug('  name :', name)
+  // trace('  newFilters', newFilters)
   // trace('  throwDefaults', throwDefaults)
 
-  if (!checked) {
-    const reason = !elements
-      ? '!elements '
-      : !elements.length
-      ? 'elements empty'
-      : !name
-      ? 'name undefined'
-      : 'name not in elements'
+  if (!checkedForDisplay) {
+    // const reason = !elements
+    //   ? '!elements '
+    //   : !elements.length
+    //   ? 'elements empty'
+    //   : !name
+    //   ? 'name undefined'
+    //   : 'name not in elements'
 
-    trace('  check failed :', reason)
-    trace(`<<<<< ${path} \n\n`)
+    // trace('  check failed :', reason)
+    // trace(`<<<<< ${path} \n\n`)
     return null
   }
 
-  if (throwDefaults) defaultFilters = emptyArray
-
-  const element = elements.find((elt) => elt.name === name)
+  const element = elements && elements.find((elt) => elt.name === name)
 
   //remove accents, spaces ...
   const cleanString = (str) =>
@@ -181,27 +155,27 @@ function Filter(props) {
       .replace(/\s/g, '')
       .toLowerCase()
 
-  const exists = (elements, name) =>
-    elements.find((element) => cleanString(element.name) === cleanString(name))
+  let elementExists
+  let existedElement
 
-  const elementExists = exists(elements, newName)
-  const elementId = dependanceValue ? dependanceValue + '_' + name : name
-  const newElementId = dependanceValue
-    ? dependanceValue + '_' + newName
-    : newName
+  if (elements && newName) {
+    existedElement = elements.find(
+      (element) => cleanString(element.name) === cleanString(newName),
+    )
+    elementExists = !!existedElement
+  }
 
   const disabled =
-    isLoadingElements || isSaving || newName === '' || !!elementExists
+    isLoadingElements || isSaving || (displayNew && !newName) || elementExists
 
-  trace('  checking ok -> going to render')
-  trace('  element', element)
-  trace('  elementId', elementId)
+  // trace('  checking ok -> going to render')
+  // trace('  element', element)
   // trace('  disabled', disabled)
   // trace('  isloading', isLoadingElements)
   // trace('  isSaving', isSaving)
-  trace('  newName', newName)
+  // trace('  newName', newName)
   // trace('  elemntsExists', !!elementExists)
-  trace(`<<<<< ${path}\n\n`)
+  // trace(`<<<<< ${path}\n\n`)
 
   const save = (path, document) => {
     setIsSaving(true)
@@ -215,65 +189,73 @@ function Filter(props) {
         setIsSaving(false)
         setSavedSuccess(true)
         dispatch(saveSuccess({ data: document, type, key }))
+        setDisplayNew(false)
       })
       .catch((error) => {
         setIsSaving(false)
         setSavedError(true)
         dispatch(saveFailure({ type, key }))
+        setDisplayNew(false)
       })
   }
 
   const saveNewElement = () => {
-    const document = {
-      name: newName,
-    }
-    if (filterNameAppended && filters.length) {
-      document[dependanceName] = dependanceValue
-    } else if (filters.length) {
-      filters.forEach((filter) => {
-        const name = Object.getOwnPropertyNames(filter)[0]
-        const value = filter[name]
-        document[name] = value
-      })
-    }
+    const document = { ...newElement, name: newName }
+
+    filters.forEach((filter) => {
+      const name = Object.getOwnPropertyNames(filter)[0]
+      const value = filter[name]
+      document[name] = value
+    })
+
     save(path, document).then(() => {
       setName(newName)
       setNewName('')
     })
   }
 
-  const errorInput = !!elementExists && !isLoadingElements && !isSaving
-  const inputLabel = !!elementExists
-    ? `${elementExists.name} existe déjà !`
+  const handleClickNew = () => {
+    if (displayNew) {
+      saveNewElement()
+    } else {
+      setDisplayNew(true)
+    }
+  }
+
+  const errorInput = elementExists && !isLoadingElements && !isSaving
+  const inputLabel = elementExists
+    ? `${existedElement.name} existe déjà !`
     : newLabel
 
   const addElement = (
-    <GridContainer>
-      <GridItem xs={8}>
-        <TextInput
-          label={inputLabel}
-          text={newName}
-          onChange={(name) => {
-            console.log('onChange name', name)
-            setNewName(name)
-          }}
-          error={errorInput}
-        />
-      </GridItem>
+    <>
+      {displayNew && (
+        <GridItem xs={elements.length > 0 ? 5 : 10}>
+          <TextInput
+            ref={newRef}
+            label={inputLabel}
+            text={newName}
+            onChange={(name) => {
+              setNewName(name)
+            }}
+            error={errorInput}
+          />
+        </GridItem>
+      )}
 
-      <GridItem xs={4}>
+      <GridItem>
         <Button
           disabled={disabled}
           round
           justIcon
           color='rose'
           size='sm'
-          onClick={saveNewElement}
+          onClick={handleClickNew}
         >
           <AddIcon />
         </Button>
       </GridItem>
-    </GridContainer>
+    </>
   )
 
   const handleChange = (name) => {
@@ -282,36 +264,37 @@ function Filter(props) {
   }
 
   let filter
+  const attributes = {
+    label,
+    elements,
+    selected: name,
+    onChange: handleChange,
+  }
   switch (type) {
     case 'select':
       filter = (
-        <GridContainer>
-          <GridItem xs={add ? 5 : 12}>
-            <Select
-              label={label}
-              elements={elements}
-              selected={name}
-              onChange={handleChange}
-            />
-          </GridItem>
-          {add && <GridItem xs={7}>{addElement}</GridItem>}
+        <GridContainer alignItems='center'>
+          {elements.length > 0 && (
+            <GridItem xs={add ? (displayNew ? 5 : 10) : 12}>
+              <Select {...attributes} onChange={handleChange} />
+            </GridItem>
+          )}
+          {add && addElement}
         </GridContainer>
       )
       break
 
     case 'list':
       filter = (
-        <div>
-          {add && addElement}
+        <>
+          <GridContainer alignItems='center'>{add && addElement}</GridContainer>
           <List
-            label={label}
-            elements={elements}
-            selected={name}
+            {...attributes}
             onSelect={handleChange}
             render={render}
             defaultName={defaults ? defaultName : ''}
           />
-        </div>
+        </>
       )
 
       break
@@ -319,14 +302,8 @@ function Filter(props) {
     default:
   }
 
-  // console.log(`\ngoing to render ${path}`)
-  // console.log(`elements for ${path}`, elements)
-  // console.log('name', name)
-
-  // if (!checked) return null
-
   return (
-    <div>
+    <div id={'filter ' + path}>
       {filter}
       {savedError && (
         <NotifAlert
@@ -349,7 +326,7 @@ function Filter(props) {
         children &&
         React.cloneElement(children, {
           filters: newFilters,
-          id: elementId,
+          filtersString,
           element,
           defaultFilters: defaults ? defaultFilters.slice(1) : [],
         })}

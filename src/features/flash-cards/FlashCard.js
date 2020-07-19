@@ -41,7 +41,7 @@ const style = {
 
 const useStyles = makeStyles(style)
 
-export default function DisplayflashCard({ card, onNext }) {
+export default function DisplayflashCard({ card, onNext, isLast }) {
   return (
     <ErrorBoundary
       FallbackComponent={ErrorFallback}
@@ -50,12 +50,12 @@ export default function DisplayflashCard({ card, onNext }) {
         // reset the state of your app so the error doesn't happen again
       }}
     >
-      <FlashCard card={card} onNext={onNext} />
+      <FlashCard card={card} onNext={onNext} isLast={isLast}/>
     </ErrorBoundary>
   )
 }
 
-function FlashCard({ card, onNext }) {
+function FlashCard({ card, onNext, isLast }) {
   const { trace, error } = getLogger('FlashCard', 'trace')
   const classes = useStyles()
   const [activeRotate, setActiveRotate] = useState('')
@@ -219,9 +219,9 @@ function FlashCard({ card, onNext }) {
                 <h4>Réponse</h4>
               </Success>
               <br />
-              <h2 className={classes.cardTitle}>
+              <h3 className={classes.cardTitle}>
                 {pending ? '' : card.answer}
-              </h2>
+              </h3>
               <br />
 
               <p className={classes.cardDescription}>{card.explanation}</p>
@@ -253,7 +253,7 @@ function FlashCard({ card, onNext }) {
                     }
                   }}
                 >
-                  <NavigateNextIcon /> Suivante
+                  <NavigateNextIcon /> {isLast ? 'Fin' : 'Suivante'}
                 </Button>
               </div>
             </CardBody>

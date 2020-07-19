@@ -19,7 +19,7 @@ import {
   listenCollection,
 } from '../features/db/db'
 
-import { compareArrays, shuffle, getLogger } from './utils'
+import { compareArrays, shuffle, getLogger, lexicoSort } from './utils'
 
 function useInterval(callback, delay) {
   const savedCallback = useRef()
@@ -261,10 +261,12 @@ const useCollection = (props) => {
     trace,
   ])
 
+  const defaultSort = (a, b) => lexicoSort(a.name, b.name)
+
   const treatedDocuments = useMemo(() => {
-    debug('documents :', documents)
+
     if (!documents) return null
-    debug('newElement :', newElement)
+
     let returned =
       !documents.length && newElement
         ? [
@@ -274,8 +276,10 @@ const useCollection = (props) => {
             },
           ]
         : documents
-    debug('returned :', returned)
-    if (sort) returned = returned.slice().sort(sort)
+  
+   
+    returned = returned.slice().sort(sort || defaultSort)
+   
     if (shuffling) returned = shuffle([...returned])
     if (extract) {
       returned = returned.map((doc) => doc[extract])

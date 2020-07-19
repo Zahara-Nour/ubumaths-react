@@ -4,7 +4,9 @@ const emptyCard = {
     answer: '',
     explanation: '',
     warning: '',
-    name:'Nouvelle carte',
+    name:'Nouvelle Flash Card',
+    grade:'6ème',
+    level:'1'
   }
 
   export default emptyCard

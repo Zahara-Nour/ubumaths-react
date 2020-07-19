@@ -22,6 +22,7 @@ import FormControlLabel from '@material-ui/core/FormControlLabel'
 import styles from 'assets/jss/customCheckboxRadioSwitch.js'
 import { selectIsLoggedIn } from 'features/auth/authSlice'
 import PrivateRoute from 'components/PrivateRoute'
+import queryString from 'query-string'
 
 const useStyles = makeStyles(styles)
 
@@ -56,24 +57,47 @@ function FlashCards({ match }) {
           path={`${match.url}/:subject/:domain/:theme/:level`}
           component={DisplayFlashCards}
         />
+        <Route
+          path={`${match.url}/:subject/:domain`}
+          component={Home}
+        />
+        <Route
+          path={`${match.url}/:subject`}
+          component={Home}
+        />
         <Route render={() => <h1>Erreur</h1>} />
       </Switch>
     </div>
   )
 }
 
-function Home() {
+function Home({match, location}) {
   const [grades, ,] = useCollection({ path: 'Grades' })
   const [grade, setGrade] = useState('')
   const [checkedPersonnal, setCheckedPersonnal] = useState(false)
   const isLoggedIn = useSelector(selectIsLoggedIn)
   const classes = useStyles()
+  const subject = match.params.subject
+  const domain = match.params.domain
+  
+
+  const defaultFilters = []
+  if (subject) defaultFilters.push({subject})
+  if (domain) defaultFilters.push({domain})
 
   useEffect(() => {
     if (grades && grades.length) {
       setGrade(grades[0].name)
     }
   }, [grades])
+
+  useEffect(() => {
+    const values = queryString.parse(location.search)
+   
+    if (grades && values.grade) {
+      setGrade(values.grade)
+    }
+  }, [location, grades])
 
   return (
     <>
@@ -108,7 +132,6 @@ function Home() {
                 type='select'
                 path='Subjects'
                 label='Matière'
-                newLabel='Nouvelle matière'
                 filterName='subject'
               >
                 <ThemesList grade={grade} user />
@@ -129,16 +152,14 @@ function Home() {
                 type='select'
                 path='Subjects'
                 label='Matière'
-                newLabel='Nouvelle matière'
                 filterName='subject'
+                defaultFilters={defaultFilters}
               >
                 <Filter
                   type='select'
                   path='Domains'
                   label='Domaine'
-                  newLabel='Nouveau domaine'
                   filterName='domain'
-                  filterNameAppended
                 >
                   <ThemesList grade={grade} />
                 </Filter>

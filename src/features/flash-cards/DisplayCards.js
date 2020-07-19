@@ -10,20 +10,25 @@ import { Redirect } from 'react-router-dom'
 import NavBar from 'components/NavBar'
 import generateCard from './generateCard'
 import { shuffle } from 'app/utils'
+import queryString from 'query-string'
 
-function DisplayFlashCards({ match }) {
+function DisplayFlashCards({ match, location }) {
   const theme = match.params.theme
   const subject = match.params.subject
   const domain = match.params.domain
-  const level = parseInt(match.params.level, 10)
+  const level = match.params.level
   const [cards, , isError] = useCollection({
     path: 'FlashCards',
-    filters: [{ subject }, { domain }, { theme }, { level }],
+    filters: [{ subject }, { domain }, { theme }, {level}],
   })
+
+
   // const [cards, , isError] = useCards({subject, domain, theme, level})
   const [card, setCard] = useState(0)
   const [IsFinished, setIsFinished] = useState(false)
   const [shuffledCards, setShuffleCards] = useState([])
+
+  const grade = queryString.parse(location.search).grade
 
   const handleNext = () => {
     if (card < cards.length - 1) {
@@ -34,7 +39,7 @@ function DisplayFlashCards({ match }) {
   }
 
   useEffect(() => {
-    setShuffleCards(shuffle([...cards]))
+    if (cards) setShuffleCards(shuffle([...cards]))
   }, [cards])
 
 
@@ -47,7 +52,9 @@ function DisplayFlashCards({ match }) {
       />
     )
 
-  if (IsFinished) return <Redirect to='/flash-cards/' />
+  if (IsFinished) return <Redirect to={`/flash-cards/${subject}/${domain}?grade=${grade}`} />
+
+  if (!cards) return null
 
   return (
     <div>
@@ -60,6 +67,7 @@ function DisplayFlashCards({ match }) {
               <FlashCard
                 card={generateCard(shuffledCards[card])}
                 onNext={handleNext}
+                isLast={card === cards.length - 1}
               />
 
               <p style={{ color: 'white' }}>.</p>
