@@ -348,8 +348,8 @@ const title = {
 
 const cardTitle = {
   ...title,
-  marginTop: '0',
-  marginBottom: '3px',
+  marginTop: '5px',
+  marginBottom: '20px',
   minHeight: 'auto',
   '& a': {
     ...title,

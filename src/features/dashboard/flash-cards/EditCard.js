@@ -525,24 +525,24 @@ function EditCard({
             onNew={createCard}
             onDuplicate={duplicateCard}
             onSave={() => {
-              if (imgName && files.length && !imgUploaded) {
+              const promises = []
+              if (imgName && files.length) {
                 const file = files[0].file
-                const data = files[0].data
+                //const data = files[0].data
                 const imgRef = storage.child(newCard.image)
-                imgRef
-                  .put(file)
-                  .then(function (snapshot) {
-                    console.log('Uploaded a blob or file!')
-                    setImgUploaded(true)
-                    onSave()
-                    localStorage.setItem('flashcards-img/' + file.name, data)
-                  })
-                  .catch((error) =>
-                    console.log('error while saving image :', error.message),
-                  )
-              } else {
-                onSave()
+                promises.push(imgRef.put(file))
               }
+              if (imgAnswerName && filesAnswer.length) {
+                const file = filesAnswer[0].file
+                //const data = files[0].data
+                const imgRef = storage.child(newCard.imageAnswer)
+                promises.push(imgRef.put(file))
+              }
+              Promise.all(promises)
+                .then(()=>onSave())
+                .catch((error) =>
+                  console.log('error while saving :', error.message),
+                )
             }}
             saving={saving}
           />

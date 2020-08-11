@@ -36,6 +36,7 @@ function DisplayFlashCards({ match, location }) {
   const [localUrlForNextImageAnswer, setLocalUrlForNextImageAnswer] = useState()
   const promiseForImageAnswerLocalUrl = usePrevious(localUrlForNextImageAnswer)
   const [image0, setImage0] = useState()
+  const [imageAnswer0, setImageAnswer0] = useState()
 
   const [IsFinished, setIsFinished] = useState(false)
   const [shuffledCards, setShuffleCards] = useState([])
@@ -118,6 +119,9 @@ function DisplayFlashCards({ match, location }) {
       if (shuffled[0].image) {
         setImage0(getLocalUrl(shuffled[0].image))
       }
+      if (shuffled[0].imageAnswer) {
+        setImageAnswer0(getLocalUrl(shuffled[0].imageAnswer))
+      }
     }
   }, [cards, getLocalUrl])
 
@@ -135,7 +139,6 @@ function DisplayFlashCards({ match, location }) {
 
   if (!shuffledCards.length) return null
 
-
   return (
     <div>
       <NavBar />
@@ -152,7 +155,7 @@ function DisplayFlashCards({ match, location }) {
                 promiseForImageLocalUrl={
                   card === 0 ? image0 : promiseForImageLocalUrl
                 }
-                promiseForImageAnswerLocalUrl={promiseForImageAnswerLocalUrl}
+                promiseForImageAnswerLocalUrl={card === 0 ? imageAnswer0 : promiseForImageAnswerLocalUrl}
               />
 
               <p style={{ color: 'white' }}>.</p>

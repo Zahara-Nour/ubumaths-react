@@ -201,6 +201,10 @@ const styles = {
   marginBottom20: {
     marginBottom: '20px',
   },
+  buttonsBottom:{
+    marginTop: '30px',
+    textAlign: 'center',
+  }
 }
 
 export default styles

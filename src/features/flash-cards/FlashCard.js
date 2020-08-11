@@ -151,7 +151,7 @@ function FlashCard({
 
   if (!card) return null
 
-  const gridItemRatio = 8
+  const gridItemRatio = 9
 
   const onLoadFakeImage = ({ target: image }) => {
     const cardWidth = cardRef.current.getBoundingClientRect().width
@@ -248,7 +248,7 @@ function FlashCard({
                 </GridContainer>
               )}
               <br />
-              <div className={classes.textCenter}>
+              <div className={classes.buttonsBottom}>
                 <Button
                   round
                   color='info'
@@ -296,7 +296,7 @@ function FlashCard({
 
               <Warning>{card.warning}</Warning>
 
-              <div className={classes.textCenter}>
+              <div className={classes.buttonsBottom}>
                 <Button
                   round
                   color='success'
@@ -310,7 +310,9 @@ function FlashCard({
                   onClick={() => {
                     if (onNext) {
                       setImgUrl(null)
+                      setImgAnswerUrl(null)
                       setImageWidth(null)
+                      setImageAnswerWidth(null)
                       setPending(true)
                       const id = setInterval(() => {
                         clearInterval(id)
