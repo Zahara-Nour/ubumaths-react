@@ -18,13 +18,13 @@
     "firebase": "^7.14.0",
     "fuzzysort": "^1.1.4",
     "history": "^4.10.1",
-    "lodash": "^4.17.15",
+    "lodash": "^4.17.19",
     "lodash.throttle": "^4.1.1",
     "material-ui-dropzone": "^3.2.1",
     "mathlive": "^0.35.1",
     "moment": "^2.26.0",
     "nouislider": "^14.2.0",
-    "npm": "^6.14.5",
+    "npm": "^6.14.7",
     "perfect-scrollbar": "^1.5.0",
     "query-string": "^6.13.0",
     "react": "^16.13.1",
@@ -45,6 +45,7 @@
     "react-table": "^7.0.4",
     "react-tagsinput": "^3.19.0",
     "react-transition-group": "^4.4.1",
+    "react-use": "^15.3.3",
     "redux-persist": "^6.0.0"
   },
   "scripts": {

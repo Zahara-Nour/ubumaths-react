@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useFilters } from 'app/hooks'
 // @material-ui/core components
 import { makeStyles } from '@material-ui/core/styles'
@@ -70,10 +70,15 @@ function EditCard({
   const [generatedCard, setGeneratedCard] = useState({ ...emptyCard })
 
   const [defaultImgName, setDefaultImgName] = useState('')
+  const [defaultImgAnswerName, setDefaultImgAnswerName] = useState('')
   const [imgName, setImgName] = useState('')
+  const [imgAnswerName, setImgAnswerName] = useState('')
   const [files, setFiles] = useState()
+  const [filesAnswer, setFilesAnswer] = useState()
   const [imgUploaded, setImgUploaded] = useState(false)
+  const [imgAnswerUploaded, setImgAnswerUploaded] = useState(false)
   const [isLoadingImage, setIsLoadingImage] = useState(false)
+  const [isLoadingImageAnswer, setIsLoadingImageAnswer] = useState(false)
 
   const [defaultFilters, setDefaultFilters] = useState([])
   const defaultFiltersRef = useRef([])
@@ -143,7 +148,6 @@ function EditCard({
   }
 
   useEffect(() => {
-
     if (grades && grades.length) {
       setGrade(card.grade || grades[0].name)
     }
@@ -164,7 +168,9 @@ function EditCard({
       setDefaultWarning(card.warning || '')
       setVariables(card.variables ? { ...card.variables } : {})
       setDefaultImgName('')
+      setDefaultImgAnswerName('')
       setImgUploaded(false)
+      setImgAnswerUploaded(false)
 
       const generated = {}
       trace('card : ', card)
@@ -213,7 +219,7 @@ function EditCard({
 
                 setFiles([{ file, data: binaryStr }])
                 setDefaultImgName(name)
-                localStorage.setItem(file.name, file)
+                // localStorage.setItem(file.name, file)
               }
               reader.readAsDataURL(file)
 
@@ -233,11 +239,57 @@ function EditCard({
         trace('reset files')
         setFiles([])
       }
+
+      if (card.imageAnswer) {
+        trace('fetching answer image :', card.imageAnswer)
+        setIsLoadingImageAnswer(true)
+        storage
+          .child(card.imageAnswer)
+          .getDownloadURL()
+          .then((url) => {
+            const xhr = new XMLHttpRequest()
+            xhr.responseType = 'blob'
+            xhr.onload = () => {
+              const blob = xhr.response
+              const name = card.image.split('/').pop()
+              const file = new File([blob], name, { type: blob.type })
+              const reader = new FileReader()
+
+              reader.onabort = () => console.log('file reading was aborted')
+              reader.onerror = () => console.log('file reading has failed')
+              reader.onload = () => {
+                // Do whatever you want with the file contents
+                const binaryStr = reader.result
+
+                setFilesAnswer([{ file, data: binaryStr }])
+                setDefaultImgAnswerName(name)
+                // localStorage.setItem(file.name, file)
+              }
+              reader.readAsDataURL(file)
+
+              setFilesAnswer([])
+              setIsLoadingImageAnswer(false)
+              setImgAnswerUploaded(true)
+            }
+            xhr.open('GET', url)
+            xhr.send()
+          })
+          .catch((err) => {
+            error('error while fetching answer image :', err.message)
+            setFilesAnswer([])
+            setIsLoadingImage(false)
+          })
+      } else {
+        trace('reset answer files')
+        setFilesAnswer([])
+      }
+
       setAdvanced(
         isAdmin ||
           card.explanation ||
           card.warning ||
           card.image ||
+          card.imageAnswer ||
           !(
             Object.keys(card.variables).length === 0 &&
             card.variables.constructor === Object
@@ -261,6 +313,10 @@ function EditCard({
         imgName || defaultImgName
           ? 'flashcards-img/' + (imgName || defaultImgName)
           : '',
+      imageAnswer:
+        imgAnswerName || defaultImgAnswerName
+          ? 'flashcards-img/' + (imgAnswerName || defaultImgAnswerName)
+          : '',
     }))
   }, [
     title,
@@ -272,7 +328,9 @@ function EditCard({
     level,
     variables,
     imgName,
+    imgAnswerName,
     defaultImgName,
+    defaultImgAnswerName,
   ])
 
   useEffect(() => {
@@ -539,6 +597,56 @@ function EditCard({
           </CardBody>
         </Card>
       )}
+
+      {advanced && (
+        <Card>
+          <CardHeader color='rose' icon>
+            <CardIcon color='rose'>
+              <EditIcon />
+            </CardIcon>
+          </CardHeader>
+          <CardBody>
+            {isLoadingImageAnswer ? (
+              <Centered>
+                {' '}
+                <GridSpinner />
+              </Centered>
+            ) : (
+              <div>
+                <TextInput
+                  label='image de la réponse'
+                  defaultText={defaultImgAnswerName}
+                  onChange={setImgAnswerName}
+                  throttle={500}
+                />
+                <DropzoneAreaBase
+                  filesLimit={1}
+                  acceptedFiles={['image/*']}
+                  fileObjects={filesAnswer}
+                  dropzoneText={'Image'}
+                  onAdd={(files) => {
+                    trace('files added', files)
+                    setDefaultImgAnswerName(files[0].file.name)
+                    setImgAnswerName(files[0].file.name)
+                    setFilesAnswer(files)
+                    setImgAnswerUploaded(false)
+                  }}
+                  onDelete={(file) => {
+                    setImgAnswerName('')
+                    setDefaultImgAnswerName('')
+                    setImgAnswerUploaded(false)
+                    setFilesAnswer([])
+                  }}
+                  onChange={(files) => {
+                    trace('files changed', files)
+                  }}
+                />
+              </div>
+            )}
+          </CardBody>
+        </Card>
+      )}
+
       {advanced && (
         <Card>
           <CardHeader color='rose' icon>

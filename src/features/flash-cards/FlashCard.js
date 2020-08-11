@@ -41,7 +41,7 @@ const style = {
 
 const useStyles = makeStyles(style)
 
-export default function DisplayflashCard({ card, onNext, isLast }) {
+export default function DisplayflashCard(props) {
   return (
     <ErrorBoundary
       FallbackComponent={ErrorFallback}
@@ -50,50 +50,35 @@ export default function DisplayflashCard({ card, onNext, isLast }) {
         // reset the state of your app so the error doesn't happen again
       }}
     >
-      <FlashCard card={card} onNext={onNext} isLast={isLast}/>
+      <FlashCard {...props} />
     </ErrorBoundary>
   )
 }
 
-function FlashCard({ card, onNext, isLast }) {
+function FlashCard({
+  card,
+  onNext,
+  isLast,
+  preloadImages,
+  promiseForImageLocalUrl,
+  promiseForImageAnswerLocalUrl,
+}) {
   const { trace, error } = getLogger('FlashCard', 'trace')
   const classes = useStyles()
   const [activeRotate, setActiveRotate] = useState('')
   const [pending, setPending] = useState(false)
   const [imgUrl, setImgUrl] = useState()
+  const [imgAnswerUrl, setImgAnswerUrl] = useState()
   const cardRef = useRef()
   const [imageWidth, setImageWidth] = useState()
+  const [imageAnswerWidth, setImageAnswerWidth] = useState()
 
   useEffect(() => {
     Mathlive.renderMathInDocument()
   })
 
-  useEffect(() => {
-    if (card.image) {
-      trace('fetching image :', card.image)
-      const data = localStorage.getItem(card.image)
-      if (data) {
-        trace('image found in store : ', data)
-        const blob = dataURItoBlob(data)
-        const url = URL.createObjectURL(blob)
-        setImgUrl(url)
-        trace('setting new image url :', url)
-      } else {
-        storage
-          .child(card.image)
-          .getDownloadURL()
-          .then((url) => {
-            setImgUrl(url)
-            trace('setting new image url :', url)
-          })
-          .catch((err) => error('error while fetching image :', err.message))
-      }
-    } else {
-      setImgUrl('')
-    }
-  }, [card.image, trace, error])
-
   // console.log('flash card', card)
+  trace('promiseForImageLocalUrl', promiseForImageLocalUrl)
 
   const addStylesForRotatingCards = useCallback(() => {
     var rotatingCards = document.getElementsByClassName(classes.cardRotate)
@@ -135,11 +120,40 @@ function FlashCard({ card, onNext, isLast }) {
     Mathlive.renderMathInDocument()
   })
 
+  useEffect(() => {
+    setImgUrl(null)
+    setImageWidth(null)
+    setImgAnswerUrl(null)
+    setImageAnswerWidth(null)
+  }, [card])
+
+  useEffect(() => {
+    async function getImages() {
+      if (card.image && preloadImages && promiseForImageLocalUrl) {
+        const localUrl = await promiseForImageLocalUrl
+        setImgUrl(localUrl)
+      }
+    }
+
+    getImages()
+  }, [card, promiseForImageLocalUrl, preloadImages])
+
+  useEffect(() => {
+    async function getImages() {
+      if (card.imageAnswer && preloadImages && promiseForImageAnswerLocalUrl) {
+        const localUrl = await promiseForImageAnswerLocalUrl
+        setImgAnswerUrl(localUrl)
+      }
+    }
+
+    getImages()
+  }, [card, preloadImages, promiseForImageAnswerLocalUrl])
+
   if (!card) return null
 
   const gridItemRatio = 8
 
-  const onLoadFake = ({ target: image }) => {
+  const onLoadFakeImage = ({ target: image }) => {
     const cardWidth = cardRef.current.getBoundingClientRect().width
     const width =
       image.width < (gridItemRatio / 12) * cardWidth
@@ -149,14 +163,42 @@ function FlashCard({ card, onNext, isLast }) {
     setImageWidth(width)
   }
 
+  const onLoadFakeImageAnswer = ({ target: image }) => {
+    const cardWidth = cardRef.current.getBoundingClientRect().width
+    const width =
+      image.width < (gridItemRatio / 12) * cardWidth
+        ? image.width
+        : (gridItemRatio / 12) * cardWidth
+
+    setImageAnswerWidth(width)
+  }
+
+  const shouldCalculateImageWidth = !!card.image && !!imgUrl && !imageWidth
+  const shouldCalculateImageAnswerWidth =
+    !!card.imageAnswer && !!imgAnswerUrl && !imageAnswerWidth
+  const isImageWidthCalculated = !!imageWidth
+  const isImageAnswerWidthCalculated = !!imageAnswerWidth
+  const shouldDisplayImageSpinner =
+    !!card.image && (!imgUrl || !isImageWidthCalculated)
+  const shouldDisplayImageAnswerSpinner =
+    !!card.imageAnswer && (!imgAnswerUrl || !isImageAnswerWidthCalculated)
+
   return (
     <div>
-      {!!imgUrl && !imageWidth && (
+      {shouldCalculateImageWidth && (
         <img
           alt='flash card'
           style={{ position: 'fixed', opacity: 0 }}
           src={imgUrl}
-          onLoad={onLoadFake}
+          onLoad={onLoadFakeImage}
+        />
+      )}
+      {shouldCalculateImageAnswerWidth && (
+        <img
+          alt='flash card answer'
+          style={{ position: 'fixed', opacity: 0 }}
+          src={imgAnswerUrl}
+          onLoad={onLoadFakeImageAnswer}
         />
       )}
 
@@ -179,11 +221,16 @@ function FlashCard({ card, onNext, isLast }) {
               </Info>
               <br />
               <h4 className={classes.cardTitle}>{card.enounce}</h4>
-              {!!card.image && !imageWidth && <GridSpinner />}
-              {!!card.image && !!imageWidth && (
+              {shouldDisplayImageSpinner && (
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{ display: 'inline-block' }}>
+                    <GridSpinner />
+                  </div>
+                </div>
+              )}
+              {isImageWidthCalculated && (
                 <GridContainer justify='center'>
                   <GridItem xs={gridItemRatio}>
-                    {/* <Image /> */}
                     <FadeIn height={400}>
                       {(onLoad) => (
                         <img
@@ -201,7 +248,6 @@ function FlashCard({ card, onNext, isLast }) {
                 </GridContainer>
               )}
               <br />
-
               <div className={classes.textCenter}>
                 <Button
                   round
@@ -222,6 +268,28 @@ function FlashCard({ card, onNext, isLast }) {
               <h3 className={classes.cardTitle}>
                 {pending ? '' : card.answer}
               </h3>
+              {shouldDisplayImageAnswerSpinner && <GridSpinner />}
+              {!pending && isImageAnswerWidthCalculated && (
+                <GridContainer justify='center'>
+                  <GridItem xs={gridItemRatio}>
+                    {/* <Image /> */}
+                    <FadeIn height={400}>
+                      {(onLoad) => (
+                        <img
+                          alt='flash card'
+                          src={imgAnswerUrl}
+                          onLoad={() => {
+                            addStylesForRotatingCards()
+                            onLoad()
+                          }}
+                          width={imageAnswerWidth}
+                        />
+                      )}
+                    </FadeIn>
+                  </GridItem>
+                </GridContainer>
+              )}
+
               <br />
 
               <p className={classes.cardDescription}>{card.explanation}</p>
@@ -241,6 +309,8 @@ function FlashCard({ card, onNext, isLast }) {
                   color='success'
                   onClick={() => {
                     if (onNext) {
+                      setImgUrl(null)
+                      setImageWidth(null)
                       setPending(true)
                       const id = setInterval(() => {
                         clearInterval(id)
