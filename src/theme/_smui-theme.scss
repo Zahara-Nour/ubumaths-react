@@ -1,0 +1,28 @@
+// @import url('https://fonts.googleapis.com/css?family=Roboto:300,400,500');
+// $mdc-typography-font-family: unquote("Roboto, sans-serif");
+
+// @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600&display=swap');
+// $mdc-typography-font-family: unquote("Montserrat, sans-serif");
+
+// @import url('https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;700&display=swap');
+// $mdc-typography-font-family: unquote("Rubik, sans-serif");
+
+@import url('https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap');
+$mdc-typography-font-family: unquote("Lato, sans-serif");
+
+
+$mdc-theme-primary: #6200ee !default; // baseline purple, 500 tone
+$mdc-theme-on-primary: if(mdc-theme-contrast-tone($mdc-theme-primary) == "dark", #000, #fff) !default;
+
+// The $mdc-theme-accent variable is DEPRECATED - it exists purely for backward compatibility.
+// The $mdc-theme-secondary* variables should be used for all new projects.
+$mdc-theme-accent: #018786 !default; // baseline teal, 600 tone
+$mdc-theme-secondary: $mdc-theme-accent !default;
+$mdc-theme-on-secondary: if(mdc-theme-contrast-tone($mdc-theme-secondary) == "dark", #000, #fff) !default;
+$mdc-theme-background: #fff !default; // White
+
+// $mdc-theme-surface: #fff !default;
+// $mdc-theme-on-surface: if(mdc-theme-contrast-tone($mdc-theme-surface) == "dark", #000, #fff) !default;
+
+// $mdc-theme-error: #b00020 !default;
+// $mdc-theme-on-error: if(mdc-theme-contrast-tone($mdc-theme-error) == "dark", #000, #fff) !default;

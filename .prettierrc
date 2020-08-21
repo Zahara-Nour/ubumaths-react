@@ -1,8 +1,11 @@
 {
-    "semi": false,
-    "trailingComma": "all",
-    "singleQuote": true,
-    "printWidth": 80,
-    "jsxSingleQuote": true
-    
-  }
+  "semi": false,
+  "trailingComma": "all",
+  "singleQuote": true,
+  "printWidth": 80,
+  "jsxSingleQuote": true,
+  "svelteSortOrder": "scripts-markup-styles",
+  "svelteStrictMode": true,
+  "svelteBracketNewLine": true,
+  "svelteAllowShorthand": false
+}
