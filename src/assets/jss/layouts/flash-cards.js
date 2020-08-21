@@ -95,6 +95,11 @@ const styles = {
   },
   cardDescription: {
     ...description,
+    fontSize: "18px",
+    lineHeight:"1.3",
+    textAlign: "left",
+    paddingLeft:"1em",
+    paddingRight:"1em",
   },
   cardDescriptionWhite: {
     color: 'rgba(' + hexToRgb(whiteColor) + ', 0.8)',
@@ -202,7 +207,7 @@ const styles = {
     marginBottom: '20px',
   },
   buttonsBottom:{
-    marginTop: '30px',
+    marginTop: '20px',
     textAlign: 'center',
   }
 }

@@ -251,7 +251,7 @@ function EditCard({
             xhr.responseType = 'blob'
             xhr.onload = () => {
               const blob = xhr.response
-              const name = card.image.split('/').pop()
+              const name = card.imageAnswer.split('/').pop()
               const file = new File([blob], name, { type: blob.type })
               const reader = new FileReader()
 
@@ -277,7 +277,7 @@ function EditCard({
           .catch((err) => {
             error('error while fetching answer image :', err.message)
             setFilesAnswer([])
-            setIsLoadingImage(false)
+            setIsLoadingImageAnswer(false)
           })
       } else {
         trace('reset answer files')

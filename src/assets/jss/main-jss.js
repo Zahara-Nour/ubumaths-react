@@ -87,7 +87,7 @@ const defaultFont = {
 }
 
 const primaryColor = ['#9c27b0', '#ab47bc', '#8e24aa', '#af2cc5', '#7b1fa2']
-const secondaryColor = ["#fafafa"];
+const secondaryColor = ['#fafafa']
 const warningColor = [
   '#ff9800',
   '#ffa726',
@@ -158,13 +158,9 @@ const tumblrColor = '#35465c'
 const behanceColor = '#1769ff'
 const dribbbleColor = '#ea4c89'
 const redditColor = '#ff4500'
-const instagramColor = "#125688";
+const instagramColor = '#125688'
 const firebaseColor = '#FFCA28'
 const reactColor = '#61DBFB'
-
-
-
-
 
 const boxShadow = {
   boxShadow:
@@ -351,6 +347,10 @@ const cardTitle = {
   marginTop: '5px',
   marginBottom: '20px',
   minHeight: 'auto',
+  fontSize: '20px',
+  lineHeight: 1.3,
+  paddingLeft:"1em",
+    paddingRight:"1em",
   '& a': {
     ...title,
     marginTop: '.625rem',
@@ -371,83 +371,83 @@ const cardLink = {
 
 const main = {
   background: whiteColor,
-  position: "relative",
-  zIndex: "3"
-};
+  position: 'relative',
+  zIndex: '3',
+}
 
 const mainRaised = {
-  "@media (max-width: 576px)": {
-    marginTop: "-30px"
+  '@media (max-width: 576px)': {
+    marginTop: '-30px',
   },
-  "@media (max-width: 830px)": {
-    marginLeft: "10px",
-    marginRight: "10px"
+  '@media (max-width: 830px)': {
+    marginLeft: '10px',
+    marginRight: '10px',
   },
-  margin: "-60px 30px 0px",
-  borderRadius: "6px",
+  margin: '-60px 30px 0px',
+  borderRadius: '6px',
   boxShadow:
-    "0 16px 24px 2px rgba(" +
+    '0 16px 24px 2px rgba(' +
     hexToRgb(blackColor) +
-    ", 0.14), 0 6px 30px 5px rgba(" +
+    ', 0.14), 0 6px 30px 5px rgba(' +
     hexToRgb(blackColor) +
-    ", 0.12), 0 8px 10px -5px rgba(" +
+    ', 0.12), 0 8px 10px -5px rgba(' +
     hexToRgb(blackColor) +
-    ", 0.2)"
-};
+    ', 0.2)',
+}
 
 const section = {
-  backgroundPosition: "50%",
-  backgroundSize: "cover"
-};
+  backgroundPosition: '50%',
+  backgroundSize: 'cover',
+}
 
 const sectionDark = {
   backgroundColor: grayColor[3],
   background:
-    "radial-gradient(ellipse at center," +
+    'radial-gradient(ellipse at center,' +
     grayColor[4] +
-    " 0," +
+    ' 0,' +
     grayColor[5] +
-    " 100%)"
-};
+    ' 100%)',
+}
 
 const sectionDescription = {
-  marginTop: "130px"
-};
+  marginTop: '130px',
+}
 
 const description = {
-  color: grayColor[0]
-};
+  color: grayColor[0],
+}
 
 const mlAuto = {
-  marginLeft: "auto"
-};
+  marginLeft: 'auto',
+}
 
 const mrAuto = {
-  marginRight: "auto"
-};
+  marginRight: 'auto',
+}
 
 const btnLink = {
-  backgroundColor: "transparent",
-  boxShdow: "none",
-  marginTop: "5px",
-  marginBottom: "5px"
-};
+  backgroundColor: 'transparent',
+  boxShdow: 'none',
+  marginTop: '5px',
+  marginBottom: '5px',
+}
 const coloredShadow = {
   // some jss/css to make the cards look a bit better on Internet Explorer
-  "@media all and (-ms-high-contrast: none), (-ms-high-contrast: active)": {
-    display: "none !important"
+  '@media all and (-ms-high-contrast: none), (-ms-high-contrast: active)': {
+    display: 'none !important',
   },
-  transform: "scale(0.94)",
-  top: "12px",
-  filter: "blur(12px)",
-  position: "absolute",
-  width: "100%",
-  height: "100%",
-  backgroundSize: "cover",
-  zIndex: "-1",
-  transition: "opacity .45s",
-  opacity: "0"
-};
+  transform: 'scale(0.94)',
+  top: '12px',
+  filter: 'blur(12px)',
+  position: 'absolute',
+  width: '100%',
+  height: '100%',
+  backgroundSize: 'cover',
+  zIndex: '-1',
+  transition: 'opacity .45s',
+  opacity: '0',
+}
 
 export {
   hexToRgb,
@@ -512,5 +512,5 @@ export {
   mlAuto,
   mrAuto,
   btnLink,
-  coloredShadow
+  coloredShadow,
 }

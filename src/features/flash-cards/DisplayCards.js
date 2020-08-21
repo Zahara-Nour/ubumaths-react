@@ -54,7 +54,8 @@ function DisplayFlashCards({ match, location }) {
   const getLocalUrl = useCallback(
     (imgPath) => {
       trace('fetching image :', imgPath)
-      const data = localStorage.getItem(imgPath)
+      // const data = localStorage.getItem(imgPath)
+      const data = null
       if (data) {
         trace('image found in store : ', data)
         const blob = dataURItoBlob(data)
