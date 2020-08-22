@@ -5,6 +5,7 @@ import livereload from 'rollup-plugin-livereload';
 import { terser } from 'rollup-plugin-terser';
 import preprocess from 'svelte-preprocess';
 import postcss from 'rollup-plugin-postcss'
+import autoprefixer from 'autoprefixer'
 
 const production = !process.env.ROLLUP_WATCH;
 
@@ -41,7 +42,8 @@ const postcssOptions = () => ({
 		  //'./static/sass'
 		]
 	  }]
-	]
+	],
+	plugins: [autoprefixer()]
   });
 
 export default {

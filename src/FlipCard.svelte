@@ -1,61 +1,70 @@
 <script>
-  export let flip = false
+  export let flip
+  export let height
+  let style=''
+  if (height) {
+    style+='height:{height}px'
+  }
 </script>
 
-<div class="card" class:flip>
+<div class="card" class:flip {style}>
   <div class="flipper">
-    <div class="front">
+    <div class="front" {style}>
       <slot name="front">Pas de front</slot>
     </div>
-    <div class="back">
-      <slot name="back">Pad de Back</slot>
+    <div class="back" {style}>
+      <slot name="black">Pad de Back</slot>
     </div>
   </div>
 </div>
 
 <style type="text/scss">
-  :root {
-    --time: 0.60s;
-  }
+/* entire container, keeps perspective */
+.card {
+  perspective: 1000px;
+  -webkit-perspective: 1000px;
+}
+	/* flip the pane when hovered */
+ .card.flip .flipper {
+  -webkit-transform: rotateY(180deg);
+		transform: rotateY(180deg);
+	}
 
-  .card {
-   
-    perspective: 40rem;
-  }
+.card, .front, .back {
+	width: 100%;
+}
 
-  .flipper {
-    border-radius: 0.25rem;
-    display: flex;
-    transform-style: preserve-3d;
-    transition: var(--time) transform;
-  }
+/* flip speed goes here */
+.flipper {
+  -webkit-transition: 0.6s;
+  -o-transition: 0.6s;
+  -webkit-transform-style: preserve-3d;
+	transition: 0.6s;
+	transform-style: preserve-3d;
+	position: relative;
+}
 
-  .card.flip .flipper {
-    transform: rotateY(-180deg);
-  }
+/* hide back of pane during swap */
+.front, .back {
+  -webkit-backface-visibility: hidden;
+	backface-visibility: hidden;
+	position: absolute;
+	top: 0;
+	left: 0;
+}
 
-  .front,
-  .back {
-    backface-visibility: hidden;
-    min-width: 100%;
-    box-shadow: 0 -1px 1px rgba(0, 0, 0, 0.04), 0 2px 2px rgba(0, 0, 0, 0.04),
-      0 4px 4px rgba(0, 0, 0, 0.04), 0 8px 8px rgba(0, 0, 0, 0.04),
-      0 16px 16px rgba(0, 0, 0, 0.04);
+/* front pane, placed above back */
+.front {
+	z-index: 2;
+  /* for firefox 31 */
 
-    background-color: white;
-    box-sizing: border-box;
-    padding: 1.5rem;
-    border-radius: 0.25rem;
-    // border-color: black;
-    // border-width: 1px;
-    // border-style: solid;
-  }
+	transform: rotateY(0deg);
+}
 
-  .back {
-    transform: rotateY(-180deg) translate(+100%, 0);
-  }
+/* back, initially hidden pane */
+.back {
+  -webkit-transform: rotateY(180deg);
+	transform: rotateY(180deg);
+}
 
-  .front {
-    z-index: 2;
-  }
 </style>

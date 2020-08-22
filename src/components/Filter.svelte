@@ -15,7 +15,7 @@
   let selected
 
   function initSelect(values) {
-    console.log('values received', label)
+    // console.log('values received', label)
     selected =
       defaultValue && values.includes(defaultValue) ? defaultValue : values[0]
     defaultValue = null
@@ -39,9 +39,9 @@
  
   }
 
-  $: {
-    console.log('selected', label, selected)
-  }
+  // $: {
+  //   console.log('selected', label, selected)
+  // }
 </script>
 
 {#await valuesP}

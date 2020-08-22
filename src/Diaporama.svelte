@@ -1,33 +1,91 @@
 <script>
-  import {images} from './stores'
-  import { fetchCollection, storage } from './db'
+  import { getLocalUrl } from './localUrl'
   import { shuffle, getLogger } from './utils'
-  import Button, { Label } from '@smui/button'
   import FlashCard from './FlashCard.svelte'
   import queryString from 'query-string'
   import { navigate } from 'svelte-routing'
   import generateCard from './generateCard'
-import { getCollection } from './collections';
+  import { getCollection } from './collections'
+  import FrontCard from './components/FrontCard.svelte'
+  import BackCard from './components/BackCard.svelte'
+  import Spinner from './components/Spinner.svelte'
+  import { afterUpdate } from 'svelte'
 
   export let location
 
   let queryParams
-  let subject
-  let domain
-  let theme
-  let level
+  let subject, domain, theme, level
   let filters = []
   let isFinished = false
   const { trace } = getLogger('FlashCards', 'trace')
-  let cards
-  let cardsP
-  let card_i
-  let frontFirstLocalUrlP
-  let backFirstLocalUrlP
-  let nextFrontLocalUrlP
-  let nextBackLocalUrlP
-  let frontLocalUrlP
-  let backLocalUrlP
+  let cards, cardsP, card_i
+  let nextFrontLocalUrlP, nextBackLocalUrlP, frontLocalUrlP, backLocalUrlP
+  let hfront = 0
+  let hback = 0
+  let h = 0
+  let nexth = 0
+  let promise, promisedone
+  let disable
+
+  const getCards = async (filters) => {
+    // first seek in store
+
+    cardsP = getCollection({
+      collectionPath: 'FlashCards',
+      filters,
+    }).then((values) => {
+      trace('crds received, ', values)
+      shuffle(values)
+      cards = values
+      card_i = -1
+      return values
+    })
+  }
+
+  afterUpdate(() => {
+    async function waitPromise() {
+      if (promise) {
+        await promise
+        await new Promise((resolve) => {
+          setTimeout(resolve, 1000)
+        })
+        nexth = Math.max(hback, hfront)
+        if (hfront !== 0 && hback !== 0) {
+          promise = null
+          if (card_i === -1) card_i = 0
+          disable = false
+        }
+      }
+    }
+    waitPromise()
+  })
+
+  function changeCard(i) {
+    console.log('change i', i)
+    if (!cards || !cards.length) return
+    promisedone = false
+    if (i < cards.length - 1) disable = true
+
+    if (i >= 0) {
+      frontLocalUrlP = nextFrontLocalUrlP
+      backLocalUrlP = nextBackLocalUrlP
+    }
+    if (i < cards.length - 1) {
+      const nextcard = cards[i + 1]
+      nextFrontLocalUrlP = nextcard.image
+        ? getLocalUrl(nextcard.image)
+        : Promise.resolve('none')
+      nextBackLocalUrlP = nextcard.imageAnswer
+        ? getLocalUrl(nextcard.imageAnswer)
+        : Promise.resolve('none')
+
+      promise = Promise.all([nextFrontLocalUrlP, nextBackLocalUrlP]).then(
+        () => (promisedone = true),
+      )
+    }
+    h = nexth
+    nexth = 0
+  }
 
   $: {
     queryParams = queryString.parse(location.search)
@@ -42,8 +100,6 @@ import { getCollection } from './collections';
     if (level) filters.push({ level })
   }
 
-  trace('filters', filters)
-
   $: {
     if (isFinished) {
       navigate(`/flash-cards?subject=${subject}&domain=${domain}`)
@@ -51,43 +107,11 @@ import { getCollection } from './collections';
   }
 
   $: {
-    frontLocalUrlP = card_i === 0 ? frontFirstLocalUrlP : nextFrontLocalUrlP
-    backLocalUrlP = card_i === 0 ? backFirstLocalUrlP : nextBackLocalUrlP
-    nextFrontLocalUrlP =
-      cards && card_i < cards.length - 1 && cards[card_i + 1].image
-        ? getLocalUrl(cards[card_i + 1].image)
-        : null
-    nextBackLocalUrlP =
-      cards && card_i < cards.length - 1 && cards[card_i + 1].imageAnswer
-        ? getLocalUrl(cards[card_i + 1].imageAnswer)
-        : null
-  }
-
-  $: {
-    const getCards = async (filters) => {
-      // first seek in store
-
-      cardsP = getCollection({
-        collectionPath: 'FlashCards',
-        filters,
-      }).then((values) => {
-        trace('crds received, ', values)
-        shuffle(values)
-        if (values.length) {
-          card_i = 0
-          const card = values[0]
-          frontFirstLocalUrlP = card.image ? getLocalUrl(card.image) : null
-          backFirstLocalUrlP = card.imageAnswer
-            ? getLocalUrl(card.imageAnswer)
-            : null
-        }
-        cards = values
-        return values
-      })
-    }
     isFinished = false
     getCards(filters)
   }
+
+  $: changeCard(card_i)
 
   const handleNextCard = () => {
     if (card_i < cards.length - 1) {
@@ -96,60 +120,41 @@ import { getCollection } from './collections';
       isFinished = true
     }
   }
-
-  const  getLocalUrl = async (imgPath) => {
-    trace('getting image :', imgPath)
-    console.log('images store', $images)
-    if ($images[imgPath]) {
-      trace('image found in store :', imgPath)
-      return $images[imgPath]
-    }
-    
-    trace('fetching image :', imgPath)
-
-    return storage
-      .child(imgPath)
-      .getDownloadURL()
-      .then((url) => {
-        
-        const promise = new Promise((resolve, reject) => {
-          const xhr = new XMLHttpRequest()
-          xhr.responseType = 'blob'
-          xhr.onload = () => {
-            trace('img dowloadeed', imgPath)
-            const blob = xhr.response
-            const localUrl = URL.createObjectURL(blob)
-            images.update(store => {
-              store[imgPath] = localUrl
-              return store
-            })
-            console.log('images store', $images)
-            resolve(localUrl)
-          }
-          xhr.onerror = () => {
-            reject()
-          }
-          xhr.open('GET', url)
-          xhr.send()
-        })
-        return promise
-      })
-      .catch((err) => error('error while fetching image :', err.message))
-  }
 </script>
 
 {#await cardsP}
-  <p>...waiting</p>
+  <div class="center">
+    <Spinner />
+  </div>
 {:then cards}
-  {#if cards && cards.length}
-    <FlashCard
-      card="{cards[card_i]}"
-      onNext="{handleNextCard}"
-      preloadImages
-      frontLocalUrlP="{frontLocalUrlP}"
-      backLocalUrlP="{backLocalUrlP}"
-      isLast="{card_i == cards.length - 1}"
-    />
+  {#if cards.length}
+    {#if card_i === -1}
+      <div class="center">
+        <Spinner />
+      </div>
+    {:else}
+      <FlashCard
+        card="{cards[card_i]}"
+        onNext="{handleNextCard}"
+        preloadImages
+        {frontLocalUrlP}
+        {backLocalUrlP}
+        isLast="{card_i === cards.length - 1}"
+        height="{h || 800}"
+        disableNext="{disable}"
+      />
+    {/if}
+    {#if card_i < cards.length - 1 && promisedone}
+      <div class="hidden" bind:offsetHeight="{hfront}">
+        <FrontCard
+          card="{cards[card_i + 1]}"
+          localUrlP="{nextFrontLocalUrlP}"
+        />
+      </div>
+      <div class="hidden" bind:offsetHeight="{hback}">
+        <BackCard card="{cards[card_i + 1]}" localUrlP="{nextBackLocalUrlP}" />
+      </div>
+    {/if}
   {:else}
     <p style="color: red">liste vide</p>
   {/if}
@@ -157,3 +162,18 @@ import { getCollection } from './collections';
 {:catch error}
   <p style="color: red">{error.message}</p>
 {/await}
+
+<style>
+  .center {
+    
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .hidden {
+    visibility: hidden;
+    /* position: relative;
+    /* left: 0;
+    right: 0; */
+  }
+</style>
