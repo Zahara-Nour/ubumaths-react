@@ -1,48 +1,45 @@
 <script>
   import Mathlive from 'mathlive'
-  import FlipCard from './FlipCard.svelte'
   import { afterUpdate } from 'svelte'
   import BackCard from './components/BackCard.svelte'
   import FrontCard from './components/FrontCard.svelte'
-  export let card = { enounce: 'énoncé', answer: 'réponse' }
+  export let card
   export let onNext
   export let frontLocalUrlP
   export let backLocalUrlP
   export let isLast = false
-  export let height
   export let disableNext
 
   let flip = false
   const toggleFlip = () => (flip = !flip)
 
-  const handleNext = () => {
-    if (!isLast) flip = false
-    setTimeout(onNext, 250)
-  }
-
   afterUpdate(() => {
     console.log('mathlive')
+    // if (!flip) {
     // Mathlive.renderMathInElement('front')
+    // } else  {
     // Mathlive.renderMathInElement('back')
+    // }
+    Mathlive.renderMathInDocument()
   })
 </script>
 
-<FlipCard {flip}>
-  <div id="front" slot="front">
-    <FrontCard {card} localUrlP="{frontLocalUrlP}" {toggleFlip} {height} />
-  </div>
-  <div id="black" slot="black">
+{#if flip}
+  <div id="back">
     <BackCard
       {card}
       localUrlP="{backLocalUrlP}"
       {toggleFlip}
-      {handleNext}
-      {height}
+      {onNext}
       {disableNext}
       {isLast}
     />
   </div>
-</FlipCard>
+{:else}
+  <div id="front">
+    <FrontCard {card} localUrlP="{frontLocalUrlP}" {toggleFlip} />
+  </div>
+{/if}
 
 <style type="text/scss">
 

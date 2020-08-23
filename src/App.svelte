@@ -1,12 +1,8 @@
 <script>
-  import FlashCard from './FlashCard.svelte'
   import FlashCards from './FlashCards.svelte'
   import { Router, Link, Route } from 'svelte-routing'
   import Home from './routes/Home.svelte'
   import About from './routes/About.svelte'
-  import Button from '@smui/button/Button.svelte'
-  import FlipCard from './FlipCard.svelte'
-  import Group from '@smui/button/Group.svelte'
   import Diaporama from './Diaporama.svelte'
   export let url = ''
 </script>

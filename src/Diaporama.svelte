@@ -4,10 +4,7 @@
   import FlashCard from './FlashCard.svelte'
   import queryString from 'query-string'
   import { navigate } from 'svelte-routing'
-  import generateCard from './generateCard'
   import { getCollection } from './collections'
-  import FrontCard from './components/FrontCard.svelte'
-  import BackCard from './components/BackCard.svelte'
   import Spinner from './components/Spinner.svelte'
   import { afterUpdate } from 'svelte'
 
@@ -20,11 +17,6 @@
   const { trace } = getLogger('FlashCards', 'trace')
   let cards, cardsP, card_i
   let nextFrontLocalUrlP, nextBackLocalUrlP, frontLocalUrlP, backLocalUrlP
-  let hfront = 0
-  let hback = 0
-  let h = 0
-  let nexth = 0
-  let promise, promisedone
   let disable
 
   const getCards = async (filters) => {
@@ -42,34 +34,17 @@
     })
   }
 
-  afterUpdate(() => {
-    async function waitPromise() {
-      if (promise) {
-        await promise
-        await new Promise((resolve) => {
-          setTimeout(resolve, 1000)
-        })
-        nexth = Math.max(hback, hfront)
-        if (hfront !== 0 && hback !== 0) {
-          promise = null
-          if (card_i === -1) card_i = 0
-          disable = false
-        }
-      }
-    }
-    waitPromise()
-  })
-
   function changeCard(i) {
     console.log('change i', i)
     if (!cards || !cards.length) return
-    promisedone = false
+
     if (i < cards.length - 1) disable = true
 
     if (i >= 0) {
       frontLocalUrlP = nextFrontLocalUrlP
       backLocalUrlP = nextBackLocalUrlP
     }
+
     if (i < cards.length - 1) {
       const nextcard = cards[i + 1]
       nextFrontLocalUrlP = nextcard.image
@@ -79,12 +54,11 @@
         ? getLocalUrl(nextcard.imageAnswer)
         : Promise.resolve('none')
 
-      promise = Promise.all([nextFrontLocalUrlP, nextBackLocalUrlP]).then(
-        () => (promisedone = true),
+      Promise.all([nextFrontLocalUrlP, nextBackLocalUrlP]).then(
+        () => (disable = false),
       )
+      if (card_i === -1) card_i = 0
     }
-    h = nexth
-    nexth = 0
   }
 
   $: {
@@ -128,11 +102,7 @@
   </div>
 {:then cards}
   {#if cards.length}
-    {#if card_i === -1}
-      <div class="center">
-        <Spinner />
-      </div>
-    {:else}
+    {#if card_i >= 0}
       <FlashCard
         card="{cards[card_i]}"
         onNext="{handleNextCard}"
@@ -140,20 +110,8 @@
         {frontLocalUrlP}
         {backLocalUrlP}
         isLast="{card_i === cards.length - 1}"
-        height="{h || 800}"
         disableNext="{disable}"
       />
-    {/if}
-    {#if card_i < cards.length - 1 && promisedone}
-      <div class="hidden" bind:offsetHeight="{hfront}">
-        <FrontCard
-          card="{cards[card_i + 1]}"
-          localUrlP="{nextFrontLocalUrlP}"
-        />
-      </div>
-      <div class="hidden" bind:offsetHeight="{hback}">
-        <BackCard card="{cards[card_i + 1]}" localUrlP="{nextBackLocalUrlP}" />
-      </div>
     {/if}
   {:else}
     <p style="color: red">liste vide</p>
@@ -165,15 +123,8 @@
 
 <style>
   .center {
-    
     display: flex;
     justify-content: center;
     align-items: center;
-  }
-  .hidden {
-    visibility: hidden;
-    /* position: relative;
-    /* left: 0;
-    right: 0; */
   }
 </style>

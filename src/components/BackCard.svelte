@@ -4,14 +4,13 @@
   export let card
   export let localUrlP
   export let isLast = false
-  export let toggleFlip = () => {}
-  export let handleNext = () => {}
-  export let height
+  export let toggleFlip
+  export let onNext
   export let disableNext
   
 </script>
 
-<div class="card content" style="height:{height}px">
+<div class="card content">
 
   <div class="title-answer">Réponse</div>
   <div class="answer">{card.answer}</div>
@@ -37,7 +36,7 @@
     </Button>
 
     <Button
-      on:click="{handleNext}"
+      on:click="{()=>{toggleFlip();onNext()}}"
       variant="raised"
       class="button-shaped-round"
       color="secondary"

@@ -5,17 +5,16 @@
   import Spinner from '../components/Spinner.svelte'
   export let card
   export let localUrlP
-  export let toggleFlip = () => {}
-  export let height
+  export let toggleFlip
 </script>
 
-<div class="card" style="height:{height}px">
+<div class="card">
   <div class="info">
     <Fa icon="{faNewspaper}" />
     {card.theme}
   </div>
   <div class="content">
-    {card.enounce}
+    <div class="textmath">{card.enounce}</div>
     {#if localUrlP}
       {#await localUrlP}
         <Spinner />
@@ -59,18 +58,23 @@
     margin-top: 2em;
   }
 
+  .textmath {
+    display: inline-block;
+    margin-top: 15px;
+    margin-bottom: 15px;
+  }
   .content {
     display: -webkit-box;
     display: -ms-flexbox;
     display: flex;
     -webkit-box-orient: vertical;
     -webkit-box-direction: normal;
-        -ms-flex-direction: column;
+    -ms-flex-direction: column;
     flex-direction: column;
     -ms-flex-pack: distribute;
     justify-content: space-around;
     -webkit-box-align: center;
-        -ms-flex-align: center;
+    -ms-flex-align: center;
     align-items: center;
   }
 
