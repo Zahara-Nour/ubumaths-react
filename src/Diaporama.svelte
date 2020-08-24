@@ -13,9 +13,8 @@
   let queryParams
   let subject, domain, theme, level
   let filters = []
-  let isFinished = false
   const { trace } = getLogger('FlashCards', 'trace')
-  let cards, cardsP, card_i
+  let cards, cardsP, card_i = -1
   let nextFrontLocalUrlP, nextBackLocalUrlP, frontLocalUrlP, backLocalUrlP
   let disable
 
@@ -29,35 +28,45 @@
       trace('crds received, ', values)
       shuffle(values)
       cards = values
-      card_i = -1
+      if (cards.length) {
+        const card = cards[0]
+        nextFrontLocalUrlP = card.image
+          ? getLocalUrl(card.image)
+          : Promise.resolve('none')
+        nextBackLocalUrlP = card.imageAnswer
+          ? getLocalUrl(card.imageAnswer)
+          : Promise.resolve('none')
+        nextCard()
+      }
       return values
     })
   }
 
-  function changeCard(i) {
-    console.log('change i', i)
-    if (!cards || !cards.length) return
+  function nextCard() {
+    card_i++
+    console.log('change card', card_i)
 
-    if (i < cards.length - 1) disable = true
-
-    if (i >= 0) {
+    if (card_i == cards.length) {
+      navigate(`/flash-cards?subject=${subject}&domain=${domain}`)
+    } 
+    else {
       frontLocalUrlP = nextFrontLocalUrlP
       backLocalUrlP = nextBackLocalUrlP
-    }
 
-    if (i < cards.length - 1) {
-      const nextcard = cards[i + 1]
-      nextFrontLocalUrlP = nextcard.image
-        ? getLocalUrl(nextcard.image)
-        : Promise.resolve('none')
-      nextBackLocalUrlP = nextcard.imageAnswer
-        ? getLocalUrl(nextcard.imageAnswer)
-        : Promise.resolve('none')
+      if (card_i < cards.length - 1) {
+        disable = true
+        const nextcard = cards[card_i + 1]
+        nextFrontLocalUrlP = nextcard.image
+          ? getLocalUrl(nextcard.image)
+          : Promise.resolve('none')
+        nextBackLocalUrlP = nextcard.imageAnswer
+          ? getLocalUrl(nextcard.imageAnswer)
+          : Promise.resolve('none')
 
-      Promise.all([nextFrontLocalUrlP, nextBackLocalUrlP]).then(
-        () => (disable = false),
-      )
-      if (card_i === -1) card_i = 0
+        Promise.all([nextFrontLocalUrlP, nextBackLocalUrlP]).then(() => {
+          disable = false
+        })
+      }
     }
   }
 
@@ -74,26 +83,7 @@
     if (level) filters.push({ level })
   }
 
-  $: {
-    if (isFinished) {
-      navigate(`/flash-cards?subject=${subject}&domain=${domain}`)
-    }
-  }
-
-  $: {
-    isFinished = false
-    getCards(filters)
-  }
-
-  $: changeCard(card_i)
-
-  const handleNextCard = () => {
-    if (card_i < cards.length - 1) {
-      card_i++
-    } else {
-      isFinished = true
-    }
-  }
+  $:  getCards(filters)
 </script>
 
 {#await cardsP}
@@ -105,7 +95,7 @@
     {#if card_i >= 0}
       <FlashCard
         card="{cards[card_i]}"
-        onNext="{handleNextCard}"
+        onNext="{nextCard}"
         preloadImages
         {frontLocalUrlP}
         {backLocalUrlP}
@@ -123,6 +113,7 @@
 
 <style>
   .center {
+    height:90vh;
     display: flex;
     justify-content: center;
     align-items: center;

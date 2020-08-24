@@ -14,7 +14,7 @@
   const toggleFlip = () => (flip = !flip)
 
   afterUpdate(() => {
-    console.log('mathlive')
+    
     // if (!flip) {
     // Mathlive.renderMathInElement('front')
     // } else  {

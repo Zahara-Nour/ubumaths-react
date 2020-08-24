@@ -13,7 +13,7 @@
 <div class="card content">
 
   <div class="title-answer">Réponse</div>
-  <div class="answer">{card.answer}</div>
+  <div class="answer textmath">{card.answer}</div>
   {#if localUrlP}
     {#await localUrlP}
       <Spinner />
@@ -25,6 +25,8 @@
       <p style="color: red">{error.message}</p>
     {/await}
   {/if}
+  <div class="textmath">{card.explanation}</div>
+  <div class="textmath">{card.warning}</div>
   <div class="buttons">
     <Button
       on:click="{toggleFlip}"
@@ -90,5 +92,11 @@
     align-items: center;
     -ms-flex-pack: distribute;
     justify-content: space-around;
+  }
+
+  .textmath {
+    display: inline-block;
+    margin-top: 15px;
+    margin-bottom: 15px;
   }
 </style>
