@@ -7,6 +7,7 @@
   import { getCollection } from './collections'
   import Spinner from './components/Spinner.svelte'
   import { afterUpdate } from 'svelte'
+  import generate from './generateCard'
 
   export let location
 
@@ -94,7 +95,7 @@
   {#if cards.length}
     {#if card_i >= 0}
       <FlashCard
-        card="{cards[card_i]}"
+        card="{generate(cards[card_i])}"
         onNext="{nextCard}"
         preloadImages
         {frontLocalUrlP}
